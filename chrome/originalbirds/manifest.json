@@ -24,7 +24,12 @@
 
 	"background": {
 		"service_worker": "scripts/background.js"
-	}
+	},
+
+	"permissions": [
+		"storage",
+		"unlimitedStorage"
+	]
 
 	// "action": {
 	// 	"default_popup": "popup.html"

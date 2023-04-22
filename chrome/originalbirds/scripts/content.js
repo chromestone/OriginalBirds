@@ -15,9 +15,16 @@ waitForElement('#react-root > div > div > div.css-1dbjc4n.r-18u37iz.r-13qz1uu.r-
 	// Do something with targetElement
 	console.log(targetElement);
 	const url = new URL(window.location);
-	console.log(location.pathname.split('/')[1]);
+	const handle = location.pathname.split('/')[1];
+	console.log(handle);
 	console.log(targetElement.firstChild.textContent);
-	console.log(handlesSet.size);
+	chrome.storage.local.get("handles", function(result){
+
+		const handlesSet = new Set(JSON.parse(result.handles));
+		console.log(handlesSet.size);
+		console.log(handlesSet.has(handle));
+		// console.log(result.handlesSet.has(handle));
+	});
 });
 
 /*
