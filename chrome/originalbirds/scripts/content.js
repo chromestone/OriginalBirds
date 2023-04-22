@@ -15,8 +15,34 @@ waitForElement('#react-root > div > div > div.css-1dbjc4n.r-18u37iz.r-13qz1uu.r-
 	// Do something with targetElement
 	console.log(targetElement);
 	const url = new URL(window.location);
-	console.log(location.pathname.split('/')[1]);
+	console.log(window.location.pathname.split('/')[1]);
 	console.log(targetElement.firstChild.textContent);
+
+	const dbName = 'originalBirds';
+	const request = indexedDB.open(dbName);
+
+	request.onsuccess = function(event) {
+	const db = event.target.result;
+	const transaction = db.transaction('handles', 'readonly');
+	const objectStore = transaction.objectStore('handles');
+
+	// Log errors if any
+	transaction.onerror = function(event) {
+	console.error('IndexedDB error:', event.target.error);
+	};
+
+	const username = window.location.pathname.split('/')[1];
+	const index = objectStore.index('handles');
+	const getRequest = index.get(username);
+	getRequest.onsuccess = function(event) {
+		const record = event.target.result;
+		if (record) {
+		  console.log('User found:', record);
+		} else {
+		  console.log('User not found');
+		}
+		};
+	};
 });
 
 /*
