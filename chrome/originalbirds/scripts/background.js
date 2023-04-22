@@ -1,4 +1,5 @@
-global.ready = false;
+// global.ready = false;
+var ready = false;
 
 function waitForReady(callback) {
 
@@ -37,4 +38,4 @@ async function loadHandles() {
 	global.ready = true;
 }
 
-load_handles();
+loadHandles();
