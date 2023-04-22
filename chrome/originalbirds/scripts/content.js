@@ -17,6 +17,11 @@ waitForElement('#react-root > div > div > div.css-1dbjc4n.r-18u37iz.r-13qz1uu.r-
 	const url = new URL(window.location);
 	console.log(location.pathname.split('/')[1]);
 	console.log(targetElement.firstChild.textContent);
+	chrome.runtime.sendMessage({request : "verifyHandles", handles : [location.pathname.split('/')[1]]},
+		function(response) {
+
+			console.log(response);
+	});
 });
 
 /*
