@@ -1,10 +1,10 @@
 // checkmark
-// const CHECK_SELECTOR = "#react-root > div > div > div.css-1dbjc4n.r-18u37iz.r-13qz1uu.r-417010 > main > div > div > div > div.css-1dbjc4n.r-kemksi.r-1kqtdi0.r-1ljd8xs.r-13l2t4g.r-1phboty.r-16y2uox.r-1jgb5lz.r-11wrixw.r-61z16t.r-1ye8kvj.r-13qz1uu.r-184en5c > div > div:nth-child(3) > div > div > div > div > div.css-1dbjc4n.r-6gpygo.r-14gqq1x > div > div > div.css-1dbjc4n.r-1wbh5a2.r-dnmrzs.r-1ny4l3l > div > div > span > span.css-901oao.css-16my406.r-poiln3.r-bcqeeo.r-1pos5eu.r-qvutc0 > span > span > div:nth-child(1)";
 const CHECK_SELECTOR = 'div[data-testid="UserName"] > div > div > div > div > div[dir="ltr"] > span > span > span > span > div:nth-child(1)';
 
 // user feed - name and checkmark container
-//const USER_SELECTOR = "#react-root > div > div > div.css-1dbjc4n.r-18u37iz.r-13qz1uu.r-417010 > main > div > div > div > div.css-1dbjc4n.r-kemksi.r-1kqtdi0.r-1ljd8xs.r-13l2t4g.r-1phboty.r-16y2uox.r-1jgb5lz.r-11wrixw.r-61z16t.r-1ye8kvj.r-13qz1uu.r-184en5c > div > div:nth-child(3) > div > div > div > div > div.css-1dbjc4n.r-6gpygo.r-14gqq1x > div.css-1dbjc4n.r-1wbh5a2.r-dnmrzs.r-1ny4l3l > div > div.css-1dbjc4n.r-1wbh5a2.r-dnmrzs.r-1ny4l3l > div > div > span";
 const USER_SELECTOR = 'div[data-testid="UserName"] > div > div > div > div > div[dir="ltr"] > span';
+// top heading on user page
+const HEADING_SELECTOR = 'h2[role="heading"] > div > div > div > div > span:nth-child(2) > span';
 
 // user feed | explore | thread reply
 //const FEED_SELECTOR = "div.css-1dbjc4n.r-18u37iz.r-1wbh5a2.r-13hce6t > div > div.css-1dbjc4n.r-1wbh5a2.r-dnmrzs > a > div > span";
@@ -35,8 +35,8 @@ function waitForElement(selector) {
 function setCheckmark(targetElement) {
 
 	chrome.storage.local.set({checkmark : targetElement.outerHTML});
-	// window.close();
-	window.setTimeout(window.close, 20000);
+	window.close();
+	// window.setTimeout(window.close, 20000);
 }
 
 // returns a Promise that returns a list indicating if the ith handle is verified
@@ -46,7 +46,7 @@ function verifiedHandles(handles) {
 
 		chrome.storage.local.get("handles", function(result) {
 
-			const handlesSet = new Set(result.handles);
+			const handlesSet = new Set(typeof result.handles === 'undefined' ? [] : result.handles);
 			resolve(handles.map(element => handlesSet.has(element)));
 		});
 	});
@@ -58,36 +58,48 @@ function retrieveCheckmark() {
 
 		chrome.storage.local.get("checkmark", function(result) {
 
-			resolve(result.checkmark);
+			resolve(typeof result.checkmark === 'undefined' ? null : result.checkmark);
 		});
 	});
 }
 
-async function verifyUserPage(targetElement) {
+async function checkmarkUserPage(targetElement) {
+
+	const checkHtml = await retrieveCheckmark();
+	if (checkHtml === null) {
+
+		return;
+	}
+
+	const div = document.createElement('span');
+
+	div.style.verticalAlign = "middle";
+
+	div.innerHTML = checkHtml;
+	const svg = div.querySelector('svg');
+	if (svg !== null) {
+
+		svg.style.color = "#2DB32D";//"#800080";
+	}
+
+	targetElement.appendChild(div);
+}
+
+async function registerOneTimeObserver() {
 
 	const url = new URL(window.location);
-	const handle = url.pathname.split('/')[1];
+	const splitted = url.pathname.split('/').filter((str) => str !== '');
+	if (splitted.length == 1) {
 
-	const verified = await verifiedHandles([handle]);
-	console.log(verified);
-	if (verified[0]) {
+		const verified = await verifiedHandles(splitted);
+		if (verified[0]) {
 
-		console.log("verified!");
-
-		const checkHtml = await retrieveCheckmark();
-		console.log(checkHtml);
-		if (checkHtml) {
-
-			const div = document.createElement('span');
-			div.style.verticalAlign = "middle";
-			div.innerHTML = checkHtml;
-			const svg = div.querySelector('svg');
-			if (svg) {
-
-				svg.style.color = "#2DB32D";//"#800080";
-			}
-			targetElement.appendChild(div);
+			waitForElement(USER_SELECTOR).then(checkmarkUserPage);
 		}
+	}
+	else if (splitted.length >= 2 && splitted[1] == 'status') {
+
+		// TODO
 	}
 }
 
@@ -224,8 +236,6 @@ chrome.runtime.sendMessage({ text: "tab_id?" }, tabObj => {
 
 	chrome.storage.local.get("closeme", function(result) {
 
-		console.log("resp received");
-
 		// go to page known to contain checkmark and cache it
 		if (tabObj.tab == result.closeme) {
 
@@ -233,10 +243,8 @@ chrome.runtime.sendMessage({ text: "tab_id?" }, tabObj => {
 		}
 		else {
 
-			waitForElement(USER_SELECTOR).then(verifyUserPage);
+			registerOneTimeObserver();
 			registerRecurringObserver();
-			//registerFeedObserver();
-			//registerThreadReplyPostObserver();
 		}
 	});
 });
