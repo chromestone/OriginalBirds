@@ -6,11 +6,9 @@ const USER_SELECTOR = 'div[data-testid="UserName"] > div > div > div > div > div
 // top heading on user page
 const HEADING_SELECTOR = 'h2[role="heading"] > div > div > div > div > span:nth-child(2) > span';
 
-// user feed | explore | thread reply
-//const FEED_SELECTOR = "div.css-1dbjc4n.r-18u37iz.r-1wbh5a2.r-13hce6t > div > div.css-1dbjc4n.r-1wbh5a2.r-dnmrzs > a > div > span";
-//const FEED_SELECTOR = 'div[data-testid="UserName"] div > div > div > a > div[dir="ltr"] > span';
 // parent
-const FEED_SELECTOR = 'div[data-testid="User-Name"] >  div > div > a';
+//const FEED_SELECTOR = 'div[data-testid="User-Name"] >  div > div > a';
+const FEED_SELECTOR = 'div[data-testid="User-Name"] > div > div > div > a > div > span';
 // name and checkmark container (relative to post parent)
 //const FEED_CHECK_SELECTOR = "div.css-1dbjc4n.r-1awozwy.r-18u37iz.r-1wbh5a2.r-dnmrzs > div > a > div";
 
@@ -86,6 +84,28 @@ async function checkmarkUserPage(targetElement) {
 	targetElement.appendChild(div);
 }
 
+async function checkmarkUserHeading(targetElement) {
+
+	const checkHtml = await retrieveCheckmark();
+	if (checkHtml === null) {
+
+		return;
+	}
+
+	const div = document.createElement('span');
+
+	div.style.display = "flex";
+
+	div.innerHTML = checkHtml;
+	const svg = div.querySelector('svg');
+	if (svg !== null) {
+
+		svg.style.color = "#2DB32D";
+	}
+
+	targetElement.appendChild(div);
+}
+
 async function registerOneTimeObserver() {
 
 	const url = new URL(window.location);
@@ -96,6 +116,7 @@ async function registerOneTimeObserver() {
 		if (verified[0]) {
 
 			waitForElement(USER_SELECTOR).then(checkmarkUserPage);
+			waitForElement(HEADING_SELECTOR).then(checkmarkUserHeading);
 		}
 	}
 	else if (splitted.length >= 2 && splitted[1] == 'status') {
@@ -110,19 +131,18 @@ function getFeedObserver() {
 
 	return () => {
 
-		// console.log(FEEDS_PROCESSED.size);
-
 		const targetElements = [...document.querySelectorAll(FEED_SELECTOR)];
-		console.log(targetElements.length);
 
-		// TODO check for element.parent hasAttribute('id') and element.href
-		const notProcessed = targetElements.filter((element) =>
-			!FEEDS_PROCESSED.has(element.parentElement.parentElement.parentElement.id)
+		const notProcessed = targetElements.filter((element) => {
+
+			const parent = element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement;
+			return parent.hasAttribute('id') && !FEEDS_PROCESSED.has(parent.id);
+		}
 		);
 
 		for (const element of notProcessed) {
 
-			FEEDS_PROCESSED.add(element.parentElement.parentElement.parentElement.id);
+			FEEDS_PROCESSED.add(element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.id);
 		}
 
 		if (notProcessed.length == 0) {
@@ -130,7 +150,7 @@ function getFeedObserver() {
 			return;
 		}
 
-		verifiedHandles(notProcessed.map((element) => element.getAttribute("href").substring(1))).then((verified) => {
+		verifiedHandles(notProcessed.map((element) => element.textContent.substring(1))).then((verified) => {
 
 			const doProcessing = notProcessed.filter((_, idx) => verified[idx]);
 
@@ -143,19 +163,19 @@ function getFeedObserver() {
 
 				for (const element of doProcessing) {
 
-					// const targetElement = element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.querySelector(FEED_CHECK_SELECTOR);
-					const targetElement = element.firstChild;
-					console.log(targetElement);
+					const targetElement = element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.firstElementChild.firstElementChild.firstElementChild.firstElementChild;
+
 					let div = document.createElement('span');
-					//div.style.verticalAlign = "middle";
+
 					div.style.display = "flex";
+
 					div.innerHTML = checkHtml;
 					let svg = div.querySelector('svg');
 					if (svg) {
 
-						svg.style.color = "#2DB32D";//"#800080";
-						// svg.style.verticalAlign = "middle";
+						svg.style.color = "#2DB32D";
 					}
+
 					targetElement.appendChild(div);
 				}
 			});
@@ -188,7 +208,6 @@ function getThreadReplyPostObserver() {
 		verifiedHandles(notProcessed.map((element) => element.textContent.substring(1))).then((verified) => {
 
 			const doProcessing = notProcessed.filter((_, idx) => verified[idx]);
-			//console.log(doProcessing.length);
 
 			if (doProcessing.length == 0) {
 
@@ -197,23 +216,22 @@ function getThreadReplyPostObserver() {
 
 			retrieveCheckmark().then((checkHtml) => {
 
-				//checkHtml = checkHtml.trim();
-
 				for (const element of doProcessing) {
 
-					console.log(element);
 					const targetElement = element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.querySelector(THREAD_REPLY_POST_CHECK_SELECTOR);
-					console.log(targetElement);
+
 					let div = document.createElement('span');
+
 					div.style.display = "flex";
+
 					div.innerHTML = checkHtml;
 					let svg = div.querySelector('svg');
 					if (svg) {
 
-						svg.style.color = "#2DB32D";//"#800080";
+						svg.style.color = "#2DB32D";
 					}
+
 					targetElement.appendChild(div);
-					console.log(element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.id);
 				}
 			});
 		});
