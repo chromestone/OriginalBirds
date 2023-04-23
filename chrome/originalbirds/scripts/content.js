@@ -35,8 +35,9 @@ function waitForElement(selector) {
 function setCheckmark(targetElement) {
 
 	chrome.storage.local.set({checkmark : targetElement.outerHTML});
+	chrome.storage.local.remove('closeme');
 	window.close();
-	// window.setTimeout(window.close, 20000);
+	//window.setTimeout(window.close, 20000);
 }
 
 // returns a Promise that returns a list indicating if the ith handle is verified
@@ -44,7 +45,7 @@ function verifiedHandles(handles) {
 
 	return new Promise((resolve) => {
 
-		chrome.storage.local.get("handles", function(result) {
+		chrome.storage.local.get("handles", (result) => {
 
 			const handlesSet = new Set(typeof result.handles === 'undefined' ? [] : result.handles);
 			resolve(handles.map(element => handlesSet.has(element)));
@@ -56,7 +57,7 @@ function retrieveCheckmark() {
 
 	return new Promise((resolve) => {
 
-		chrome.storage.local.get("checkmark", function(result) {
+		chrome.storage.local.get("checkmark", (result) => {
 
 			resolve(typeof result.checkmark === 'undefined' ? null : result.checkmark);
 		});
@@ -232,12 +233,12 @@ function registerRecurringObserver() {
 	observer.observe(document.body, { childList: true, subtree: true });
 }
 
-chrome.runtime.sendMessage({ text: "tab_id?" }, tabObj => {
+chrome.runtime.sendMessage({ text: "tab_id?" }, response => {
 
-	chrome.storage.local.get("closeme", function(result) {
+	chrome.storage.local.get("closeme", (result) => {
 
 		// go to page known to contain checkmark and cache it
-		if (tabObj.tab == result.closeme) {
+		if (typeof result.closeme !== 'undefined' && result.closeme == response.tab) {
 
 			waitForElement(CHECK_SELECTOR).then(setCheckmark);
 		}

@@ -27,4 +27,11 @@ async function loadHandles() {
 	chrome.storage.local.set({handles : [...handlesSet]});
 }
 
-loadHandles();
+chrome.storage.local.get('handles', (result) => {
+
+	if (typeof result.handles === 'undefined') {
+
+		loadHandles();
+	}
+});
+chrome.runtime.onStartup.addListener(loadHandles);
