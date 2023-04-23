@@ -6,7 +6,7 @@ chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
 	}
 });
 
-chrome.storage.local.get('checkmark', function(result) {
+chrome.storage.local.get("checkmark", function(result) {
 
 	if (typeof result.checkmark === 'undefined') {
 
@@ -27,7 +27,7 @@ async function loadHandles() {
 	chrome.storage.local.set({handles : [...handlesSet]});
 }
 
-chrome.storage.local.get('handles', (result) => {
+chrome.storage.local.get("handles", (result) => {
 
 	if (typeof result.handles === 'undefined') {
 

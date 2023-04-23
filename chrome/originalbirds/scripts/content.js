@@ -35,7 +35,7 @@ function waitForElement(selector) {
 function setCheckmark(targetElement) {
 
 	chrome.storage.local.set({checkmark : targetElement.outerHTML});
-	chrome.storage.local.remove('closeme');
+	chrome.storage.local.remove("closeme");
 	window.close();
 	//window.setTimeout(window.close, 20000);
 }
@@ -72,7 +72,7 @@ async function checkmarkUserPage(targetElement) {
 		return;
 	}
 
-	const div = document.createElement('span');
+	const div = document.createElement("span");
 
 	div.style.verticalAlign = "middle";
 
@@ -94,7 +94,7 @@ async function checkmarkUserHeading(targetElement) {
 		return;
 	}
 
-	const div = document.createElement('span');
+	const div = document.createElement("span");
 
 	div.style.display = "flex";
 
@@ -111,7 +111,7 @@ async function checkmarkUserHeading(targetElement) {
 async function registerOneTimeObserver() {
 
 	const url = new URL(window.location);
-	const splitted = url.pathname.split('/').filter((str) => str !== '');
+	const splitted = url.pathname.split("/").filter((str) => str !== "");
 	if (splitted.length == 1) {
 
 		const verified = await verifiedHandles(splitted);
@@ -121,7 +121,7 @@ async function registerOneTimeObserver() {
 			waitForElement(HEADING_SELECTOR).then(checkmarkUserHeading);
 		}
 	}
-	else if (splitted.length >= 2 && splitted[1] == 'status') {
+	else if (splitted.length >= 2 && splitted[1] == "status") {
 
 		// TODO
 	}
@@ -138,7 +138,7 @@ function getFeedObserver() {
 		const notProcessed = targetElements.filter((element) => {
 
 			const parent = element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement;
-			return parent.hasAttribute('id') && !FEEDS_PROCESSED.has(parent.id);
+			return parent.hasAttribute("id") && !FEEDS_PROCESSED.has(parent.id);
 		}
 		);
 
@@ -167,7 +167,7 @@ function getFeedObserver() {
 
 					const targetElement = element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.firstElementChild.firstElementChild.firstElementChild.firstElementChild;
 
-					let div = document.createElement('span');
+					let div = document.createElement("span");
 
 					div.style.display = "flex";
 
