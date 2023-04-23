@@ -1,6 +1,8 @@
 chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
+
 	if (msg.text == "tab_id?") {
-		sendResponse({tab: sender.tab.id});
+
+		sendResponse({tab : sender.tab.id});
 	}
 });
 
@@ -8,18 +10,10 @@ chrome.storage.local.get('checkmark', function(result) {
 
 	if (typeof result.checkmark === 'undefined') {
 
-		console.log("checkmark not found");
+		chrome.tabs.create({url : "https://twitter.com/elonmusk", active : false}, function(tab) {
 
-		chrome.tabs.create({url: "https://twitter.com/elonmusk"}, function(tab) {
-
-			//console.log(tab.id);
-			console.log("tab created");
 			chrome.storage.local.set({closeme : tab.id});
 		});
-	}
-	else {
-
-		console.log("checkmark found");
 	}
 });
 

@@ -34,14 +34,12 @@ function waitForElement(selector) {
 
 function setCheckmark(targetElement) {
 
-	//console.log(targetElement);
-	console.log("setCheckmark");
 	chrome.storage.local.set({checkmark : targetElement.outerHTML});
-	window.close();
-	//window.setTimeout(window.close, 20000);
+	// window.close();
+	window.setTimeout(window.close, 20000);
 }
 
-// returns a Promise that yields a list of verified handles
+// returns a Promise that returns a list indicating if the ith handle is verified
 function verifiedHandles(handles) {
 
 	return new Promise((resolve) => {
@@ -68,8 +66,7 @@ function retrieveCheckmark() {
 async function verifyUserPage(targetElement) {
 
 	const url = new URL(window.location);
-	const handle = location.pathname.split('/')[1];
-	console.log(targetElement.firstChild.textContent);
+	const handle = url.pathname.split('/')[1];
 
 	const verified = await verifiedHandles([handle]);
 	console.log(verified);
@@ -88,18 +85,17 @@ async function verifyUserPage(targetElement) {
 			if (svg) {
 
 				svg.style.color = "#2DB32D";//"#800080";
-				// svg.style.verticalAlign = "middle";
 			}
 			targetElement.appendChild(div);
 		}
 	}
 }
 
-function registerFeedObserver() {
+function getFeedObserver() {
 
 	var FEEDS_PROCESSED = new Set();
 
-	const feedObserver = new MutationObserver((mutations) => {
+	return () => {
 
 		// console.log(FEEDS_PROCESSED.size);
 
@@ -151,15 +147,14 @@ function registerFeedObserver() {
 				}
 			});
 		});
-	});
-	feedObserver.observe(document.body, { childList: true, subtree: true });
+	};
 }
 
-function registerThreadReplyPostObserver() {
+function getThreadReplyPostObserver() {
 
 	var FEEDS_PROCESSED = new Set();
 
-	const feedObserver = new MutationObserver((mutations) => {
+	return () => {
 
 		const targetElements = [...document.querySelectorAll(THREAD_REPLY_POST_SELECTOR)];
 
@@ -209,17 +204,29 @@ function registerThreadReplyPostObserver() {
 				}
 			});
 		});
+	};
+}
+
+function registerRecurringObserver() {
+
+	const updateFeed = getFeedObserver();
+	const updateReplyPost = getThreadReplyPostObserver();
+
+	const observer = new MutationObserver((mutations) => {
+
+		updateFeed();
+		updateReplyPost();
 	});
-	feedObserver.observe(document.body, { childList: true, subtree: true });
+	observer.observe(document.body, { childList: true, subtree: true });
 }
 
 chrome.runtime.sendMessage({ text: "tab_id?" }, tabObj => {
-	//console.log('My tabId is', tabId);
+
 	chrome.storage.local.get("closeme", function(result) {
 
 		console.log("resp received");
-		//console.log(tabObj.tab);
-		//console.log(result.closeme);
+
+		// go to page known to contain checkmark and cache it
 		if (tabObj.tab == result.closeme) {
 
 			waitForElement(CHECK_SELECTOR).then(setCheckmark);
@@ -227,8 +234,9 @@ chrome.runtime.sendMessage({ text: "tab_id?" }, tabObj => {
 		else {
 
 			waitForElement(USER_SELECTOR).then(verifyUserPage);
-			registerFeedObserver();
-			registerThreadReplyPostObserver();
+			registerRecurringObserver();
+			//registerFeedObserver();
+			//registerThreadReplyPostObserver();
 		}
 	});
 });
