@@ -6,7 +6,8 @@ chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
 
 chrome.tabs.create({url: "https://twitter.com/elonmusk"}, function(tab) {
 
-	console.log(tab.id);
+	//console.log(tab.id);
+	console.log("tab created");
 	chrome.storage.local.set({closeme : tab.id});
 });
 

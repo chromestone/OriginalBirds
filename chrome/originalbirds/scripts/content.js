@@ -1,3 +1,7 @@
+const CHECK_SELECTOR = "#react-root > div > div > div.css-1dbjc4n.r-18u37iz.r-13qz1uu.r-417010 > main > div > div > div > div.css-1dbjc4n.r-kemksi.r-1kqtdi0.r-1ljd8xs.r-13l2t4g.r-1phboty.r-16y2uox.r-1jgb5lz.r-11wrixw.r-61z16t.r-1ye8kvj.r-13qz1uu.r-184en5c > div > div:nth-child(3) > div > div > div > div > div.css-1dbjc4n.r-6gpygo.r-14gqq1x > div > div > div.css-1dbjc4n.r-1wbh5a2.r-dnmrzs.r-1ny4l3l > div > div > span > span.css-901oao.css-16my406.r-poiln3.r-bcqeeo.r-1pos5eu.r-qvutc0 > span > span > div:nth-child(1)";
+const USER_SELECTOR = "#react-root > div > div > div.css-1dbjc4n.r-18u37iz.r-13qz1uu.r-417010 > main > div > div > div > div.css-1dbjc4n.r-kemksi.r-1kqtdi0.r-1ljd8xs.r-13l2t4g.r-1phboty.r-16y2uox.r-1jgb5lz.r-11wrixw.r-61z16t.r-1ye8kvj.r-13qz1uu.r-184en5c > div > div:nth-child(3) > div > div > div > div > div.css-1dbjc4n.r-6gpygo.r-14gqq1x > div.css-1dbjc4n.r-1wbh5a2.r-dnmrzs.r-1ny4l3l > div > div.css-1dbjc4n.r-1wbh5a2.r-dnmrzs.r-1ny4l3l > div > div > span";
+const FEED_SELECTOR = "div.css-1dbjc4n.r-18u37iz.r-1wbh5a2.r-13hce6t > div > div.css-1dbjc4n.r-1wbh5a2.r-dnmrzs > a > div > span";
+
 function waitForElement(selector) {
 	return new Promise((resolve) => {
 		const observer = new MutationObserver((mutations) => {
@@ -13,12 +17,15 @@ function waitForElement(selector) {
 
 function setCheckmark(targetElement) {
 
-	console.log(targetElement);
+	//console.log(targetElement);
+	console.log("setCheckmark");
 	chrome.storage.local.set({checkmark : targetElement.outerHTML});
 	window.close();
+	//window.setTimeout(window.close, 20000);
 }
 
-function verifyHandles(handles) {
+// returns a Promise that yields a list of verified handles
+function verifiedHandles(handles) {
 
 	return new Promise((resolve) => {
 
@@ -47,41 +54,128 @@ async function verifyUserPage(targetElement) {
 	const handle = location.pathname.split('/')[1];
 	console.log(targetElement.firstChild.textContent);
 
-	const verified = await verifyHandles([handle]);
+	const verified = await verifiedHandles([handle]);
 	console.log(verified);
 	if (verified[0]) {
 
 		console.log("verified!");
 
-		const check_html = await retrieveCheckmark();
-		console.log(check_html);
-		if (check_html) {
+		const checkHtml = await retrieveCheckmark();
+		console.log(checkHtml);
+		if (checkHtml) {
 
 			var div = document.createElement('span');
-			div.innerHTML = check_html.trim();
+			div.style.verticalAlign = "middle";
+			div.innerHTML = checkHtml;
 			var svg = div.querySelector('svg');
 			if (svg) {
 
-				svg.style.color = "#800080";
+				svg.style.color = "#2DB32D";//"#800080";
+				// svg.style.verticalAlign = "middle";
 			}
 			targetElement.appendChild(div);
 		}
 	}
 }
 
+function registerFeedObserver() {
+
+	var FEEDS_PROCESSED = new Set();
+
+	const feedObserver = new MutationObserver((mutations) => {
+
+		// console.log(FEEDS_PROCESSED.size);
+
+		const targetElements = [...document.querySelectorAll(FEED_SELECTOR)];
+		//console.log(targetElements.length);
+
+		const notProcessed = targetElements.filter((element) =>
+			!FEEDS_PROCESSED.has(element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.id)
+		);
+
+		for (const element of notProcessed) {
+
+			FEEDS_PROCESSED.add(element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.id);
+		}
+
+		if (notProcessed.length == 0) {
+
+			return;
+		}
+
+		verifiedHandles(notProcessed.map((element) => element.textContent.substring(1))).then((verified) => {
+
+			const doProcessing = notProcessed.filter((_, idx) => verified[idx]);
+			//console.log(doProcessing.length);
+
+			if (doProcessing.length == 0) {
+
+				return;
+			}
+
+			retrieveCheckmark().then((checkHtml) => {
+
+				//checkHtml = checkHtml.trim();
+
+				for (const element of doProcessing) {
+
+					//TODO move checkmark
+					var div = document.createElement('span');
+					div.style.verticalAlign = "middle";
+					div.innerHTML = checkHtml;
+					var svg = div.querySelector('svg');
+					if (svg) {
+
+						svg.style.color = "#2DB32D";//"#800080";
+						// svg.style.verticalAlign = "middle";
+					}
+					element.appendChild(div);
+					console.log(element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.id);
+					// FEEDS_PROCESSED.add(element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.id);
+				}
+			});
+/*
+			// for (const element of targetElements) {
+			doProcessing.forEach((element) => {
+
+					//const id = element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.id;
+					//if (!FEEDS_PROCESSED.has(id)) {
+
+					FEEDS_PROCESSED.add(id);
+					retrieveCheckmark().then((checkHtml) => {
+
+						var div = document.createElement('span');
+						div.innerHTML = checkHtml.trim();
+						var svg = div.querySelector('svg');
+						if (svg) {
+
+							svg.style.color = "#2DB32D";//"#800080";
+							svg.style.verticalAlign = "middle";
+						}
+						element.appendChild(div);
+					});
+					//}*/
+			//});
+		});
+	});
+	feedObserver.observe(document.body, { childList: true, subtree: true });
+}
+
 chrome.runtime.sendMessage({ text: "tab_id?" }, tabObj => {
 	//console.log('My tabId is', tabId);
 	chrome.storage.local.get("closeme", function(result) {
 
-		console.log(tabObj.tab);
-		console.log(result.closeme);
+		console.log("resp received");
+		//console.log(tabObj.tab);
+		//console.log(result.closeme);
 		if (tabObj.tab == result.closeme) {
 
-			waitForElement('#react-root > div > div > div.css-1dbjc4n.r-18u37iz.r-13qz1uu.r-417010 > main > div > div > div > div.css-1dbjc4n.r-kemksi.r-1kqtdi0.r-1ljd8xs.r-13l2t4g.r-1phboty.r-16y2uox.r-1jgb5lz.r-11wrixw.r-61z16t.r-1ye8kvj.r-13qz1uu.r-184en5c > div > div:nth-child(3) > div > div > div > div > div.css-1dbjc4n.r-6gpygo.r-14gqq1x > div > div > div.css-1dbjc4n.r-1wbh5a2.r-dnmrzs.r-1ny4l3l > div > div > span > span.css-901oao.css-16my406.r-poiln3.r-bcqeeo.r-1pos5eu.r-qvutc0 > span > span > div:nth-child(1)').then(setCheckmark);
+			waitForElement(CHECK_SELECTOR).then(setCheckmark);
 		}
 		else {
 
-			waitForElement('#react-root > div > div > div.css-1dbjc4n.r-18u37iz.r-13qz1uu.r-417010 > main > div > div > div > div.css-1dbjc4n.r-kemksi.r-1kqtdi0.r-1ljd8xs.r-13l2t4g.r-1phboty.r-16y2uox.r-1jgb5lz.r-11wrixw.r-61z16t.r-1ye8kvj.r-13qz1uu.r-184en5c > div > div:nth-child(3) > div > div > div > div > div.css-1dbjc4n.r-6gpygo.r-14gqq1x > div.css-1dbjc4n.r-1wbh5a2.r-dnmrzs.r-1ny4l3l > div > div.css-1dbjc4n.r-1wbh5a2.r-dnmrzs.r-1ny4l3l > div > div > span').then(verifyUserPage);
+			waitForElement(USER_SELECTOR).then(verifyUserPage);
+			registerFeedObserver();
 		}
 	});
 });
