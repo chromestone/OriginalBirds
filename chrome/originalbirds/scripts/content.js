@@ -7,15 +7,17 @@ const USER_SELECTOR = 'div[data-testid="UserName"] > div > div > div > div > div
 const HEADING_SELECTOR = 'h2[role="heading"] > div > div > div > div > span:nth-child(2) > span';
 
 // parent
+// also handles the OP of thread
 //const FEED_SELECTOR = 'div[data-testid="User-Name"] >  div > div > a';
 const FEED_SELECTOR = 'div[data-testid="User-Name"] > div > div > div > a > div > span';
 // name and checkmark container (relative to post parent)
 //const FEED_CHECK_SELECTOR = "div.css-1dbjc4n.r-1awozwy.r-18u37iz.r-1wbh5a2.r-dnmrzs > div > a > div";
 
 // thread reply with post - handle
-const THREAD_REPLY_POST_SELECTOR = "div.css-1dbjc4n.r-1kqtdi0.r-1867qdf.r-rs99b7.r-1loqt21.r-adacv.r-1ny4l3l.r-1udh08x.r-o7ynqc.r-6416eg > div > div.css-1dbjc4n.r-eqz5dr.r-1fz3rvf.r-1s2bzr4 > div > div > div > div.css-1dbjc4n.r-1wbh5a2.r-dnmrzs.r-1ny4l3l > div > div.css-1dbjc4n.r-18u37iz.r-1wbh5a2.r-13hce6t > div > div.css-1dbjc4n.r-1wbh5a2.r-dnmrzs > div > div > span";
+//const THREAD_REPLY_POST_SELECTOR = "div.css-1dbjc4n.r-1kqtdi0.r-1867qdf.r-rs99b7.r-1loqt21.r-adacv.r-1ny4l3l.r-1udh08x.r-o7ynqc.r-6416eg > div > div.css-1dbjc4n.r-eqz5dr.r-1fz3rvf.r-1s2bzr4 > div > div > div > div.css-1dbjc4n.r-1wbh5a2.r-dnmrzs.r-1ny4l3l > div > div.css-1dbjc4n.r-18u37iz.r-1wbh5a2.r-13hce6t > div > div.css-1dbjc4n.r-1wbh5a2.r-dnmrzs > div > div > span";
+const THREAD_REPLY_POST_SELECTOR = 'div[data-testid="User-Name"] > div:nth-child(2) > div > div > div > div > span';
 // name and checkmark container (relative to post parent)
-const THREAD_REPLY_POST_CHECK_SELECTOR = "div.css-1dbjc4n.r-1awozwy.r-18u37iz.r-1wbh5a2.r-dnmrzs > div > div > div > div";
+// const THREAD_REPLY_POST_CHECK_SELECTOR = "div.css-1dbjc4n.r-1awozwy.r-18u37iz.r-1wbh5a2.r-dnmrzs > div > div > div > div";
 
 function waitForElement(selector) {
 	return new Promise((resolve) => {
@@ -192,12 +194,12 @@ function getThreadReplyPostObserver() {
 		const targetElements = [...document.querySelectorAll(THREAD_REPLY_POST_SELECTOR)];
 
 		const notProcessed = targetElements.filter((element) =>
-			!FEEDS_PROCESSED.has(element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.id)
+			!FEEDS_PROCESSED.has(element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.id)
 		);
 
 		for (const element of notProcessed) {
 
-			FEEDS_PROCESSED.add(element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.id);
+			FEEDS_PROCESSED.add(element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.id);
 		}
 
 		if (notProcessed.length == 0) {
@@ -218,7 +220,8 @@ function getThreadReplyPostObserver() {
 
 				for (const element of doProcessing) {
 
-					const targetElement = element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.querySelector(THREAD_REPLY_POST_CHECK_SELECTOR);
+					//const targetElement = element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.querySelector(THREAD_REPLY_POST_CHECK_SELECTOR);
+					const targetElement = element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.firstChild.firstChild.firstChild.firstChild;
 
 					let div = document.createElement('span');
 
