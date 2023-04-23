@@ -4,11 +4,23 @@ chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
 	}
 });
 
-chrome.tabs.create({url: "https://twitter.com/elonmusk"}, function(tab) {
+chrome.storage.local.get('checkmark', function(result) {
 
-	//console.log(tab.id);
-	console.log("tab created");
-	chrome.storage.local.set({closeme : tab.id});
+	if (typeof result.checkmark === 'undefined') {
+
+		console.log("checkmark not found");
+
+		chrome.tabs.create({url: "https://twitter.com/elonmusk"}, function(tab) {
+
+			//console.log(tab.id);
+			console.log("tab created");
+			chrome.storage.local.set({closeme : tab.id});
+		});
+	}
+	else {
+
+		console.log("checkmark found");
+	}
 });
 
 async function loadHandles() {
