@@ -11,13 +11,10 @@
 	//   "128": "images/icon-128.png"
 	// },
 
-	//"background": {
-	//  "service_worker": "background.js"
-	//},
-
 	"content_scripts": [
 		{
 			"matches": ["https://*.twitter.com/*"],
+			"runAt" : "document_start",
 			"js": ["scripts/content.js"]
 		}
 	],
@@ -30,10 +27,4 @@
 		"storage",
 		"unlimitedStorage"
 	]
-
-	// "action": {
-	// 	"default_popup": "popup.html"
-	// },
-	// "permissions": [ "activeTab", ],
-	// "host_permissions": [ "<all_urls>" ]
 }
