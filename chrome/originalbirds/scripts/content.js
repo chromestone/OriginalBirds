@@ -24,6 +24,8 @@ const HOVER_CARD_SELECTOR = 'div[data-testid="HoverCard"] > div > div > div > di
 
 const SPAN_WITH_ID = 'span[id]';
 
+// const CHECKMARK_TOOLTIP = "A legacy verified user used this Twitter handle in the past.";
+
 function myRandomId() {
 
 	return "id_" + Date.now().toString() + Math.random().toString(16).slice(2);
@@ -73,70 +75,7 @@ function retrieveCheckmark() {
 		});
 	});
 }
-/*
-async function checkmarkUserPage(targetElement) {
 
-	const checkHtml = await retrieveCheckmark();
-	if (checkHtml === null) {
-
-		return;
-	}
-
-	const div = document.createElement("span");
-
-	div.style.verticalAlign = "middle";
-
-	div.innerHTML = checkHtml;
-	const svg = div.querySelector('svg');
-	if (svg !== null) {
-
-		svg.style.color = "#2DB32D";//"#800080";
-	}
-
-	targetElement.appendChild(div);
-}
-*/
-async function checkmarkUserHeading(targetElement) {
-
-	const checkHtml = await retrieveCheckmark();
-	if (checkHtml === null) {
-
-		return;
-	}
-
-	const div = document.createElement("span");
-
-	div.style.display = "flex";
-
-	div.innerHTML = checkHtml;
-	const svg = div.querySelector('svg');
-	if (svg !== null) {
-
-		svg.style.color = "#2DB32D";
-	}
-
-	targetElement.appendChild(div);
-}
-/*
-async function registerOneTimeObserver() {
-
-	const url = new URL(window.location);
-	const splitted = url.pathname.split("/").filter((str) => str !== "");
-	//if (splitted.length == 1) {
-
-	const verified = await verifiedHandles([splitted[0]]);
-	if (verified[0]) {
-
-		waitForElement(USER_SELECTOR).then(checkmarkUserPage);
-		waitForElement(HEADING_SELECTOR).then(checkmarkUserHeading);
-	}
-	//}
-	//else if (splitted.length >= 2 && splitted[1] == "status") {
-
-		// TODO
-	//}
-}
-*/
 function getUserPageObserver() {
 
 	var FEEDS_PROCESSED = new Set();
@@ -192,6 +131,8 @@ function getUserPageObserver() {
 
 				const div = document.createElement("span");
 
+				div.classList.add("tooltip");
+
 				div.id = myId;
 				// div.style.verticalAlign = "middle";
 
@@ -201,6 +142,11 @@ function getUserPageObserver() {
 
 					svg.style.color = "#2DB32D";//"#800080";
 				}
+
+				const tooltipSpan = document.createElement("span");
+				tooltipSpan.classList.add('tooltiptext');
+				tooltipSpan.textContent = CHECKMARK_TOOLTIP;
+				div.appendChild(tooltipSpan);
 
 				targetElement.appendChild(div);
 			}
@@ -246,18 +192,13 @@ function getUserPageObserver() {
 function getFeedObserver(selector) {
 
 	var FEEDS_PROCESSED = new Set();
-	//var lastClick = -1;
-	//var invocations = 50;
 
 	return () => {
-
-		//window.setTimeout(() => {console.log(invocations)}, 1000);
 
 		const targetElements = [...document.querySelectorAll(selector)];
 
 		if (targetElements.length == 0) {
 
-			//invocations += 1;
 			return;
 		}
 
@@ -267,7 +208,6 @@ function getFeedObserver(selector) {
 
 			if (doProcessing.length == 0) {
 
-				//invocations += 1;
 				return;
 			}
 
@@ -275,11 +215,8 @@ function getFeedObserver(selector) {
 
 				if (checkHtml === null) {
 
-					//invocations += 1;
 					return;
 				}
-
-				//try {
 
 				for (const element of doProcessing) {
 
@@ -292,13 +229,7 @@ function getFeedObserver(selector) {
 						console.log("This should not happen.");
 						continue;
 					}
-					/*
-					if ([...parent.querySelectorAll(SPAN_WITH_ID)].some((element) => FEEDS_PROCESSED.has(element.id))) {
 
-						// we have already added the checkmark
-						continue;
-					}
-					*/
 					console.log(targetElement);
 					let checkmarkFound = false;
 					for (const child of targetElement.children) {
@@ -337,46 +268,23 @@ function getFeedObserver(selector) {
 
 					targetElement.appendChild(div);
 				}
-				//}
-				//finally {
-
-					//invocations += 1;
-				//}
 			});
 		});
 	};
-/*
-	return () => {
-
-		if (invocations <= 0) {
-
-			return;
-		}
-		//const timeNow = Date.now();
-
-		// console.log(invocations);
-		invocations -= 1;
-
-		//if (lastClick >= (timeNow - 500)) {
-		// if (timeNow - lastClick < 50) {
-
-		// 	// console.log(200 - (timeNow - lastClick));
-		// 	window.setTimeout(doWork, 50 - (timeNow - lastClick));
-		// 	lastClick = timeNow;
-		// 	return;
-		// }
-		// lastClick = timeNow;
-		doWork();
-	};*/
 }
-/*
-function getThreadReplyPostObserver() {
+
+function getHoverObserver() {
 
 	var FEEDS_PROCESSED = new Set();
 
 	return () => {
 
-		const targetElements = [...document.querySelectorAll(THREAD_REPLY_POST_SELECTOR)];
+		const targetElements = [...document.querySelectorAll(HOVER_CARD_SELECTOR)];
+
+		if (targetElements.length == 0) {
+
+			return;
+		}
 
 		verifiedHandles(targetElements.map((element) => element.textContent?.substring(1))).then((verified) => {
 
@@ -389,18 +297,35 @@ function getThreadReplyPostObserver() {
 
 			retrieveCheckmark().then((checkHtml) => {
 
+				if (checkHtml === null) {
+
+					return;
+				}
+
 				for (const element of doProcessing) {
-					const parent = element.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.
-						parentElement;
-					const targetElement = parent?.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild;
+
+					const parent = element.parentElement?.parentElement?.parentElement?.parentElement?.parentElement;
+					const targetElement = parent?.firstElementChild?.firstElementChild?.lastElementChild;
+					// check undefined as well
 					if (parent == null || targetElement == null) {
 
 						console.log("This should not happen.");
 						continue;
 					}
-					if ([...parent.querySelectorAll(SPAN_WITH_ID)].some((element) => FEEDS_PROCESSED.has(element.id))) {
 
-						// we have already added the checkmark
+					console.log(targetElement);
+					let checkmarkFound = false;
+					for (const child of targetElement.children) {
+
+						console.log(child.id);
+						if (FEEDS_PROCESSED.has(child.id)) {
+
+							checkmarkFound = true;
+							break;
+						}
+					}
+					if (checkmarkFound) {
+
 						continue;
 					}
 
@@ -410,17 +335,16 @@ function getThreadReplyPostObserver() {
 						myId = myRandomId();
 					}
 					FEEDS_PROCESSED.add(myId);
+					console.log(myId);
 
-					
-					//const targetElement = element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.firstChild.firstChild.firstChild.firstChild;
+					const div = document.createElement("span");
 
-					let div = document.createElement('span');
-
+					div.id = myId;
 					div.style.display = "flex";
 
 					div.innerHTML = checkHtml;
-					let svg = div.querySelector('svg');
-					if (svg) {
+					const svg = div.querySelector('svg');
+					if (svg !== null) {
 
 						svg.style.color = "#2DB32D";
 					}
@@ -431,22 +355,56 @@ function getThreadReplyPostObserver() {
 		});
 	};
 }
-*/
+
 function registerRecurringObserver() {
 
 	const updateUserPage = getUserPageObserver();
 	const updateFeed = getFeedObserver(FEED_SELECTOR);
 	const updateReplyPost = getFeedObserver(THREAD_REPLY_POST_SELECTOR);
+	const updateHoverCard = getHoverObserver();
 
 	const observer = new MutationObserver((mutations) => {
 
 		updateUserPage();
 		updateFeed();
 		updateReplyPost();
+		updateHoverCard();
 	});
 	observer.observe(document.body, { childList: true, subtree: true });
 }
+/*
+function createTooltipCSS() {
 
+	const style = document.createElement('style');
+	style.innerHTML = `
+		.tooltip {
+			position: relative;
+			display: inline-block;
+			border-bottom: 1px dotted black;
+		}
+
+		.tooltip .tooltiptext {
+			visibility: hidden;
+			width: 120px;
+			background-color: black;
+			color: #fff;
+			text-align: center;
+			border-radius: 6px;
+			padding: 5px 0;
+
+			position: absolute;
+			z-index: 100;
+			top: 100%;
+			left: 50%;
+			margin-left: -60px;
+		}
+
+		.tooltip:hover .tooltiptext {
+			visibility: visible;
+		}`;
+	document.getElementsByTagName('head')[0].appendChild(style);
+}
+*/
 chrome.runtime.sendMessage({ text: "tab_id?" }, response => {
 
 	chrome.storage.local.get("closeme", (result) => {
@@ -458,6 +416,7 @@ chrome.runtime.sendMessage({ text: "tab_id?" }, response => {
 		}
 		else {
 
+			//createTooltipCSS();
 			// registerOneTimeObserver();
 			registerRecurringObserver();
 		}
