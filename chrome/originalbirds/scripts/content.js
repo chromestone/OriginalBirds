@@ -2,7 +2,8 @@
 const CHECK_SELECTOR = 'div[data-testid="UserName"] > div > div > div > div > div[dir="ltr"] > span > span > span > span > div:nth-child(1)';
 
 // user feed - name and checkmark container
-const USER_SELECTOR = 'div[data-testid="UserName"] > div > div > div > div > div[dir="ltr"] > span';
+//const USER_SELECTOR = 'div[data-testid="UserName"] > div > div > div > div > div[dir="ltr"] > span';
+const USER_SELECTOR = 'div[data-testid="UserName"] > div > div > div > div > div > div[dir="ltr"] > span';
 // top heading on user page
 const HEADING_SELECTOR = 'h2[role="heading"] > div > div > div > div > span:nth-child(2) > span';
 
@@ -18,6 +19,8 @@ const FEED_SELECTOR = 'div[data-testid="User-Name"] > div > div > div > a > div 
 const THREAD_REPLY_POST_SELECTOR = 'div[data-testid="User-Name"] > div:nth-child(2) > div > div > div > div > span';
 // name and checkmark container (relative to post parent)
 // const THREAD_REPLY_POST_CHECK_SELECTOR = "div.css-1dbjc4n.r-1awozwy.r-18u37iz.r-1wbh5a2.r-dnmrzs > div > div > div > div";
+
+const HOVER_CARD_SELECTOR = 'div[data-testid="HoverCard"] > div > div > div > div > div > div > a > div > div > span';
 
 const SPAN_WITH_ID = 'span[id]';
 
@@ -70,7 +73,7 @@ function retrieveCheckmark() {
 		});
 	});
 }
-
+/*
 async function checkmarkUserPage(targetElement) {
 
 	const checkHtml = await retrieveCheckmark();
@@ -92,7 +95,7 @@ async function checkmarkUserPage(targetElement) {
 
 	targetElement.appendChild(div);
 }
-
+*/
 async function checkmarkUserHeading(targetElement) {
 
 	const checkHtml = await retrieveCheckmark();
@@ -114,7 +117,7 @@ async function checkmarkUserHeading(targetElement) {
 
 	targetElement.appendChild(div);
 }
-
+/*
 async function registerOneTimeObserver() {
 
 	const url = new URL(window.location);
@@ -133,22 +136,128 @@ async function registerOneTimeObserver() {
 		// TODO
 	//}
 }
+*/
+function getUserPageObserver() {
+
+	var FEEDS_PROCESSED = new Set();
+
+	return async () => {
+
+		const handleElement = document.querySelector(USER_SELECTOR);
+		if (handleElement === null) {
+
+			return;
+		}
+
+		const verified = await verifiedHandles([handleElement.textContent?.substring(1)]);
+		if (!verified[0]) {
+
+			return;
+		}
+
+		const checkHtml = await retrieveCheckmark();
+		if (checkHtml === null) {
+
+			return;
+		}
+
+		const parent = handleElement.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.
+			parentElement?.parentElement;
+		const targetElement = parent?.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild?.
+			firstElementChild?.lastElementChild;
+		// check undefined as well
+		if (parent == null || targetElement == null) {
+
+			console.log("This should not happen.");
+		}
+		else {
+
+			let checkmarkFound = false;
+			for (const child of targetElement.children) {
+
+				if (FEEDS_PROCESSED.has(child.id)) {
+
+					checkmarkFound = true;
+					break;
+				}
+			}
+			if (!checkmarkFound) {
+
+				let myId = myRandomId();
+				while (FEEDS_PROCESSED.has(myId)) {
+
+					myId = myRandomId();
+				}
+				FEEDS_PROCESSED.add(myId);
+
+				const div = document.createElement("span");
+
+				div.id = myId;
+				// div.style.verticalAlign = "middle";
+
+				div.innerHTML = checkHtml;
+				const svg = div.querySelector('svg');
+				if (svg !== null) {
+
+					svg.style.color = "#2DB32D";//"#800080";
+				}
+
+				targetElement.appendChild(div);
+			}
+		}
+
+		const headingElement = document.querySelector(HEADING_SELECTOR);
+
+		let checkmarkFound = false;
+		for (const child of headingElement.children) {
+
+			if (FEEDS_PROCESSED.has(child.id)) {
+
+				checkmarkFound = true;
+				break;
+			}
+		}
+		if (!checkmarkFound) {
+
+			let myId = myRandomId();
+			while (FEEDS_PROCESSED.has(myId)) {
+
+				myId = myRandomId();
+			}
+			FEEDS_PROCESSED.add(myId);
+
+			const div = document.createElement("span");
+
+			div.id = myId;
+			div.style.display = "flex";
+		
+			div.innerHTML = checkHtml;
+			const svg = div.querySelector('svg');
+			if (svg !== null) {
+		
+				svg.style.color = "#2DB32D";
+			}
+
+			headingElement.appendChild(div);
+		}
+	};
+}
 
 function getFeedObserver(selector) {
 
 	var FEEDS_PROCESSED = new Set();
 	//var lastClick = -1;
-	var invocations = 50;
+	//var invocations = 50;
 
-	function doWork() {
+	return () => {
 
-		window.setTimeout(() => {console.log(invocations)}, 1000);
+		//window.setTimeout(() => {console.log(invocations)}, 1000);
 
 		const targetElements = [...document.querySelectorAll(selector)];
 
 		if (targetElements.length == 0) {
 
-			invocations += 1;
+			//invocations += 1;
 			return;
 		}
 
@@ -158,7 +267,7 @@ function getFeedObserver(selector) {
 
 			if (doProcessing.length == 0) {
 
-				invocations += 1;
+				//invocations += 1;
 				return;
 			}
 
@@ -166,73 +275,77 @@ function getFeedObserver(selector) {
 
 				if (checkHtml === null) {
 
-					invocations += 1;
+					//invocations += 1;
 					return;
 				}
 
-				try {
+				//try {
 
-					for (const element of doProcessing) {
+				for (const element of doProcessing) {
 
-						const parent = element.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.
-							parentElement;
-						const targetElement = parent?.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild;
-						if (parent == null || targetElement == null) {
+					const parent = element.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.
+						parentElement;
+					const targetElement = parent?.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild;
+					// check undefined as well
+					if (parent == null || targetElement == null) {
 
-							console.log("This should not happen.");
-							continue;
-						}
-						/*
-						if ([...parent.querySelectorAll(SPAN_WITH_ID)].some((element) => FEEDS_PROCESSED.has(element.id))) {
-
-							// we have already added the checkmark
-							continue;
-						}
-						*/
-						let checkmarkFound = false;
-						for (const child of targetElement.children) {
-
-							if (FEEDS_PROCESSED.has(child.id)) {
-
-								checkmarkFound = true;
-								break;
-							}
-						}
-						if (checkmarkFound) {
-
-							continue;
-						}
-
-						let myId = myRandomId();
-						while (FEEDS_PROCESSED.has(myId)) {
-
-							myId = myRandomId();
-						}
-						FEEDS_PROCESSED.add(myId);
-
-						const div = document.createElement("span");
-
-						div.id = myId;
-						div.style.display = "flex";
-
-						div.innerHTML = checkHtml;
-						const svg = div.querySelector('svg');
-						if (svg !== null) {
-
-							svg.style.color = "#2DB32D";
-						}
-
-						targetElement.appendChild(div);
+						console.log("This should not happen.");
+						continue;
 					}
-				}
-				finally {
+					/*
+					if ([...parent.querySelectorAll(SPAN_WITH_ID)].some((element) => FEEDS_PROCESSED.has(element.id))) {
 
-					invocations += 1;
+						// we have already added the checkmark
+						continue;
+					}
+					*/
+					console.log(targetElement);
+					let checkmarkFound = false;
+					for (const child of targetElement.children) {
+
+						console.log(child.id);
+						if (FEEDS_PROCESSED.has(child.id)) {
+
+							checkmarkFound = true;
+							break;
+						}
+					}
+					if (checkmarkFound) {
+
+						continue;
+					}
+
+					let myId = myRandomId();
+					while (FEEDS_PROCESSED.has(myId)) {
+
+						myId = myRandomId();
+					}
+					FEEDS_PROCESSED.add(myId);
+					console.log(myId);
+
+					const div = document.createElement("span");
+
+					div.id = myId;
+					div.style.display = "flex";
+
+					div.innerHTML = checkHtml;
+					const svg = div.querySelector('svg');
+					if (svg !== null) {
+
+						svg.style.color = "#2DB32D";
+					}
+
+					targetElement.appendChild(div);
 				}
+				//}
+				//finally {
+
+					//invocations += 1;
+				//}
 			});
 		});
-	}
-
+	};
+/*
 	return () => {
 
 		if (invocations <= 0) {
@@ -254,7 +367,7 @@ function getFeedObserver(selector) {
 		// }
 		// lastClick = timeNow;
 		doWork();
-	};
+	};*/
 }
 /*
 function getThreadReplyPostObserver() {
@@ -321,11 +434,13 @@ function getThreadReplyPostObserver() {
 */
 function registerRecurringObserver() {
 
+	const updateUserPage = getUserPageObserver();
 	const updateFeed = getFeedObserver(FEED_SELECTOR);
 	const updateReplyPost = getFeedObserver(THREAD_REPLY_POST_SELECTOR);
 
 	const observer = new MutationObserver((mutations) => {
 
+		updateUserPage();
 		updateFeed();
 		updateReplyPost();
 	});
@@ -343,7 +458,7 @@ chrome.runtime.sendMessage({ text: "tab_id?" }, response => {
 		}
 		else {
 
-			registerOneTimeObserver();
+			// registerOneTimeObserver();
 			registerRecurringObserver();
 		}
 	});
