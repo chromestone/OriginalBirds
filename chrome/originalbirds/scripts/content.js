@@ -57,20 +57,25 @@ function setCheckmark(targetElement) {
 	window.close();
 	//window.setTimeout(window.close, 20000);
 }
-
+/*
 // returns a Promise that returns a list indicating if the ith handle is verified
 function verifiedHandles(handles) {
 
+	//resolve(handles.map(element => window?.originalBirdsHandlesSet?.has(element)));
 	return new Promise((resolve) => {
 
+		const theDate = Date.now();
 		chrome.storage.local.get("handles", (result) => {
 
+			console.log(Date.now() - theDate);
+			const theDate2 = Date.now();
 			const handlesSet = new Set(typeof result.handles === 'undefined' ? [] : result.handles);
 			resolve(handles.map(element => handlesSet.has(element)));
+			console.log(Date.now() - theDate2);
 		});
 	});
 }
-
+*/
 function retrieveCheckmark() {
 
 	return new Promise((resolve) => {
@@ -94,8 +99,14 @@ function getUserPageObserver() {
 			return;
 		}
 
-		const verified = await verifiedHandles([handleElement.textContent?.substring(1)]);
-		if (!verified[0]) {
+		//const verified = await verifiedHandles([handleElement.textContent?.substring(1)]);
+		if (typeof window.originalBirdsHandlesSet === 'undefined') {
+
+			return;
+		}
+
+		const verified = window.originalBirdsHandlesSet.has(handleElement.textContent?.substring(1));
+		if (!verified) {
 
 			return;
 		}
@@ -205,81 +216,91 @@ function getFeedObserver(selector) {
 
 	return () => {
 
+		const theDate = Date.now();
 		const targetElements = [...document.querySelectorAll(selector)];
+		console.log(Date.now() - theDate);
 
 		if (targetElements.length == 0) {
 
 			return;
 		}
 
-		verifiedHandles(targetElements.map((element) => element.textContent?.substring(1))).then((verified) => {
+		//const theDate2 = Date.now();
+		//verifiedHandles(targetElements.map((element) => element.textContent?.substring(1))).then((verified) => {
+		if (typeof window.originalBirdsHandlesSet === 'undefined') {
 
-			const doProcessing = targetElements.filter((_, idx) => verified[idx]);
+			return;
+		}
 
-			if (doProcessing.length == 0) {
+		const verified = targetElements.filter(element => window.originalBirdsHandlesSet.has(element.textContent?.substring(1)));
+		//console.log(Date.now() - theDate2);
+
+		const doProcessing = targetElements.filter((_, idx) => verified[idx]);
+
+		if (doProcessing.length == 0) {
+
+			return;
+		}
+
+		retrieveCheckmark().then((checkHtml) => {
+
+			if (checkHtml === null) {
 
 				return;
 			}
 
-			retrieveCheckmark().then((checkHtml) => {
+			for (const element of doProcessing) {
 
-				if (checkHtml === null) {
+				const parent = element.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.
+					parentElement;
+				const targetElement = parent?.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild;
+				// check undefined as well
+				if (parent == null || targetElement == null) {
 
-					return;
+					console.log("This should not happen.");
+					continue;
 				}
 
-				for (const element of doProcessing) {
+				//console.log(targetElement);
+				let checkmarkFound = false;
+				for (const child of targetElement.children) {
 
-					const parent = element.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.
-						parentElement;
-					const targetElement = parent?.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild;
-					// check undefined as well
-					if (parent == null || targetElement == null) {
+					//console.log(child.id);
+					if (FEEDS_PROCESSED.has(child.id)) {
 
-						console.log("This should not happen.");
-						continue;
+						checkmarkFound = true;
+						break;
 					}
-
-					//console.log(targetElement);
-					let checkmarkFound = false;
-					for (const child of targetElement.children) {
-
-						//console.log(child.id);
-						if (FEEDS_PROCESSED.has(child.id)) {
-
-							checkmarkFound = true;
-							break;
-						}
-					}
-					if (checkmarkFound) {
-
-						continue;
-					}
-
-					let myId = myRandomId();
-					while (FEEDS_PROCESSED.has(myId)) {
-
-						myId = myRandomId();
-					}
-					FEEDS_PROCESSED.add(myId);
-					//console.log(myId);
-
-					const div = document.createElement("span");
-
-					div.id = myId;
-					div.style.display = "flex";
-
-					div.innerHTML = checkHtml;
-					const svg = div.querySelector('svg');
-					if (svg !== null) {
-
-						svg.style.color = "#2DB32D";
-					}
-
-					targetElement.appendChild(div);
 				}
-			});
+				if (checkmarkFound) {
+
+					continue;
+				}
+
+				let myId = myRandomId();
+				while (FEEDS_PROCESSED.has(myId)) {
+
+					myId = myRandomId();
+				}
+				FEEDS_PROCESSED.add(myId);
+				//console.log(myId);
+
+				const div = document.createElement("span");
+
+				div.id = myId;
+				div.style.display = "flex";
+
+				div.innerHTML = checkHtml;
+				const svg = div.querySelector('svg');
+				if (svg !== null) {
+
+					svg.style.color = "#2DB32D";
+				}
+
+				targetElement.appendChild(div);
+			}
 		});
+		//});
 	};
 }
 
@@ -296,73 +317,79 @@ function getHoverObserver() {
 			return;
 		}
 
-		verifiedHandles(targetElements.map((element) => element.textContent?.substring(1))).then((verified) => {
+		//verifiedHandles(targetElements.map((element) => element.textContent?.substring(1))).then((verified) => {
+		if (typeof window.originalBirdsHandlesSet === 'undefined') {
 
-			const doProcessing = targetElements.filter((_, idx) => verified[idx]);
+			return;
+		}
 
-			if (doProcessing.length == 0) {
+		const verified = targetElements.filter(element => window.originalBirdsHandlesSet.has(element.textContent?.substring(1)));
+
+		const doProcessing = targetElements.filter((_, idx) => verified[idx]);
+
+		if (doProcessing.length == 0) {
+
+			return;
+		}
+
+		retrieveCheckmark().then((checkHtml) => {
+
+			if (checkHtml === null) {
 
 				return;
 			}
 
-			retrieveCheckmark().then((checkHtml) => {
+			for (const element of doProcessing) {
 
-				if (checkHtml === null) {
+				const parent = element.parentElement?.parentElement?.parentElement?.parentElement?.parentElement;
+				const targetElement = parent?.firstElementChild?.firstElementChild?.lastElementChild;
+				// check undefined as well
+				if (parent == null || targetElement == null) {
 
-					return;
+					console.log("This should not happen.");
+					continue;
 				}
 
-				for (const element of doProcessing) {
+				//console.log(targetElement);
+				let checkmarkFound = false;
+				for (const child of targetElement.children) {
 
-					const parent = element.parentElement?.parentElement?.parentElement?.parentElement?.parentElement;
-					const targetElement = parent?.firstElementChild?.firstElementChild?.lastElementChild;
-					// check undefined as well
-					if (parent == null || targetElement == null) {
+					//console.log(child.id);
+					if (FEEDS_PROCESSED.has(child.id)) {
 
-						console.log("This should not happen.");
-						continue;
+						checkmarkFound = true;
+						break;
 					}
-
-					//console.log(targetElement);
-					let checkmarkFound = false;
-					for (const child of targetElement.children) {
-
-						//console.log(child.id);
-						if (FEEDS_PROCESSED.has(child.id)) {
-
-							checkmarkFound = true;
-							break;
-						}
-					}
-					if (checkmarkFound) {
-
-						continue;
-					}
-
-					let myId = myRandomId();
-					while (FEEDS_PROCESSED.has(myId)) {
-
-						myId = myRandomId();
-					}
-					FEEDS_PROCESSED.add(myId);
-					//console.log(myId);
-
-					const div = document.createElement("span");
-
-					div.id = myId;
-					div.style.display = "flex";
-
-					div.innerHTML = checkHtml;
-					const svg = div.querySelector('svg');
-					if (svg !== null) {
-
-						svg.style.color = "#2DB32D";
-					}
-
-					targetElement.appendChild(div);
 				}
-			});
+				if (checkmarkFound) {
+
+					continue;
+				}
+
+				let myId = myRandomId();
+				while (FEEDS_PROCESSED.has(myId)) {
+
+					myId = myRandomId();
+				}
+				FEEDS_PROCESSED.add(myId);
+				//console.log(myId);
+
+				const div = document.createElement("span");
+
+				div.id = myId;
+				div.style.display = "flex";
+
+				div.innerHTML = checkHtml;
+				const svg = div.querySelector('svg');
+				if (svg !== null) {
+
+					svg.style.color = "#2DB32D";
+				}
+
+				targetElement.appendChild(div);
+			}
 		});
+		//});
 	};
 }
 
@@ -380,78 +407,86 @@ function getRecommendedObserver() {
 			return;
 		}
 
-		verifiedHandles(targetElements.map((element) => element.textContent?.substring(1))).then((verified) => {
+		//verifiedHandles(targetElements.map((element) => element.textContent?.substring(1))).then((verified) => {
+		if (typeof window.originalBirdsHandlesSet === 'undefined') {
 
-			const doProcessing = targetElements.filter((_, idx) => verified[idx]);
+			return;
+		}
 
-			if (doProcessing.length == 0) {
+		const verified = targetElements.filter(element => window.originalBirdsHandlesSet.has(element.textContent?.substring(1)));
+
+		const doProcessing = targetElements.filter((_, idx) => verified[idx]);
+
+		if (doProcessing.length == 0) {
+
+			return;
+		}
+
+		retrieveCheckmark().then((checkHtml) => {
+
+			if (checkHtml === null) {
 
 				return;
 			}
 
-			retrieveCheckmark().then((checkHtml) => {
+			for (const element of doProcessing) {
 
-				if (checkHtml === null) {
+				const parent = element.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.
+					parentElement;
+				const targetElement = parent?.firstElementChild?.firstElementChild?.lastElementChild;
+				// check undefined as well
+				if (parent == null || targetElement == null) {
 
-					return;
+					console.log("This should not happen.");
+					continue;
 				}
 
-				for (const element of doProcessing) {
+				//console.log(targetElement);
+				let checkmarkFound = false;
+				for (const child of targetElement.children) {
 
-					const parent = element.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.
-						parentElement;
-					const targetElement = parent?.firstElementChild?.firstElementChild?.lastElementChild;
-					// check undefined as well
-					if (parent == null || targetElement == null) {
+					//console.log(child.id);
+					if (FEEDS_PROCESSED.has(child.id)) {
 
-						console.log("This should not happen.");
-						continue;
+						checkmarkFound = true;
+						break;
 					}
-
-					//console.log(targetElement);
-					let checkmarkFound = false;
-					for (const child of targetElement.children) {
-
-						//console.log(child.id);
-						if (FEEDS_PROCESSED.has(child.id)) {
-
-							checkmarkFound = true;
-							break;
-						}
-					}
-					if (checkmarkFound) {
-
-						continue;
-					}
-
-					let myId = myRandomId();
-					while (FEEDS_PROCESSED.has(myId)) {
-
-						myId = myRandomId();
-					}
-					FEEDS_PROCESSED.add(myId);
-					//console.log(myId);
-
-					const div = document.createElement("span");
-
-					div.id = myId;
-					div.style.display = "flex";
-
-					div.innerHTML = checkHtml;
-					const svg = div.querySelector('svg');
-					if (svg !== null) {
-
-						svg.style.color = "#2DB32D";
-					}
-
-					targetElement.appendChild(div);
 				}
-			});
+				if (checkmarkFound) {
+
+					continue;
+				}
+
+				let myId = myRandomId();
+				while (FEEDS_PROCESSED.has(myId)) {
+
+					myId = myRandomId();
+				}
+				FEEDS_PROCESSED.add(myId);
+				//console.log(myId);
+
+				const div = document.createElement("span");
+
+				div.id = myId;
+				div.style.display = "flex";
+
+				div.innerHTML = checkHtml;
+				const svg = div.querySelector('svg');
+				if (svg !== null) {
+
+					svg.style.color = "#2DB32D";
+				}
+
+				targetElement.appendChild(div);
+			}
 		});
+		//});
 	};
 }
 
 function registerRecurringObserver() {
+
+	var invocations = 10;
 
 	const updateUserPage = getUserPageObserver();
 	const updateFeed = getFeedObserver(FEED_SELECTOR);
@@ -459,13 +494,44 @@ function registerRecurringObserver() {
 	const updateHoverCard = getHoverObserver();
 	const updateRecommended = getRecommendedObserver();
 
-	const observer = new MutationObserver((mutations) => {
+	/*const observer = new MutationObserver((mutations) => {
 
 		updateUserPage();
 		updateFeed();
 		updateReplyPost();
 		updateHoverCard();
 		updateRecommended();
+	});
+	observer.observe(document.body, { childList: true, subtree: true });
+	*/
+	function addCheckmark() {
+
+		if (invocations > 0) {
+
+			invocations -= 1;
+
+			updateUserPage();
+			updateFeed();
+			updateReplyPost();
+			updateHoverCard();
+			updateRecommended();
+
+			window.setTimeout(addCheckmark, 500);
+		}
+	}
+	addCheckmark();
+
+	const observer = new MutationObserver((mutations) => {
+
+		if (invocations <= 0) {
+
+			invocations = 1;
+			window.setTimeout(addCheckmark, 500);
+		}
+		else {
+
+			invocations = Math.max(10, invocations + 1);
+		}
 	});
 	observer.observe(document.body, { childList: true, subtree: true });
 }
@@ -515,6 +581,10 @@ chrome.runtime.sendMessage({ text: "tab_id?" }, response => {
 
 			//createTooltipCSS();
 			//registerOneTimeObserver();
+			chrome.storage.local.get("handles", (result) => {
+
+				window.originalBirdsHandlesSet = new Set(typeof result.handles === 'undefined' ? [] : result.handles);
+			});
 			registerRecurringObserver();
 		}
 	});
