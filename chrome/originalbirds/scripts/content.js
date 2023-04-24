@@ -10,23 +10,23 @@ const HEADING_SELECTOR = 'h2[role="heading"] > div > div > div > div > span:nth-
 // parent
 // also handles the OP of thread
 //const FEED_SELECTOR = 'div[data-testid="User-Name"] >  div > div > a';
-const FEED_SELECTOR = 'div[data-testid="User-Name"] > div > div > div > a > div > span';
+const FEED_SELECTOR = 'div[data-testid="User-Name"] > div > div > div > a > div > span:not([id])';
 //const FEED_SELECTOR = 'div[data-testid="User-Name"] > div > div > div > a > div[dir="ltr"] > span';
 // TODO move document
 // name and checkmark container (relative to post parent)
 
 // thread reply with post - handle
-const THREAD_REPLY_POST_SELECTOR = 'div[data-testid="User-Name"] > div:nth-child(2) > div > div > div > div > span';
+const THREAD_REPLY_POST_SELECTOR = 'div[data-testid="User-Name"] > div:nth-child(2) > div > div > div > div > span:not([id])';
 //const THREAD_REPLY_POST_SELECTOR = 'div[data-testid="User-Name"] > div:nth-child(2) > div > div > div > div[dir="ltr"] > span';
 // TODO move document
 // name and checkmark container (relative to post parent)
 
 // TODO document
-const HOVER_CARD_SELECTOR = 'div[data-testid="HoverCard"] > div > div > div > div > div > div > a > div > div > span';
+const HOVER_CARD_SELECTOR = 'div[data-testid="HoverCard"] > div > div > div > div > div > div > a > div > div > span:not([id])';
 // const HOVER_CARD_SELECTOR = 'div[data-testid="HoverCard"] > div > div > div > div > div > div > a > div > div[dir="ltr"] > span';
 
 // TODO document
-const RECOMMENDATION_SELECTOR = 'div[data-testid="UserCell"] > div > div > div > div > div > div > div > a > div > div[dir="ltr"] > span';
+const RECOMMENDATION_SELECTOR = 'div[data-testid="UserCell"] > div > div > div > div > div > div > div > a > div > div[dir="ltr"] > span:not([id])';
 
 const SPAN_WITH_ID = 'span[id]';
 
@@ -205,11 +205,27 @@ function getFeedObserver(selector) {
 
 	return () => {
 
-		const targetElements = [...document.querySelectorAll(selector)];
+		if (document.querySelector(selector) === null) {
+
+			return;
+		}
+
+		const targetElements = [...document.querySelectorAll(selector)];//.filter((element) => !element.hasAttribute('id') || !FEEDS_PROCESSED.has(element.id));
 
 		if (targetElements.length == 0) {
 
 			return;
+		}
+
+		for (const element of targetElements) {
+
+			let myId = myRandomId();
+			while (FEEDS_PROCESSED.has(myId)) {
+
+				myId = myRandomId();
+			}
+			FEEDS_PROCESSED.add(myId);
+			element.id = myId;
 		}
 
 		verifiedHandles(targetElements.map((element) => element.textContent?.substring(1))).then((verified) => {
@@ -241,7 +257,7 @@ function getFeedObserver(selector) {
 					}
 
 					//console.log(targetElement);
-					let checkmarkFound = false;
+					/*let checkmarkFound = false;
 					for (const child of targetElement.children) {
 
 						//console.log(child.id);
@@ -262,11 +278,11 @@ function getFeedObserver(selector) {
 						myId = myRandomId();
 					}
 					FEEDS_PROCESSED.add(myId);
-					//console.log(myId);
+					//console.log(myId);*/
 
 					const div = document.createElement("span");
 
-					div.id = myId;
+					//div.id = myId;
 					div.style.display = "flex";
 
 					div.innerHTML = checkHtml;
@@ -289,11 +305,27 @@ function getHoverObserver() {
 
 	return () => {
 
-		const targetElements = [...document.querySelectorAll(HOVER_CARD_SELECTOR)];
+		if (document.querySelector(HOVER_CARD_SELECTOR) === null) {
+
+			return;
+		}
+
+		const targetElements = [...document.querySelectorAll(HOVER_CARD_SELECTOR)];//.filter((element) => !element.hasAttribute('id') || !FEEDS_PROCESSED.has(element.id));
 
 		if (targetElements.length == 0) {
 
 			return;
+		}
+
+		for (const element of targetElements) {
+
+			let myId = myRandomId();
+			while (FEEDS_PROCESSED.has(myId)) {
+
+				myId = myRandomId();
+			}
+			FEEDS_PROCESSED.add(myId);
+			element.id = myId;
 		}
 
 		verifiedHandles(targetElements.map((element) => element.textContent?.substring(1))).then((verified) => {
@@ -323,7 +355,7 @@ function getHoverObserver() {
 						continue;
 					}
 
-					//console.log(targetElement);
+					/*//console.log(targetElement);
 					let checkmarkFound = false;
 					for (const child of targetElement.children) {
 
@@ -345,11 +377,11 @@ function getHoverObserver() {
 						myId = myRandomId();
 					}
 					FEEDS_PROCESSED.add(myId);
-					//console.log(myId);
+					//console.log(myId);*/
 
 					const div = document.createElement("span");
 
-					div.id = myId;
+					//div.id = myId;
 					div.style.display = "flex";
 
 					div.innerHTML = checkHtml;
@@ -373,11 +405,27 @@ function getRecommendedObserver() {
 
 	return () => {
 
-		const targetElements = [...document.querySelectorAll(RECOMMENDATION_SELECTOR)];
+		if (document.querySelector(RECOMMENDATION_SELECTOR) === null) {
+
+			return;
+		}
+
+		const targetElements = [...document.querySelectorAll(RECOMMENDATION_SELECTOR)];//.filter((element) => !element.hasAttribute('id') || !FEEDS_PROCESSED.has(element.id));
 
 		if (targetElements.length == 0) {
 
 			return;
+		}
+
+		for (const element of targetElements) {
+
+			let myId = myRandomId();
+			while (FEEDS_PROCESSED.has(myId)) {
+
+				myId = myRandomId();
+			}
+			FEEDS_PROCESSED.add(myId);
+			element.id = myId;
 		}
 
 		verifiedHandles(targetElements.map((element) => element.textContent?.substring(1))).then((verified) => {
@@ -408,7 +456,7 @@ function getRecommendedObserver() {
 						continue;
 					}
 
-					//console.log(targetElement);
+					/*//console.log(targetElement);
 					let checkmarkFound = false;
 					for (const child of targetElement.children) {
 
@@ -430,11 +478,11 @@ function getRecommendedObserver() {
 						myId = myRandomId();
 					}
 					FEEDS_PROCESSED.add(myId);
-					//console.log(myId);
+					//console.log(myId);*/
 
 					const div = document.createElement("span");
 
-					div.id = myId;
+					// div.id = myId;
 					div.style.display = "flex";
 
 					div.innerHTML = checkHtml;
