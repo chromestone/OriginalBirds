@@ -134,37 +134,138 @@ async function registerOneTimeObserver() {
 	//}
 }
 
-function getFeedObserver() {
+function getFeedObserver(selector) {
+
+	var FEEDS_PROCESSED = new Set();
+	//var lastClick = -1;
+	var invocations = 50;
+
+	function doWork() {
+
+		window.setTimeout(() => {console.log(invocations)}, 1000);
+
+		const targetElements = [...document.querySelectorAll(selector)];
+
+		if (targetElements.length == 0) {
+
+			invocations += 1;
+			return;
+		}
+
+		verifiedHandles(targetElements.map((element) => element.textContent?.substring(1))).then((verified) => {
+
+			const doProcessing = targetElements.filter((_, idx) => verified[idx]);
+
+			if (doProcessing.length == 0) {
+
+				invocations += 1;
+				return;
+			}
+
+			retrieveCheckmark().then((checkHtml) => {
+
+				if (checkHtml === null) {
+
+					invocations += 1;
+					return;
+				}
+
+				try {
+
+					for (const element of doProcessing) {
+
+						const parent = element.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.
+							parentElement;
+						const targetElement = parent?.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild;
+						if (parent == null || targetElement == null) {
+
+							console.log("This should not happen.");
+							continue;
+						}
+						/*
+						if ([...parent.querySelectorAll(SPAN_WITH_ID)].some((element) => FEEDS_PROCESSED.has(element.id))) {
+
+							// we have already added the checkmark
+							continue;
+						}
+						*/
+						let checkmarkFound = false;
+						for (const child of targetElement.children) {
+
+							if (FEEDS_PROCESSED.has(child.id)) {
+
+								checkmarkFound = true;
+								break;
+							}
+						}
+						if (checkmarkFound) {
+
+							continue;
+						}
+
+						let myId = myRandomId();
+						while (FEEDS_PROCESSED.has(myId)) {
+
+							myId = myRandomId();
+						}
+						FEEDS_PROCESSED.add(myId);
+
+						const div = document.createElement("span");
+
+						div.id = myId;
+						div.style.display = "flex";
+
+						div.innerHTML = checkHtml;
+						const svg = div.querySelector('svg');
+						if (svg !== null) {
+
+							svg.style.color = "#2DB32D";
+						}
+
+						targetElement.appendChild(div);
+					}
+				}
+				finally {
+
+					invocations += 1;
+				}
+			});
+		});
+	}
+
+	return () => {
+
+		if (invocations <= 0) {
+
+			return;
+		}
+		//const timeNow = Date.now();
+
+		// console.log(invocations);
+		invocations -= 1;
+
+		//if (lastClick >= (timeNow - 500)) {
+		// if (timeNow - lastClick < 50) {
+
+		// 	// console.log(200 - (timeNow - lastClick));
+		// 	window.setTimeout(doWork, 50 - (timeNow - lastClick));
+		// 	lastClick = timeNow;
+		// 	return;
+		// }
+		// lastClick = timeNow;
+		doWork();
+	};
+}
+/*
+function getThreadReplyPostObserver() {
 
 	var FEEDS_PROCESSED = new Set();
 
 	return () => {
 
-		const targetElements = [...document.querySelectorAll(FEED_SELECTOR)];
+		const targetElements = [...document.querySelectorAll(THREAD_REPLY_POST_SELECTOR)];
 
-		/*
-		const notProcessed = targetElements.filter((element) => {
-
-			const parent = element.parentElement.parentElement.parentElement.parentElement.parentElement.
-				parentElement;
-			return parent.hasAttribute("id") && !FEEDS_PROCESSED.has(parent.id);
-		}
-		);
-
-		/*
-		for (const element of notProcessed) {
-
-			FEEDS_PROCESSED.add(element.parentElement.parentElement.parentElement.parentElement.parentElement.
-				parentElement.id);
-		}
-
-		if (notProcessed.length == 0) {
-
-			return;
-		}
-		*/
-
-		verifiedHandles(targetElements.map((element) => element?.textContent.substring(1))).then((verified) => {
+		verifiedHandles(targetElements.map((element) => element.textContent?.substring(1))).then((verified) => {
 
 			const doProcessing = targetElements.filter((_, idx) => verified[idx]);
 
@@ -176,16 +277,17 @@ function getFeedObserver() {
 			retrieveCheckmark().then((checkHtml) => {
 
 				for (const element of doProcessing) {
-
 					const parent = element.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.
 						parentElement;
-					if (parent == null) {
+					const targetElement = parent?.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild;
+					if (parent == null || targetElement == null) {
 
 						console.log("This should not happen.");
 						continue;
 					}
-			        if ([...parent.querySelectorAll(SPAN_WITH_ID)].some((element) => FEEDS_PROCESSED.has(element.id))) {
+					if ([...parent.querySelectorAll(SPAN_WITH_ID)].some((element) => FEEDS_PROCESSED.has(element.id))) {
 
+						// we have already added the checkmark
 						continue;
 					}
 
@@ -196,77 +298,8 @@ function getFeedObserver() {
 					}
 					FEEDS_PROCESSED.add(myId);
 
-					// const targetElement = element.parentElement.parentElement.parentElement.parentElement.parentElement.
-					// parentElement.firstElementChild.firstElementChild.firstElementChild.firstElementChild;
-					const targetElement = parent.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild;
-					if (targetElement == null) {
-
-						console.log("This should not happen.");
-						continue;
-					}
-
-					const div = document.createElement("span");
-
-					div.id = myId;
-					div.style.display = "flex";
-
-					div.innerHTML = checkHtml;
-					const svg = div.querySelector('svg');
-					if (svg !== null) {
-
-						svg.style.color = "#2DB32D";
-					}
-
-					targetElement.appendChild(div);
-				}
-			});
-		});
-	};
-}
-
-function getThreadReplyPostObserver() {
-
-	var FEEDS_PROCESSED = new Set();
-
-	return () => {
-
-		const targetElements = [...document.querySelectorAll(THREAD_REPLY_POST_SELECTOR)];
-
-		const notProcessed = targetElements.filter((element) => {
-
-			const parent = element.parentElement.parentElement.parentElement.parentElement.parentElement.
-				parentElement.parentElement.parentElement.parentElement.parentElement.
-				parentElement.parentElement.parentElement.parentElement;
-			return parent.hasAttribute("id") && !FEEDS_PROCESSED.has(parent.id);
-		}
-		);
-
-		for (const element of notProcessed) {
-
-			FEEDS_PROCESSED.add(element.parentElement.parentElement.parentElement.parentElement.parentElement.
-				parentElement.parentElement.parentElement.parentElement.parentElement.
-				parentElement.parentElement.parentElement.parentElement.id);
-		}
-
-		if (notProcessed.length == 0) {
-
-			return;
-		}
-
-		verifiedHandles(notProcessed.map((element) => element.textContent.substring(1))).then((verified) => {
-
-			const doProcessing = notProcessed.filter((_, idx) => verified[idx]);
-
-			if (doProcessing.length == 0) {
-
-				return;
-			}
-
-			retrieveCheckmark().then((checkHtml) => {
-
-				for (const element of doProcessing) {
-
-					const targetElement = element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.firstChild.firstChild.firstChild.firstChild;
+					
+					//const targetElement = element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.firstChild.firstChild.firstChild.firstChild;
 
 					let div = document.createElement('span');
 
@@ -285,11 +318,11 @@ function getThreadReplyPostObserver() {
 		});
 	};
 }
-
+*/
 function registerRecurringObserver() {
 
-	const updateFeed = getFeedObserver();
-	const updateReplyPost = getThreadReplyPostObserver();
+	const updateFeed = getFeedObserver(FEED_SELECTOR);
+	const updateReplyPost = getFeedObserver(THREAD_REPLY_POST_SELECTOR);
 
 	const observer = new MutationObserver((mutations) => {
 
