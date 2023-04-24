@@ -19,6 +19,13 @@ const THREAD_REPLY_POST_SELECTOR = 'div[data-testid="User-Name"] > div:nth-child
 // name and checkmark container (relative to post parent)
 // const THREAD_REPLY_POST_CHECK_SELECTOR = "div.css-1dbjc4n.r-1awozwy.r-18u37iz.r-1wbh5a2.r-dnmrzs > div > div > div > div";
 
+const SPAN_WITH_ID = 'span[id]';
+
+function myRandomId() {
+
+	return "id_" + Date.now().toString() + Math.random().toString(16).slice(2);
+}
+
 function waitForElement(selector) {
 	return new Promise((resolve) => {
 		const observer = new MutationObserver((mutations) => {
@@ -112,19 +119,19 @@ async function registerOneTimeObserver() {
 
 	const url = new URL(window.location);
 	const splitted = url.pathname.split("/").filter((str) => str !== "");
-	if (splitted.length == 1) {
+	//if (splitted.length == 1) {
 
-		const verified = await verifiedHandles(splitted);
-		if (verified[0]) {
+	const verified = await verifiedHandles([splitted[0]]);
+	if (verified[0]) {
 
-			waitForElement(USER_SELECTOR).then(checkmarkUserPage);
-			waitForElement(HEADING_SELECTOR).then(checkmarkUserHeading);
-		}
+		waitForElement(USER_SELECTOR).then(checkmarkUserPage);
+		waitForElement(HEADING_SELECTOR).then(checkmarkUserHeading);
 	}
-	else if (splitted.length >= 2 && splitted[1] == "status") {
+	//}
+	//else if (splitted.length >= 2 && splitted[1] == "status") {
 
 		// TODO
-	}
+	//}
 }
 
 function getFeedObserver() {
@@ -135,6 +142,7 @@ function getFeedObserver() {
 
 		const targetElements = [...document.querySelectorAll(FEED_SELECTOR)];
 
+		/*
 		const notProcessed = targetElements.filter((element) => {
 
 			const parent = element.parentElement.parentElement.parentElement.parentElement.parentElement.
@@ -143,6 +151,7 @@ function getFeedObserver() {
 		}
 		);
 
+		/*
 		for (const element of notProcessed) {
 
 			FEEDS_PROCESSED.add(element.parentElement.parentElement.parentElement.parentElement.parentElement.
@@ -153,10 +162,11 @@ function getFeedObserver() {
 
 			return;
 		}
+		*/
 
-		verifiedHandles(notProcessed.map((element) => element.textContent.substring(1))).then((verified) => {
+		verifiedHandles(targetElements.map((element) => element?.textContent.substring(1))).then((verified) => {
 
-			const doProcessing = notProcessed.filter((_, idx) => verified[idx]);
+			const doProcessing = targetElements.filter((_, idx) => verified[idx]);
 
 			if (doProcessing.length == 0) {
 
@@ -167,16 +177,42 @@ function getFeedObserver() {
 
 				for (const element of doProcessing) {
 
-					const targetElement = element.parentElement.parentElement.parentElement.parentElement.parentElement.
-						parentElement.firstElementChild.firstElementChild.firstElementChild.firstElementChild;
+					const parent = element.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.
+						parentElement;
+					if (parent == null) {
 
-					let div = document.createElement("span");
+						console.log("This should not happen.");
+						continue;
+					}
+			        if ([...parent.querySelectorAll(SPAN_WITH_ID)].some((element) => FEEDS_PROCESSED.has(element.id))) {
 
+						continue;
+					}
+
+					let myId = myRandomId();
+					while (FEEDS_PROCESSED.has(myId)) {
+
+						myId = myRandomId();
+					}
+					FEEDS_PROCESSED.add(myId);
+
+					// const targetElement = element.parentElement.parentElement.parentElement.parentElement.parentElement.
+					// parentElement.firstElementChild.firstElementChild.firstElementChild.firstElementChild;
+					const targetElement = parent.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild;
+					if (targetElement == null) {
+
+						console.log("This should not happen.");
+						continue;
+					}
+
+					const div = document.createElement("span");
+
+					div.id = myId;
 					div.style.display = "flex";
 
 					div.innerHTML = checkHtml;
-					let svg = div.querySelector('svg');
-					if (svg) {
+					const svg = div.querySelector('svg');
+					if (svg !== null) {
 
 						svg.style.color = "#2DB32D";
 					}
@@ -203,12 +239,10 @@ function getThreadReplyPostObserver() {
 				parentElement.parentElement.parentElement.parentElement;
 			return parent.hasAttribute("id") && !FEEDS_PROCESSED.has(parent.id);
 		}
-			//!FEEDS_PROCESSED.has(element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.id)
 		);
 
 		for (const element of notProcessed) {
 
-			// FEEDS_PROCESSED.add(element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.id);
 			FEEDS_PROCESSED.add(element.parentElement.parentElement.parentElement.parentElement.parentElement.
 				parentElement.parentElement.parentElement.parentElement.parentElement.
 				parentElement.parentElement.parentElement.parentElement.id);
@@ -232,7 +266,6 @@ function getThreadReplyPostObserver() {
 
 				for (const element of doProcessing) {
 
-					//const targetElement = element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.querySelector(THREAD_REPLY_POST_CHECK_SELECTOR);
 					const targetElement = element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.firstChild.firstChild.firstChild.firstChild;
 
 					let div = document.createElement('span');
@@ -252,81 +285,7 @@ function getThreadReplyPostObserver() {
 		});
 	};
 }
-/*
-function checkmarkThreadReplyPost() {
 
-	//var FEEDS_PROCESSED = new Set();
-
-	//return () => {
-
-	const targetElements = [...document.querySelectorAll(THREAD_REPLY_POST_SELECTOR)];
-
-	// console.log(targetElements.length);
-
-	const notProcessed = targetElements.filter((element) =>
-		//!FEEDS_PROCESSED.has(element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.id)
-		element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.hasAttribute('id')
-	);
-
-	console.log(notProcessed.length);
-
-	//for (const element of notProcessed) {
-
-	//	FEEDS_PROCESSED.add(element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.id);
-	//}
-
-	if (notProcessed.length == 0) {
-
-		return;
-	}
-
-	verifiedHandles(notProcessed.map((element) => element.textContent.substring(1))).then((verified) => {
-
-		const doProcessing = notProcessed.filter((_, idx) => verified[idx]);
-
-		console.log(doProcessing.length);
-
-		if (doProcessing.length == 0) {
-
-			return;
-		}
-
-		retrieveCheckmark().then((checkHtml) => {
-
-			for (const element of doProcessing) {
-
-				const parent = element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement;
-				const id = parent.id;
-				//const targetElement = element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.querySelector(THREAD_REPLY_POST_CHECK_SELECTOR);
-				//const targetElement = element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.firstChild.firstChild.firstChild.firstChild;
-				const targetElement = parent.firstChild.firstChild.firstChild.firstChild;
-				console.log(targetElement);
-
-				const spanId = id + "_verified";
-				if (targetElement.querySelector('span#' + spanId) !== null) {
-
-					continue;
-				}
-
-				let div = document.createElement("span");
-
-				div.id = spanId;
-				div.style.display = "flex";
-
-				div.innerHTML = checkHtml;
-				let svg = div.querySelector('svg');
-				if (svg) {
-
-					svg.style.color = "#2DB32D";
-				}
-
-				targetElement.appendChild(div);
-			}
-		});
-	});
-	//};
-}
-*/
 function registerRecurringObserver() {
 
 	const updateFeed = getFeedObserver();
@@ -336,7 +295,6 @@ function registerRecurringObserver() {
 
 		updateFeed();
 		updateReplyPost();
-		//checkmarkThreadReplyPost();
 	});
 	observer.observe(document.body, { childList: true, subtree: true });
 }
