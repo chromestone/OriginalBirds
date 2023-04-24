@@ -55,27 +55,8 @@ function setCheckmark(targetElement) {
 	chrome.storage.local.set({checkmark : targetElement.outerHTML});
 	chrome.storage.local.remove("closeme");
 	window.close();
-	//window.setTimeout(window.close, 20000);
 }
-/*
-// returns a Promise that returns a list indicating if the ith handle is verified
-function verifiedHandles(handles) {
 
-	//resolve(handles.map(element => window?.originalBirdsHandlesSet?.has(element)));
-	return new Promise((resolve) => {
-
-		const theDate = Date.now();
-		chrome.storage.local.get("handles", (result) => {
-
-			console.log(Date.now() - theDate);
-			const theDate2 = Date.now();
-			const handlesSet = new Set(typeof result.handles === 'undefined' ? [] : result.handles);
-			resolve(handles.map(element => handlesSet.has(element)));
-			console.log(Date.now() - theDate2);
-		});
-	});
-}
-*/
 function retrieveCheckmark() {
 
 	return new Promise((resolve) => {
@@ -232,10 +213,10 @@ function getFeedObserver(selector) {
 			return;
 		}
 
-		const verified = targetElements.filter(element => window.originalBirdsHandlesSet.has(element.textContent?.substring(1)));
+		const doProcessing = targetElements.filter(element => window.originalBirdsHandlesSet.has(element.textContent?.substring(1)));
 		//console.log(Date.now() - theDate2);
 
-		const doProcessing = targetElements.filter((_, idx) => verified[idx]);
+		//const doProcessing = targetElements.filter((_, idx) => verified[idx]);
 
 		if (doProcessing.length == 0) {
 
@@ -323,9 +304,9 @@ function getHoverObserver() {
 			return;
 		}
 
-		const verified = targetElements.filter(element => window.originalBirdsHandlesSet.has(element.textContent?.substring(1)));
+		const doProcessing = targetElements.filter(element => window.originalBirdsHandlesSet.has(element.textContent?.substring(1)));
 
-		const doProcessing = targetElements.filter((_, idx) => verified[idx]);
+		//const doProcessing = targetElements.filter((_, idx) => verified[idx]);
 
 		if (doProcessing.length == 0) {
 
@@ -407,15 +388,14 @@ function getRecommendedObserver() {
 			return;
 		}
 
-		//verifiedHandles(targetElements.map((element) => element.textContent?.substring(1))).then((verified) => {
 		if (typeof window.originalBirdsHandlesSet === 'undefined') {
 
 			return;
 		}
 
-		const verified = targetElements.filter(element => window.originalBirdsHandlesSet.has(element.textContent?.substring(1)));
+		const doProcessing = targetElements.filter(element => window.originalBirdsHandlesSet.has(element.textContent?.substring(1)));
 
-		const doProcessing = targetElements.filter((_, idx) => verified[idx]);
+		//const doProcessing = targetElements.filter((_, idx) => verified[idx]);
 
 		if (doProcessing.length == 0) {
 
@@ -441,11 +421,9 @@ function getRecommendedObserver() {
 					continue;
 				}
 
-				//console.log(targetElement);
 				let checkmarkFound = false;
 				for (const child of targetElement.children) {
 
-					//console.log(child.id);
 					if (FEEDS_PROCESSED.has(child.id)) {
 
 						checkmarkFound = true;
@@ -463,7 +441,6 @@ function getRecommendedObserver() {
 					myId = myRandomId();
 				}
 				FEEDS_PROCESSED.add(myId);
-				//console.log(myId);
 
 				const div = document.createElement("span");
 
@@ -494,16 +471,6 @@ function registerRecurringObserver() {
 	const updateHoverCard = getHoverObserver();
 	const updateRecommended = getRecommendedObserver();
 
-	/*const observer = new MutationObserver((mutations) => {
-
-		updateUserPage();
-		updateFeed();
-		updateReplyPost();
-		updateHoverCard();
-		updateRecommended();
-	});
-	observer.observe(document.body, { childList: true, subtree: true });
-	*/
 	function addCheckmark() {
 
 		if (invocations > 0) {
