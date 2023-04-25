@@ -14,8 +14,6 @@ const THREAD_REPLY_POST_SELECTOR = 'div[data-testid="User-Name"] > div:nth-child
 
 // targets overlay upon hovering on user
 const HOVER_CARD_SELECTOR = 'div[data-testid="HoverCard"] > ' + 'div > '.repeat(6) + 'a > div > :is(div, span) > span';
-// dunno why but notifications page follow is different
-// const HOVER_CARD_SELECTOR2 = 'div[data-testid="HoverCard"] > ' + 'div > '.repeat(6) + 'a > div > span > span';
 
 // targets recommendation and people you might like
 const RECOMMENDATION_SELECTOR = 'div[data-testid="UserCell"] > ' + 'div > '.repeat(7) + 'a > div > div[dir] > span';
@@ -159,10 +157,6 @@ class CheckmarkManager {
 			return;
 		}
 
-		//const parent = handleElement.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.
-		//	parentElement?.parentElement;
-		// const targetElement = parent.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild?.
-		// 	firstElementChild?.lastElementChild;
 		const targetElement = nth_element(parent, "firstElementChild", 6);
 		// this should not happen unless html structure changed
 		// double equal checks for undefined as well
@@ -192,10 +186,8 @@ class CheckmarkManager {
 
 				const div = document.createElement("span");
 
-				//div.classList.add("tooltip");
-
 				div.id = myId;
-				// div.style.verticalAlign = "middle";
+				div.style.verticalAlign = "middle";
 
 				div.innerHTML = this.checkHtml;
 				const svg = div.querySelector('svg');
@@ -203,11 +195,6 @@ class CheckmarkManager {
 
 					svg.style.color = "#2DB32D";//"#800080";
 				}
-
-				//const tooltipSpan = document.createElement("span");
-				//tooltipSpan.classList.add('tooltiptext');
-				//tooltipSpan.textContent = CHECKMARK_TOOLTIP;
-				//div.appendChild(tooltipSpan);
 
 				targetElement.appendChild(div);
 			}
@@ -376,9 +363,6 @@ async function registerRecurringObserver() {
 	}
 	const donors = typeof supporters.donors === 'undefined' ? new Set() : new Set(supporters.donors.map((obj) => obj.handle.toLowerCase()));
 	const contributors = typeof supporters.contributors === 'undefined' ? new Set() : new Set(supporters.contributors.map((obj) => obj.handle.toLowerCase()));
-	// TODO delete
-	donors.add("realopenbirds");
-	verifiedHandles.add("no1mann");
 
 	const manager = new CheckmarkManager(verifiedHandles, checkHtml, donors, contributors);
 
