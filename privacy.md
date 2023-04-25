@@ -12,7 +12,7 @@ We do not sell, trade, or otherwise transfer your personal information to outsid
 
 ## Security
 
-We do not collect, store, trade, or otherwise transfer any of your data. Thus, you are soley responsible for protecting and securing your own personal data.
+We do not collect, store, trade, or otherwise transfer any of your data. To the extent of the law, you are soley responsible for protecting and securing your own personal data.
 
 ## Changes to the Privacy Policy
 

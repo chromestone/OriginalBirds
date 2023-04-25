@@ -1,10 +1,10 @@
 # Original Birds
 
-Original Birds is a browser extension to BRING BACK the **legacy Twitter verified checkmarks**!!!
+Original Birds is a browser extension to bring back the **legacy Twitter verified checkmarks**!!!
 
-Tired of not knowing who was an Original Bird (**OB**)? Then this extension is for you! A green checkmark is added on Twitter to indicate who was an **OB** before the great purge of 2023.
+Tired of not knowing who was an Original Bird (**OB**)? Then this extension is for you! A **green checkmark** is added on Twitter to indicate who was an **OB** before the great purge of 2023.
 
-<img src="https://chromestone.github.io/OriginalBirds/images/reynolds.png" alt="Extension Demo">
+<img src="https://chromestone.github.io/OriginalBirds/images/reynolds.png" alt="Extension Demo" style="width: 50%;display: block;margin-left: auto;margin-right: auto">
 
 ## Donations
 
@@ -28,7 +28,7 @@ A: Please report any bugs to [GitHub issues](https://github.com/chromestone/Orig
 
 ## Privacy
 
-We take your privacy seriously and do NOT collect ANY user data. We will always be transparent and open source.
+We take your privacy seriously and **do not** collect **any** user data. We will always be transparent and open source.
 
 For more information visit our privacy policy:
 
