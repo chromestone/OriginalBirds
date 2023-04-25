@@ -6,25 +6,22 @@
 </div>
 
 <script>
-const url = 'https://chromestone.github.io/OriginalBirds/supporters.json';
-const container = document.getElementById('donor-list');
+	const url = 'https://chromestone.github.io/OriginalBirds/supporters.json';
 
-fetch(url).then(response => response.json()).then(data => {
-
+	// Fetch the JSON data from the URL
+	fetch(url).then(response => response.json()).then(data => {
+		// Extract the list of donors from the JSON data
 		const donors = data.donors;
 
-		const listItemContainer = document.createElement('div'); // create a container for the list items
-		listItemContainer.style.display = 'flex'; // set the display property to flex to allow wrapping
+		// Get the container element to display the list
+		const container = document.getElementById('donor-list');
 
+		// Loop through the list of donors and create a list item for each one
 		donors.forEach(donor => {
-			const listItem = document.createElement('div'); // create a div for each donor
-			listItem.textContent = donor;
-			listItem.style.padding = '10px'; // add some padding for spacing
-
-			listItemContainer.appendChild(listItem); // append the div to the container
+			const listItem = document.createElement('li');
+			listItem.textContent = donor.handle;
+			container.appendChild(listItem);
 		});
-
-	container.appendChild(listItemContainer); // append the container to the main container
-})
-.catch(error => console.error(error));
+	})
+	.catch(error => console.error(error));
 </script>
