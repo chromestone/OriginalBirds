@@ -1,31 +1,21 @@
-// checkmark
+// checkmark selector to get html with checkmark svg
 const CHECK_SELECTOR = 'div[data-testid="UserName"] > div > div > div > div > div[dir="ltr"] > span > span > span > span > div:nth-child(1)';
 
-// user feed - name and checkmark container
-//const USER_SELECTOR = 'div[data-testid="UserName"] > div > div > div > div > div[dir="ltr"] > span';
+// targets user name on their profile/feed page
 const USER_SELECTOR = 'div[data-testid="UserName"] > div > div > div > div > div > div[dir="ltr"] > span';
-// top heading on user page
+// targets top heading on user page
 const HEADING_SELECTOR = 'h2[role="heading"] > div > div > div > div > span:nth-child(2) > span';
 
-// parent
-// also handles the OP of thread
-//const FEED_SELECTOR = 'div[data-testid="User-Name"] >  div > div > a';
+// targets feed topmost post
 const FEED_SELECTOR = 'div[data-testid="User-Name"] > div > div > div > a > div > span';
-//const FEED_SELECTOR = 'div[data-testid="User-Name"] > div > div > div > a > div[dir="ltr"] > span';
-// TODO move document
-// name and checkmark container (relative to post parent)
 
-// thread reply with post - handle
+// targets user feed or thread reply with (nested) post
 const THREAD_REPLY_POST_SELECTOR = 'div[data-testid="User-Name"] > div:nth-child(2) > div > div > div > div > span';
-//const THREAD_REPLY_POST_SELECTOR = 'div[data-testid="User-Name"] > div:nth-child(2) > div > div > div > div[dir="ltr"] > span';
-// TODO move document
-// name and checkmark container (relative to post parent)
 
-// TODO document
+// targets overlay upon hovering on user
 const HOVER_CARD_SELECTOR = 'div[data-testid="HoverCard"] > div > div > div > div > div > div > a > div > div > span';
-// const HOVER_CARD_SELECTOR = 'div[data-testid="HoverCard"] > div > div > div > div > div > div > a > div > div[dir="ltr"] > span';
 
-// TODO document
+// targets recommendation and people you might like
 const RECOMMENDATION_SELECTOR = 'div[data-testid="UserCell"] > div > div > div > div > div > div > div > a > div > div[dir="ltr"] > span';
 
 const SPAN_WITH_ID = 'span[id]';
@@ -78,183 +68,7 @@ function myRandomId() {
 
 	return "id_" + Date.now().toString() + "_" + Math.random().toString(16).slice(2);
 }
-/*
-function getHoverObserver() {
 
-	var FEEDS_PROCESSED = new Set();
-
-	return () => {
-
-		const targetElements = [...document.querySelectorAll(HOVER_CARD_SELECTOR)];
-
-		if (targetElements.length == 0) {
-
-			return;
-		}
-
-		//verifiedHandles(targetElements.map((element) => element.textContent?.substring(1))).then((verified) => {
-		if (typeof window.originalBirdsHandlesSet === 'undefined') {
-
-			return;
-		}
-
-		const doProcessing = targetElements.filter(element => window.originalBirdsHandlesSet.has(element.textContent?.substring(1)));
-
-		//const doProcessing = targetElements.filter((_, idx) => verified[idx]);
-
-		if (doProcessing.length == 0) {
-
-			return;
-		}
-
-		retrieveCheckmark().then((checkHtml) => {
-
-			if (checkHtml === null) {
-
-				return;
-			}
-
-			for (const element of doProcessing) {
-
-				const parent = element.parentElement?.parentElement?.parentElement?.parentElement?.parentElement;
-				const targetElement = parent?.firstElementChild?.firstElementChild?.lastElementChild;
-				// check undefined as well
-				if (parent == null || targetElement == null) {
-
-					console.log("This should not happen.");
-					continue;
-				}
-
-				//console.log(targetElement);
-				let checkmarkFound = false;
-				for (const child of targetElement.children) {
-
-					//console.log(child.id);
-					if (FEEDS_PROCESSED.has(child.id)) {
-
-						checkmarkFound = true;
-						break;
-					}
-				}
-				if (checkmarkFound) {
-
-					continue;
-				}
-
-				let myId = myRandomId();
-				while (FEEDS_PROCESSED.has(myId)) {
-
-					myId = myRandomId();
-				}
-				FEEDS_PROCESSED.add(myId);
-				//console.log(myId);
-
-				const div = document.createElement("span");
-
-				div.id = myId;
-				div.style.display = "flex";
-
-				div.innerHTML = checkHtml;
-				const svg = div.querySelector('svg');
-				if (svg !== null) {
-
-					svg.style.color = "#2DB32D";
-				}
-
-				targetElement.appendChild(div);
-			}
-		});
-		//});
-	};
-}
-
-// side bar recommended birds
-function getRecommendedObserver() {
-
-	var FEEDS_PROCESSED = new Set();
-
-	return () => {
-
-		const targetElements = [...document.querySelectorAll(RECOMMENDATION_SELECTOR)];
-
-		if (targetElements.length == 0) {
-
-			return;
-		}
-
-		if (typeof window.originalBirdsHandlesSet === 'undefined') {
-
-			return;
-		}
-
-		const doProcessing = targetElements.filter(element => window.originalBirdsHandlesSet.has(element.textContent?.substring(1)));
-
-		//const doProcessing = targetElements.filter((_, idx) => verified[idx]);
-
-		if (doProcessing.length == 0) {
-
-			return;
-		}
-
-		retrieveCheckmark().then((checkHtml) => {
-
-			if (checkHtml === null) {
-
-				return;
-			}
-
-			for (const element of doProcessing) {
-
-				const parent = element.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.
-					parentElement;
-				const targetElement = parent?.firstElementChild?.firstElementChild?.lastElementChild;
-				// check undefined as well
-				if (parent == null || targetElement == null) {
-
-					console.log("This should not happen.");
-					continue;
-				}
-
-				let checkmarkFound = false;
-				for (const child of targetElement.children) {
-
-					if (FEEDS_PROCESSED.has(child.id)) {
-
-						checkmarkFound = true;
-						break;
-					}
-				}
-				if (checkmarkFound) {
-
-					continue;
-				}
-
-				let myId = myRandomId();
-				while (FEEDS_PROCESSED.has(myId)) {
-
-					myId = myRandomId();
-				}
-				FEEDS_PROCESSED.add(myId);
-
-				const div = document.createElement("span");
-
-				div.id = myId;
-				div.style.display = "flex";
-
-				div.innerHTML = checkHtml;
-				const svg = div.querySelector('svg');
-				if (svg !== null) {
-
-					svg.style.color = "#2DB32D";
-				}
-
-				targetElement.appendChild(div);
-			}
-		});
-		//});
-	};
-}
-*/
 class CheckmarkManager {
 
 	constructor(verifiedHandles, checkHtml) {
@@ -448,7 +262,7 @@ async function registerRecurringObserver() {
 
 	function addCheckmark() {
 
-		console.log(invocations);
+		//console.log(invocations);
 		if (invocations > 0) {
 
 			invocations -= 1;
@@ -470,7 +284,10 @@ async function registerRecurringObserver() {
 
 			window.setTimeout(addCheckmark, 500);
 		}
-		console.log("stopped");
+		// else {
+
+		// 	console.log("stopped");
+		// }
 	}
 	addCheckmark();
 
@@ -483,7 +300,7 @@ async function registerRecurringObserver() {
 		}
 		else {
 
-			invocations = Math.max(10, invocations + 1);
+			invocations = Math.min(10, invocations + 1);
 		}
 	});
 	observer.observe(document.body, { childList: true, subtree: true });
