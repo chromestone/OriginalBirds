@@ -2,21 +2,21 @@
 const CHECK_SELECTOR = 'div[data-testid="UserName"] > div > div > div > div > div[dir="ltr"] > span > span > span > span > div:nth-child(1)';
 
 // targets user name on their profile/feed page
-const USER_SELECTOR = 'div[data-testid="UserName"] > div > div > div > div > div > div[dir="ltr"] > span';
+const USER_SELECTOR = 'div[data-testid="UserName"] > ' + 'div > '.repeat(5) + 'div[dir="ltr"] > span';
 // targets top heading on user page
-const HEADING_SELECTOR = 'h2[role="heading"] > div > div > div > div > span:nth-child(2) > span';
+const HEADING_SELECTOR = 'h2[role="heading"] > ' + 'div > '.repeat(4) + 'span:nth-child(2) > span';
 
 // targets feed topmost post
 const FEED_SELECTOR = 'div[data-testid="User-Name"] > div > div > div > a > div > span';
 
 // targets user feed or thread reply with (nested) post
-const THREAD_REPLY_POST_SELECTOR = 'div[data-testid="User-Name"] > div:nth-child(2) > div > div > div > div > span';
+const THREAD_REPLY_POST_SELECTOR = 'div[data-testid="User-Name"] > div:nth-child(2) > ' + 'div > '.repeat(4) + 'span';
 
 // targets overlay upon hovering on user
-const HOVER_CARD_SELECTOR = 'div[data-testid="HoverCard"] > div > div > div > div > div > div > a > div > div > span';
+const HOVER_CARD_SELECTOR = 'div[data-testid="HoverCard"] > ' + 'div > '.repeat(6) + 'a > div > div > span';
 
 // targets recommendation and people you might like
-const RECOMMENDATION_SELECTOR = 'div[data-testid="UserCell"] > div > div > div > div > div > div > div > a > div > div[dir="ltr"] > span';
+const RECOMMENDATION_SELECTOR = 'div[data-testid="UserCell"] > ' + 'div > '.repeat(7) + 'a > div > div[dir="ltr"] > span';
 
 const SPAN_WITH_ID = 'span[id]';
 
@@ -69,6 +69,24 @@ function myRandomId() {
 	return "id_" + Date.now().toString() + "_" + Math.random().toString(16).slice(2);
 }
 
+function nth_element(elem, dir, n) {
+
+	if (elem == null) {
+
+		return null;
+	}
+
+	let i = 0;
+	while ( i < n && ( elem = elem[ dir ] ) && elem.nodeType !== 9 ) {
+
+		if ( elem.nodeType === 1 ) {
+			
+			i += 1;
+		}
+	}
+	return i == n ? elem : null;
+}
+
 class CheckmarkManager {
 
 	constructor(verifiedHandles, checkHtml) {
@@ -81,7 +99,7 @@ class CheckmarkManager {
 	updateUserPage(user_selector, heading_selector) {
 
 		const handleElement = document.querySelector(user_selector);
-		if (handleElement === null || !this.verifiedHandles.has(handleElement.textContent?.substring(1))) {
+		if (handleElement === null || !this.verifiedHandles.has(handleElement.textContent?.substring(1).toLowerCase())) {
 
 			return;
 		}
@@ -179,16 +197,12 @@ class CheckmarkManager {
 
 		for (const element of document.querySelectorAll(selector)) {
 
-			if (!this.verifiedHandles.has(element.textContent?.substring(1))) {
+			if (!this.verifiedHandles.has(element.textContent?.substring(1).toLowerCase())) {
 
 				continue;
 			}
 
-			//const parent = element.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.
-			//	parentElement;
-			//const targetElement = parent?.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild;
-			//const parent = element2Parent(element);
-			const targetElement = element2Target(element);//parent2Target(parent);
+			const targetElement = element2Target(element);
 			// this should not happen unless html structure changed
 			// double equal checks for undefined as well
 			if (targetElement == null) {
@@ -254,40 +268,26 @@ async function registerRecurringObserver() {
 
 	var invocations = 10;
 
-	//const updateUserPage = getUserPageObserver();
-	//const updateFeed = getFeedObserver(FEED_SELECTOR);
-	//const updateReplyPost = getFeedObserver(THREAD_REPLY_POST_SELECTOR);
-	//const updateHoverCard = getHoverObserver();
-	//const updateRecommended = getRecommendedObserver();
-
 	function addCheckmark() {
 
-		//console.log(invocations);
 		if (invocations > 0) {
 
 			invocations -= 1;
 
+			const theDate = Date.now();
 			manager.updateUserPage(USER_SELECTOR, HEADING_SELECTOR);
 			manager.updateCheckmark(FEED_SELECTOR,
-				(element) => element.closest('div[data-testid="User-Name"]')?.
-					firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild);
+				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 4));
 			manager.updateCheckmark(THREAD_REPLY_POST_SELECTOR,
-				(element) => element.closest('div[data-testid="User-Name"]')?.
-					firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild);
+				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 4));
 			manager.updateCheckmark(HOVER_CARD_SELECTOR,
-				(element) => element.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.
-					firstElementChild?.firstElementChild?.lastElementChild);
+				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.lastElementChild);
 			manager.updateCheckmark(RECOMMENDATION_SELECTOR,
-				(element) => element.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.
-					parentElement?.
-					firstElementChild?.firstElementChild?.lastElementChild);
+				(element) => nth_element(element, "parentElement", 6)?.firstElementChild?.firstElementChild?.lastElementChild);
+			console.log(Date.now() - theDate);
 
 			window.setTimeout(addCheckmark, 500);
 		}
-		// else {
-
-		// 	console.log("stopped");
-		// }
 	}
 	addCheckmark();
 

@@ -21,10 +21,9 @@ async function loadHandles() {
 
 	const response = await fetch("../data/verified_handles.txt");
 	const data = await response.text();
-	const handles = data.split('\n').filter((str) => str !== "");
+	const handles = data.split('\n').filter((str) => str !== "").map((str) => str.toLowerCase());
 
 	const handlesSet = new Set(handles);
-	console.log(handlesSet.has(''));
 	chrome.storage.local.set({handles : [...handlesSet]});
 }
 
