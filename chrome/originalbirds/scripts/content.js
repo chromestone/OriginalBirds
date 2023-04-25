@@ -68,6 +68,17 @@ function getVerifiedHandles() {
 	});
 }
 
+function getSupporters() {
+
+	return new Promise((resolve) => {
+
+		chrome.storage.local.get("supporters", (result) => {
+
+			resolve(typeof result.supporters === 'undefined' ? null : result.supporters);
+		});
+	});
+}
+
 function myRandomId() {
 
 	return "id_" + Date.now().toString() + "_" + Math.random().toString(16).slice(2);
@@ -93,10 +104,12 @@ function nth_element(elem, dir, n) {
 
 class CheckmarkManager {
 
-	constructor(verifiedHandles, checkHtml) {
+	constructor(verifiedHandles, checkHtml, donors, contributors) {
 
 		this.verifiedHandles = verifiedHandles;
 		this.checkHtml = checkHtml;
+		this.donors = donors;
+		this.contributors = contributors;
 		this.checkmarkIds = new Set();
 	}
 
@@ -197,11 +210,36 @@ class CheckmarkManager {
 		headingElement.appendChild(div);
 	}
 
-	updateCheckmark(selector, element2Target) {
+	updateCheckmark(selector, element2Target, element2Name) {
 
 		for (const element of document.querySelectorAll(selector)) {
 
-			if (!this.verifiedHandles.has(element.textContent?.substring(1).toLowerCase())) {
+			const handle = element.textContent?.substring(1).toLowerCase();
+
+			// BEGIN SUPPORTERS SECTION
+
+			let color = null;
+			if (this.donors.has(handle)) {
+
+				color = "#FFDB98";
+			}
+			else if (this.contributors.has(handle)) {
+
+				color = "#FFCDFF";
+			}
+
+			if (color !== null) {
+
+				const nameElement = element2Name(element);
+				if (nameElement != null) {
+
+					nameElement.style.color = color;
+				}
+			}
+
+			// END SUPPORTERS SECTION
+
+			if (!this.verifiedHandles.has(handle)) {
 
 				continue;
 			}
@@ -258,17 +296,37 @@ async function registerRecurringObserver() {
 	const verifiedHandles = await getVerifiedHandles();
 	if (verifiedHandles === null) {
 
-		console.log("Warning: Original Birds could not load verified handles.");
+		console.log("Error: Original Birds could not load verified handles.");
 		return;
 	}
 	const checkHtml = await getCheckmark();
 	if (checkHtml === null) {
 
-		console.log("Warning: Original Birds could not load checkmark.");
+		console.log("Error: Original Birds could not load checkmark.");
 		return;
 	}
 
-	const manager = new CheckmarkManager(verifiedHandles, checkHtml);
+	const supportersStr = await getSupporters();
+	if (supportersStr === null) {
+
+		console.log("Warning: Original Birds could not load supporters :( .");
+	}
+	const supporters = JSON.parse(supportersStr);
+	if (typeof supporters.donors === 'undefined') {
+
+		console.log("Warning: Original Birds could not load donors :( .");
+	}
+	if (typeof supporters.contributors === 'undefined') {
+
+		console.log("Warning: Original Birds could not load contributors :( .");
+	}
+	const donors = typeof supporters.donors === 'undefined' ? new Set() : new Set(supporters.donors.map((obj) => obj.handle.toLowerCase()));
+	const contributors = typeof supporters.contributors === 'undefined' ? new Set() : new Set(supporters.contributors.map((obj) => obj.handle.toLowerCase()));
+	console.log(donors);
+	console.log(contributors);
+	donors.add("realopenbirds");
+
+	const manager = new CheckmarkManager(verifiedHandles, checkHtml, donors, contributors);
 
 	var invocations = 10;
 
@@ -278,21 +336,25 @@ async function registerRecurringObserver() {
 
 			invocations -= 1;
 
-			//const theDate = Date.now();
 			manager.updateUserPage(USER_SELECTOR, HEADING_SELECTOR);
 			manager.updateCheckmark(FEED_SELECTOR,
-				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 4));
+				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 4),
+				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 7));
 			manager.updateCheckmark(THREAD_REPLY_POST_SELECTOR,
-				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 4));
+				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 4),
+				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 7));
 			manager.updateCheckmark(HOVER_CARD_SELECTOR,
-				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.lastElementChild);
+				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.lastElementChild,
+				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.firstElementChild);
 			manager.updateCheckmark(RECOMMENDATION_SELECTOR,
-				(element) => nth_element(element, "parentElement", 6)?.firstElementChild?.firstElementChild?.lastElementChild);
+				(element) => nth_element(element, "parentElement", 6)?.firstElementChild?.firstElementChild?.lastElementChild,
+				(element) => nth_element(nth_element(element, "parentElement", 6), "firstElementChild", 6));
 			manager.updateCheckmark(CONVERSATION_SELECTOR,
-				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild);
+				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild,
+				(element) => nth_element(nth_element(element, "parentElement", 5), "firstElementChild", 5));
 			manager.updateCheckmark(ACTIVE_MESSAGE_SELECTOR,
-				(element) => nth_element(element, "parentElement", 6)?.firstElementChild?.firstElementChild?.firstElementChild);
-			//console.log(Date.now() - theDate);
+				(element) => nth_element(element, "parentElement", 6)?.firstElementChild?.firstElementChild?.firstElementChild,
+				(element) => nth_element(nth_element(element, "parentElement", 6), "firstElementChild", 6));
 
 			window.setTimeout(addCheckmark, 500);
 		}
