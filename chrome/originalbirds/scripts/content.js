@@ -1,8 +1,8 @@
 // checkmark selector to get html with checkmark svg
-const CHECK_SELECTOR = 'div[data-testid="UserName"] > div > div > div > div > div[dir="ltr"] > span > span > span > span > div:nth-child(1)';
+const CHECK_SELECTOR = 'div[data-testid="UserName"] > ' + 'div > '.repeat(4) + 'div[dir] > ' + 'span > '.repeat(4) + 'div:nth-child(1)';
 
 // targets user name on their profile/feed page
-const USER_SELECTOR = 'div[data-testid="UserName"] > ' + 'div > '.repeat(5) + 'div[dir="ltr"] > span';
+const USER_SELECTOR = 'div[data-testid="UserName"] > ' + 'div > '.repeat(5) + 'div[dir] > span';
 // targets top heading on user page
 const HEADING_SELECTOR = 'h2[role="heading"] > ' + 'div > '.repeat(4) + 'span:nth-child(2) > span';
 
@@ -16,7 +16,11 @@ const THREAD_REPLY_POST_SELECTOR = 'div[data-testid="User-Name"] > div:nth-child
 const HOVER_CARD_SELECTOR = 'div[data-testid="HoverCard"] > ' + 'div > '.repeat(6) + 'a > div > div > span';
 
 // targets recommendation and people you might like
-const RECOMMENDATION_SELECTOR = 'div[data-testid="UserCell"] > ' + 'div > '.repeat(7) + 'a > div > div[dir="ltr"] > span';
+const RECOMMENDATION_SELECTOR = 'div[data-testid="UserCell"] > ' + 'div > '.repeat(7) + 'a > div > div[dir] > span';
+
+// targets messages
+const CONVERSATION_SELECTOR = 'div[data-testid="conversation"] > ' + 'div > '.repeat(12) + 'div[dir] > span';
+const ACTIVE_MESSAGE_SELECTOR = 'div[data-testid="cellInnerDiv"] > ' + 'div > '.repeat(5) + 'a > div > div[dir] > span';
 
 const SPAN_WITH_ID = 'span[id]';
 
@@ -274,7 +278,7 @@ async function registerRecurringObserver() {
 
 			invocations -= 1;
 
-			const theDate = Date.now();
+			//const theDate = Date.now();
 			manager.updateUserPage(USER_SELECTOR, HEADING_SELECTOR);
 			manager.updateCheckmark(FEED_SELECTOR,
 				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 4));
@@ -284,7 +288,11 @@ async function registerRecurringObserver() {
 				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.lastElementChild);
 			manager.updateCheckmark(RECOMMENDATION_SELECTOR,
 				(element) => nth_element(element, "parentElement", 6)?.firstElementChild?.firstElementChild?.lastElementChild);
-			console.log(Date.now() - theDate);
+			manager.updateCheckmark(CONVERSATION_SELECTOR,
+				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild);
+			manager.updateCheckmark(ACTIVE_MESSAGE_SELECTOR,
+				(element) => nth_element(element, "parentElement", 6)?.firstElementChild?.firstElementChild?.firstElementChild);
+			//console.log(Date.now() - theDate);
 
 			window.setTimeout(addCheckmark, 500);
 		}
