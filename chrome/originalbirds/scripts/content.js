@@ -13,7 +13,9 @@ const FEED_SELECTOR = 'div[data-testid="User-Name"] > div > div > div > a > div 
 const THREAD_REPLY_POST_SELECTOR = 'div[data-testid="User-Name"] > div:nth-child(2) > ' + 'div > '.repeat(4) + 'span';
 
 // targets overlay upon hovering on user
-const HOVER_CARD_SELECTOR = 'div[data-testid="HoverCard"] > ' + 'div > '.repeat(6) + 'a > div > div > span';
+const HOVER_CARD_SELECTOR = 'div[data-testid="HoverCard"] > ' + 'div > '.repeat(6) + 'a > div > :is(div, span) > span';
+// dunno why but notifications page follow is different
+// const HOVER_CARD_SELECTOR2 = 'div[data-testid="HoverCard"] > ' + 'div > '.repeat(6) + 'a > div > span > span';
 
 // targets recommendation and people you might like
 const RECOMMENDATION_SELECTOR = 'div[data-testid="UserCell"] > ' + 'div > '.repeat(7) + 'a > div > div[dir] > span';
@@ -113,21 +115,58 @@ class CheckmarkManager {
 		this.checkmarkIds = new Set();
 	}
 
+	_getSupporterColor(handle) {
+
+		if (this.donors.has(handle)) {
+
+			return "#FFDB98";
+		}
+		if (this.contributors.has(handle)) {
+
+			return "#FFCDFF";
+		}
+		return null;
+	}
+
 	updateUserPage(user_selector, heading_selector) {
 
 		const handleElement = document.querySelector(user_selector);
-		if (handleElement === null || !this.verifiedHandles.has(handleElement.textContent?.substring(1).toLowerCase())) {
+		if (handleElement === null) {
 
 			return;
 		}
 
-		const parent = handleElement.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.
-			parentElement?.parentElement;
-		const targetElement = parent?.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild?.
-			firstElementChild?.lastElementChild;
+		const handle = handleElement.textContent?.substring(1).toLowerCase();
+		const parent = nth_element(handleElement, "parentElement", 7);
+
+		// BEGIN SUPPORTER SECTION
+
+		const color = this._getSupporterColor(handle);
+		if (color !== null) {
+
+			const nameElement = nth_element(parent, "firstElementChild", 5);
+			if (nameElement != null) {
+
+				nameElement.style.color = color;
+			}
+		}
+
+		// END SUPPORTER SECTION
+
+		if (!this.verifiedHandles.has(handle)) {
+
+			this._updateHeading(heading_selector, color, false);
+			return;
+		}
+
+		//const parent = handleElement.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.
+		//	parentElement?.parentElement;
+		// const targetElement = parent.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild?.firstElementChild?.
+		// 	firstElementChild?.lastElementChild;
+		const targetElement = nth_element(parent, "firstElementChild", 6);
 		// this should not happen unless html structure changed
 		// double equal checks for undefined as well
-		if (parent == null || targetElement == null) {
+		if (targetElement == null) {
 
 			console.log("Error: Original Birds could not locate checkmark parent.");
 		}
@@ -174,8 +213,32 @@ class CheckmarkManager {
 			}
 		}
 
-		const headingElement = document.querySelector(heading_selector);
+		this._updateHeading(heading_selector, color, true);
+	}
+
+	_updateHeading(selector, color, verified) {
+
+		const headingElement = document.querySelector(selector);
 		if (headingElement === null) {
+
+			return;
+		}
+
+		// BEGIN SUPPORTER SECTION
+
+		if (color !== null) {
+
+			const nameElement = headingElement.parentElement?.parentElement?.
+				firstElementChild?.firstElementChild?.firstElementChild;
+			if (nameElement != null) {
+
+				nameElement.style.color = color;
+			}
+		}
+
+		// END SUPPORTER SECTION
+
+		if (!verified) {
 
 			return;
 		}
@@ -216,18 +279,9 @@ class CheckmarkManager {
 
 			const handle = element.textContent?.substring(1).toLowerCase();
 
-			// BEGIN SUPPORTERS SECTION
+			// BEGIN SUPPORTER SECTION
 
-			let color = null;
-			if (this.donors.has(handle)) {
-
-				color = "#FFDB98";
-			}
-			else if (this.contributors.has(handle)) {
-
-				color = "#FFCDFF";
-			}
-
+			const color = this._getSupporterColor(handle);
 			if (color !== null) {
 
 				const nameElement = element2Name(element);
@@ -237,7 +291,7 @@ class CheckmarkManager {
 				}
 			}
 
-			// END SUPPORTERS SECTION
+			// END SUPPORTER SECTION
 
 			if (!this.verifiedHandles.has(handle)) {
 
@@ -322,9 +376,9 @@ async function registerRecurringObserver() {
 	}
 	const donors = typeof supporters.donors === 'undefined' ? new Set() : new Set(supporters.donors.map((obj) => obj.handle.toLowerCase()));
 	const contributors = typeof supporters.contributors === 'undefined' ? new Set() : new Set(supporters.contributors.map((obj) => obj.handle.toLowerCase()));
-	console.log(donors);
-	console.log(contributors);
+	// TODO delete
 	donors.add("realopenbirds");
+	verifiedHandles.add("no1mann");
 
 	const manager = new CheckmarkManager(verifiedHandles, checkHtml, donors, contributors);
 
