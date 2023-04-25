@@ -10,6 +10,8 @@ YouTube Demo: [youtube.com/watch?v=R3rb2JZEjxo](https://www.youtube.com/watch?v=
 
 ## Donations
 
+Thank you to our [donors](donors.md) and [contributors](contributors.md)!!! Please go check them out and show them some love!
+
 If you like using this extension, then please consider donating to support this project!<br />
 [buymeacoffee.com/openbirds](https://www.buymeacoffee.com/openbirds)
 
