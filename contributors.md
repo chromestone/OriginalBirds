@@ -11,7 +11,7 @@
 	// Fetch the JSON data from the URL
 	fetch(url).then(response => response.json()).then(data => {
 		// Extract the list of donors from the JSON data
-		const donors = data.supporters;
+		const donors = data.contributors;
 
 		// Get the container element to display the list
 		const container = document.getElementById('donor-list');
