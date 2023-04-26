@@ -3,6 +3,10 @@ Where my OBs at?
 
 This browser extension brings back the legacy Twitter verified status.
 
+[Get it now for **free** on the Chrome Web Store.](https://chrome.google.com/webstore/detail/original-birds/chhgbpmapfgibdoimakecicdlhhmkpjn)
+
+(Firefox coming soon)
+
 For more information visit our [website](https://chromestone.github.io/OriginalBirds/).
 
 Huge thanks to thansen0 for publishing the data:
