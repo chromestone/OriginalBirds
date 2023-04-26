@@ -45,7 +45,9 @@ A: Please report any bugs to [GitHub issues](https://github.com/chromestone/Orig
 See below about contributing a patch to fix a bug.
 
 **Q: How do I become a contributor?**<br />
-A: Always consult the [contribution guidelines] and make a GitHub issue first. Remember to include your Twitter handle when you make your pull request. If it gets approved, then congrats, you're a contributor!
+A: Always consult the [contribution guidelines](https://github.com/chromestone/OriginalBirds/blob/main/CONTRIBUTING.md) and make a GitHub issue first. Remember to include your Twitter handle when you make your pull request. If it gets approved, then congrats, you're a contributor!
+
+(Discord for donors and contributors coming soon.)
 
 ## Privacy
 
