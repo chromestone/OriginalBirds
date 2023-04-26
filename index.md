@@ -22,9 +22,12 @@ If you like using this extension, then please consider donating to support this 
 ## FAQ
 
 **Q: How do you determine who was legacy verified?**<br />
-A: Users will see a green checkmark by OBs who were legacy verified around April 6th, 2023. This means that @verified at one point followed them on Twitter. We sourced our data from [thansen0](https://github.com/thansen0/verified_twitters). Please show them some love!
+A: Users will see a green checkmark beside OBs who were legacy verified around April 6th, 2023. This means that @verified followed them on Twitter at the time of data collection. We sourced our data from [thansen0](https://github.com/thansen0/verified_twitters). Please show them some love!
 
 **Note:** We are currently cross-referencing Twitter handles (because it would be costly to verify against the actual Twitter ID). We recognize that Twitter handles may have changed and will be working on it when we have the resources.
+
+**Q: Why is my browser randomly visiting Elon Musk's Twitter page?**<br />
+A: This is a normal operation to retrieve Twitter's checkmark that happens once on installation. Since Elon Musk owns Twitter, he is always verified and we obtain Twitter's checkmark from his page after installation. Our extension does not include any Twitter source code or assets to avoid copyright issues.
 
 **Q: Can I be added to the legacy verified list?**<br />
 A: As of right now we're only planning on this to be a static list (like a Wayback Machine). If we were to implement our own user verification then it would require volunteers or some external funding, which would 100% draw the ire of Twitter.
@@ -38,6 +41,11 @@ Please do not create a GitHub issue in this case. For bugs, please see below.
 
 **Q: I found a bug. How do I report it?**<br />
 A: Please report any bugs to [GitHub issues](https://github.com/chromestone/OriginalBirds/issues). Since, this is still a work in progress, don't hesitate to create an issue if checkmarks are missing! You can of course reach out to us at our email listed on the Chrome Web Store. However, for sanity purposes we request you stick to GitHub issues.
+
+See below about contributing a patch to fix a bug.
+
+**Q: How do I become a contributor?**<br />
+A: Always consult the [contribution guidelines] and make a GitHub issue first. Remember to include your Twitter handle when you make your pull request. If it gets approved, then congrats, you're a contributor!
 
 ## Privacy
 
