@@ -24,8 +24,6 @@ const ACTIVE_MESSAGE_SELECTOR = 'div[data-testid="cellInnerDiv"] > ' + 'div > '.
 
 const SPAN_WITH_ID = 'span[id]';
 
-// const CHECKMARK_TOOLTIP = "A legacy verified user used this Twitter handle in the past.";
-
 function waitForElement(selector) {
 	return new Promise((resolve) => {
 		const observer = new MutationObserver((mutations) => {
@@ -413,39 +411,7 @@ async function registerRecurringObserver() {
 	});
 	observer.observe(document.body, { childList: true, subtree: true });
 }
-/*
-function createTooltipCSS() {
 
-	const style = document.createElement('style');
-	style.innerHTML = `
-		.tooltip {
-			position: relative;
-			display: inline-block;
-			border-bottom: 1px dotted black;
-		}
-
-		.tooltip .tooltiptext {
-			visibility: hidden;
-			width: 120px;
-			background-color: black;
-			color: #fff;
-			text-align: center;
-			border-radius: 6px;
-			padding: 5px 0;
-
-			position: absolute;
-			z-index: 100;
-			top: 100%;
-			left: 50%;
-			margin-left: -60px;
-		}
-
-		.tooltip:hover .tooltiptext {
-			visibility: visible;
-		}`;
-	document.getElementsByTagName('head')[0].appendChild(style);
-}
-*/
 chrome.runtime.sendMessage({ text: "tab_id?" }, response => {
 
 	chrome.storage.local.get("closeme", (result) => {
@@ -457,7 +423,6 @@ chrome.runtime.sendMessage({ text: "tab_id?" }, response => {
 		}
 		else {
 
-			//createTooltipCSS();
 			registerRecurringObserver();
 		}
 	});
