@@ -195,7 +195,7 @@ class CheckmarkManager {
 				div.id = myId;
 				div.style.verticalAlign = "middle";
 
-				div.innerHTML = this.checkHtml;
+				div.appendChild(this.checkHtml.cloneNode(true));
 				const svg = div.querySelector('svg');
 				if (svg !== null) {
 
@@ -256,7 +256,7 @@ class CheckmarkManager {
 		div.id = myId;
 		div.style.display = "flex";
 
-		div.innerHTML = this.checkHtml;
+		div.appendChild(this.checkHtml.cloneNode(true));
 		const svg = div.querySelector('svg');
 		if (svg !== null) {
 	
@@ -326,7 +326,7 @@ class CheckmarkManager {
 			div.id = myId;
 			div.style.display = "flex";
 
-			div.innerHTML = this.checkHtml;
+			div.appendChild(this.checkHtml.cloneNode(true));
 			const svg = div.querySelector('svg');
 			if (svg !== null) {
 
@@ -346,8 +346,16 @@ async function registerRecurringObserver() {
 		console.log("Error: Original Birds could not load verified handles.");
 		return;
 	}
-	const checkHtml = await getCheckmark();
-	if (checkHtml === null) {
+	const checkHtmlStr = await getCheckmark();
+	if (checkHtmlStr === null) {
+
+		console.log("Error: Original Birds could not load checkmark.");
+		return;
+	}
+	const parser = new DOMParser();
+	const checkDoc = parser.parseFromString(checkHtmlStr, "text/html");
+	const checkHtml = checkDoc?.body?.firstChild;
+	if (checkHtml == null || checkDoc.querySelector("parsererror") !== null) {
 
 		console.log("Error: Original Birds could not load checkmark.");
 		return;

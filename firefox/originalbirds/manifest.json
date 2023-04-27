@@ -1,7 +1,45 @@
+{
+	"manifest_version": 3,
+	"name": "Original Birds",
+	"version": "0.0.0.1",
+	"description": "A simple extension that adds UI to indicate legacy Twitter verified status.",
+
+	"icons": {
+	  "16": "images/icon-16.png",
+	  "32": "images/icon-32.png",
+	  "48": "images/icon-48.png",
+	  "128": "images/icon-128.png"
+	},
+
+	"content_scripts": [
+		{
+			"matches": ["https://*.twitter.com/*"],
+			"js": ["scripts/content.js"]
+		}
+	],
+
+	"background": {
+		"scripts": ["scripts/background.js"]
+	},
+
+	"permissions": [
+		"storage",
+		"unlimitedStorage"
+	],
+
+	"action": {
+		"default_icon": {
+			"16": "images/icon-16.png",
+			"32": "images/icon-32.png",
+			"48": "images/icon-48.png",
+			"128": "images/icon-128.png"
+		},
+		"default_title": "Original Birds"
 	},
 
 	"browser_specific_settings": {
 		"gecko": {
-			"id": "open.birds.official@gmail.com",
-			"strict_min_version": "42.0"
+			"id": "open.birds.official@gmail.com"
 		}
+	}
+}
