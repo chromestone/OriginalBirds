@@ -4,7 +4,8 @@ Original Birds is a browser extension that brings back the **legacy Twitter veri
 
 Tired of not knowing who was an Original Bird (**OB**)? Then this extension is for you! A **green checkmark** is added on Twitter to indicate who was an **OB** before the great purge of 2023.
 
-[Get it now for **free** on the Chrome Web Store.](https://chrome.google.com/webstore/detail/original-birds/chhgbpmapfgibdoimakecicdlhhmkpjn)
+<a href="https://chrome.google.com/webstore/detail/original-birds/chhgbpmapfgibdoimakecicdlhhmkpjn" style="display: inline"><img src="https://chromestone.github.io/OriginalBirds/images/chrome.png" alt="Get it for FREE on the Chrome Web Store."></a>
+<a href="https://addons.mozilla.org/en-US/firefox/addon/original-birds/" style="display: inline"><img src="https://chromestone.github.io/OriginalBirds/images/firefox.webp" alt="Get it for FREE for Firefox."></a>
 
 <img src="https://chromestone.github.io/OriginalBirds/images/reynolds.png" alt="Extension Demo" style="width: 50%;display: block;margin-left: auto;margin-right: auto">
 
@@ -29,6 +30,9 @@ A: Users will see a green checkmark beside OBs who were legacy verified around A
 **Q: Why is my browser randomly visiting Elon Musk's Twitter page?**<br />
 A: This is a normal operation to retrieve Twitter's checkmark that happens once on installation. Since Elon Musk owns Twitter, he is always verified and we obtain Twitter's checkmark from his page after installation. Our extension does not include any Twitter source code or assets to avoid copyright issues.
 
+**Q: Why do I need to grant permission to access data on Twitter?**<br />
+A: We access Twitter websites to read user handles in order to check if they are verified and write HTML to add checkmarks. We don't collect any user data. If you are concerned about privacy check out our [privacy policy](privacy.md) or install from our open source [GitHub repository](https://github.com/chromestone/OriginalBirds).
+
 **Q: Can I be added to the legacy verified list?**<br />
 A: As of right now we're only planning on this to be a static list (like a Wayback Machine). If we were to implement our own user verification then it would require volunteers or some external funding, which would 100% draw the ire of Twitter.
 
@@ -41,6 +45,8 @@ Please do not create a GitHub issue in this case. For bugs, please see below.
 
 **Q: I found a bug. How do I report it?**<br />
 A: Please report any bugs to [GitHub issues](https://github.com/chromestone/OriginalBirds/issues). Since, this is still a work in progress, don't hesitate to create an issue if checkmarks are missing! You can of course reach out to us at our email listed on the Chrome Web Store. However, for sanity purposes we request you stick to GitHub issues.
+
+For non-GitHub users we're accepting bug reports on our Twitter [@RealOpenBirds](https://twitter.com/RealOpenBirds).
 
 See below about contributing a patch to fix a bug.
 
