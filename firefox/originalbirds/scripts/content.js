@@ -52,36 +52,11 @@ function setCheckmark(targetElement) {
 	window.close();
 }
 
-function getCheckmark() {
+function getProperties(keys) {
 
 	return new Promise((resolve) => {
 
-		chrome.storage.local.get("checkmark", (result) => {
-
-			resolve(typeof result.checkmark === 'undefined' ? null : result.checkmark);
-		});
-	});
-}
-
-function getVerifiedHandles() {
-
-	return new Promise((resolve) => {
-
-		chrome.storage.local.get("handles", (result) => {
-
-			resolve(typeof result.handles === 'undefined' ? null : new Set(result.handles));
-		});
-	});
-}
-
-function getSupporters() {
-
-	return new Promise((resolve) => {
-
-		chrome.storage.local.get("supporters", (result) => {
-
-			resolve(typeof result.supporters === 'undefined' ? null : result.supporters);
-		});
+		chrome.storage.local.get(keys, resolve);
 	});
 }
 
@@ -338,47 +313,77 @@ class CheckmarkManager {
 	}
 }
 
-async function registerRecurringObserver() {
+async function checkmarkManagerFactory() {
 
-	const verifiedHandles = await getVerifiedHandles();
-	if (verifiedHandles === null) {
+	const properties = await getProperties(["handles", "checkmark", "supporters"]);
 
-		console.log("Error: Original Birds could not load verified handles.");
-		return;
-	}
-	const checkHtmlStr = await getCheckmark();
-	if (checkHtmlStr === null) {
+	if (typeof properties.checkmark === 'undefined') {
 
 		console.log("Error: Original Birds could not load checkmark.");
-		return;
+		return null;
 	}
+	if (typeof properties.handles === 'undefined') {
+
+		console.log("Error: Original Birds could not load verified handles.");
+		return null;
+	}
+
 	const parser = new DOMParser();
-	const checkDoc = parser.parseFromString(checkHtmlStr, "text/html");
+	const checkDoc = parser.parseFromString(properties.checkmark, "text/html");
+
 	const checkHtml = checkDoc?.body?.firstChild;
 	if (checkHtml == null || checkDoc.querySelector("parsererror") !== null) {
 
 		console.log("Error: Original Birds could not load checkmark.");
 		return;
 	}
+	const verifiedHandles = new Set(properties.handles);
 
-	const supportersStr = await getSupporters();
-	if (supportersStr === null) {
+	let donors, contributors;
+	// BEGIN SUPPORTER SECTION
+
+	if (typeof properties.supporters === 'undefined') {
 
 		console.log("Warning: Original Birds could not load supporters :( .");
+		donors = new Set();
+		contributors = new Set();
 	}
-	const supporters = JSON.parse(supportersStr);
-	if (typeof supporters.donors === 'undefined') {
+	else {
 
-		console.log("Warning: Original Birds could not load donors :( .");
+		const supporters = JSON.parse(properties.supporters);
+
+		if (typeof supporters.donors === 'undefined') {
+	
+			console.log("Warning: Original Birds could not load donors :( .");
+			donors = new Set();
+		}
+		else {
+
+			donors = new Set(supporters.donors.map((obj) => obj.handle.toLowerCase()))
+		}
+
+		if (typeof supporters.contributors === 'undefined') {
+	
+			console.log("Warning: Original Birds could not load contributors :( .");
+			contributors = new Set();
+		}
+		else {
+
+			contributors =  new Set(supporters.contributors.map((obj) => obj.handle.toLowerCase()));
+		}
 	}
-	if (typeof supporters.contributors === 'undefined') {
 
-		console.log("Warning: Original Birds could not load contributors :( .");
+	// END SUPPORTER SECTION
+
+	return new CheckmarkManager(verifiedHandles, checkHtml, donors, contributors);
+}
+
+async function registerRecurringObserver(manager) {
+
+	if (manager === null) {
+
+		return;
 	}
-	const donors = typeof supporters.donors === 'undefined' ? new Set() : new Set(supporters.donors.map((obj) => obj.handle.toLowerCase()));
-	const contributors = typeof supporters.contributors === 'undefined' ? new Set() : new Set(supporters.contributors.map((obj) => obj.handle.toLowerCase()));
-
-	const manager = new CheckmarkManager(verifiedHandles, checkHtml, donors, contributors);
 
 	var invocations = 10;
 
@@ -439,7 +444,7 @@ chrome.runtime.sendMessage({ text: "tab_id?" }, response => {
 		}
 		else {
 
-			registerRecurringObserver();
+			checkmarkManagerFactory().then(registerRecurringObserver);
 		}
 	});
 });

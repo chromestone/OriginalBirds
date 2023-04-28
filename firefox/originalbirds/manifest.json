@@ -1,7 +1,7 @@
 {
 	"manifest_version": 3,
 	"name": "Original Birds",
-	"version": "0.0.0.1",
+	"version": "0.0.0.2",
 	"description": "A simple extension that adds UI to indicate legacy Twitter verified status.",
 
 	"icons": {
