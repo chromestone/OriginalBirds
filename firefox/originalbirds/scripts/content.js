@@ -12,6 +12,9 @@ const FEED_SELECTOR = 'div[data-testid="User-Name"] > div > div > div > a > div 
 // targets user feed or thread reply with (nested) post
 const THREAD_REPLY_POST_SELECTOR = 'div[data-testid="User-Name"] > div:nth-child(2) > ' + 'div > '.repeat(4) + 'span';
 
+// targets user name when writing a popup reply
+const COMPOSE_REPLY_TWEET_SELECTOR = 'div[data-testid="User-Name"] > div:nth-child(2) > div > div > div[dir] > span';
+
 // targets overlay upon hovering on user
 const HOVER_CARD_SELECTOR = 'div[data-testid="HoverCard"] > ' + 'div > '.repeat(6) + 'a > div > :is(div, span) > span';
 
@@ -21,6 +24,10 @@ const RECOMMENDATION_SELECTOR = 'div[data-testid="UserCell"] > ' + 'div > '.repe
 // targets messages
 const CONVERSATION_SELECTOR = 'div[data-testid="conversation"] > ' + 'div > '.repeat(12) + 'div[dir] > span';
 const ACTIVE_MESSAGE_SELECTOR = 'div[data-testid="cellInnerDiv"] > ' + 'div > '.repeat(5) + 'a > div > div[dir] > span';
+
+// targets embed tweets
+const EMBED_ORIGINAL_SELECTOR = 'article[role] >' + 'div > '.repeat(5) + 'a[dir]:nth-child(1) > span:nth-child(2)';
+const EMBED_TWEET_SELECTOR = 'article[role] >' + 'div > '.repeat(6) + 'a > div > div[dir] > span';
 
 function waitForElement(selector) {
 
@@ -123,10 +130,12 @@ class CheckmarkManager {
 		const color = this._getSupporterColor(handle);
 		if (color !== null) {
 
-			const nameElement = nth_element(parent, "firstElementChild", 5);
+			const nameElement = nth_element(parent, "firstElementChild", 7);
 			if (nameElement != null) {
 
 				nameElement.style.color = color;
+				// nameElement.style.backgroundColor = "black";
+				// nameElement.style.borderRadius = "1em";
 			}
 		}
 
@@ -201,6 +210,8 @@ class CheckmarkManager {
 			if (nameElement != null) {
 
 				nameElement.style.color = color;
+				// nameElement.style.backgroundColor = "black";
+				// nameElement.style.borderRadius = "1em";
 			}
 		}
 
@@ -241,11 +252,11 @@ class CheckmarkManager {
 		headingElement.appendChild(div);
 	}
 
-	updateCheckmark(selector, element2Target, element2Name) {
+	updateCheckmark(selector, element2Target, element2Name, start=1) {
 
 		for (const element of document.querySelectorAll(selector)) {
 
-			const handle = element.textContent?.substring(1).toLowerCase();
+			const handle = element.textContent?.substring(start).toLowerCase();
 
 			// BEGIN SUPPORTER SECTION
 
@@ -256,6 +267,8 @@ class CheckmarkManager {
 				if (nameElement != null) {
 
 					nameElement.style.color = color;
+					// nameElement.style.backgroundColor = "black";
+					// nameElement.style.borderRadius = "1em";
 				}
 			}
 
@@ -400,6 +413,9 @@ async function registerRecurringObserver(manager) {
 			manager.updateCheckmark(THREAD_REPLY_POST_SELECTOR,
 				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 4),
 				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 7));
+			manager.updateCheckmark(COMPOSE_REPLY_TWEET_SELECTOR,
+				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 4),
+				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 6));
 			manager.updateCheckmark(HOVER_CARD_SELECTOR,
 				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.lastElementChild,
 				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.firstElementChild);
@@ -412,6 +428,13 @@ async function registerRecurringObserver(manager) {
 			manager.updateCheckmark(ACTIVE_MESSAGE_SELECTOR,
 				(element) => nth_element(element, "parentElement", 6)?.firstElementChild?.firstElementChild?.firstElementChild,
 				(element) => nth_element(nth_element(element, "parentElement", 6), "firstElementChild", 6));
+			manager.updateCheckmark(EMBED_ORIGINAL_SELECTOR,
+				(element) => nth_element(nth_element(element, "parentElement", 3), "firstElementChild", 6)?.lastElementChild?.lastElementChild,
+				(element) => nth_element(nth_element(element, "parentElement", 3), "firstElementChild", 9),
+				0);
+			manager.updateCheckmark(EMBED_TWEET_SELECTOR,
+				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.lastElementChild?.lastElementChild,
+				(element) => nth_element(nth_element(element, "parentElement", 5), "firstElementChild", 5));
 
 			window.setTimeout(addCheckmark, 500);
 		}
