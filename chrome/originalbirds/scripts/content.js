@@ -29,6 +29,8 @@ const ACTIVE_MESSAGE_SELECTOR = 'div[data-testid="cellInnerDiv"] > ' + 'div > '.
 const EMBED_ORIGINAL_SELECTOR = 'article[role] >' + 'div > '.repeat(5) + 'a[dir]:nth-child(1) > span:nth-child(2)';
 const EMBED_TWEET_SELECTOR = 'article[role] >' + 'div > '.repeat(6) + 'a > div > div[dir] > span';
 
+const VERIFIED_ICON_SELECTOR = 'svg[data-testid="icon-verified"]';
+
 function waitForElement(selector) {
 
 	return new Promise((resolve) => {
@@ -92,10 +94,12 @@ function nth_element(elem, dir, n) {
 
 class CheckmarkManager {
 
-	constructor(verifiedHandles, checkHtml, donors, contributors) {
+	constructor(verifiedHandles, checkHtml, showBlue, showLegacy, donors, contributors) {
 
 		this.verifiedHandles = verifiedHandles;
 		this.checkHtml = checkHtml;
+		this.showBlue = showBlue;
+		this.showLegacy = showLegacy;
 		this.donors = donors;
 		this.contributors = contributors;
 		this.checkmarkIds = new Set();
@@ -141,56 +145,75 @@ class CheckmarkManager {
 
 		// END SUPPORTER SECTION
 
-		if (!this.verifiedHandles.has(handle)) {
-
-			this._updateHeading(heading_selector, color, false);
-			return;
-		}
+		const verified = this.verifiedHandles.has(handle);
 
 		const targetElement = nth_element(parent, "firstElementChild", 6);
 		// this should not happen unless html structure changed
 		// double equal checks for undefined as well
 		if (targetElement == null) {
 
-			console.log("Error: Original Birds could not locate checkmark parent.");
+			console.log("Warning: Original Birds could not locate checkmark parent.");
 		}
 		else {
 
-			let checkmarkFound = false;
-			for (const child of targetElement.children) {
+			if (!this.showBlue) {
 
-				if (this.checkmarkIds.has(child.id)) {
+				// TODO
+/*
+				const verifiedIcons = targetElement.querySelectorAll();
+				for (const child of targetElement.children) {
 
-					checkmarkFound = true;
-					break;
+					if (this.checkmarkIds.has(child.id)) {
+
+						continue;
+					}
+
+
 				}
+				c.replace(/^(rgb|rgba)\(/,'').replace(/\)$/,'').replace(/\s/g,'').split(',');
+*/
 			}
-			if (!checkmarkFound) {
 
-				let myId = myRandomId();
-				while (this.checkmarkIds.has(myId)) {
+			if (verified) {
 
-					myId = myRandomId();
+				let checkmarkFound = false;
+				for (const child of targetElement.children) {
+
+					if (this.checkmarkIds.has(child.id)) {
+
+						checkmarkFound = true;
+						break;
+					}
 				}
-				this.checkmarkIds.add(myId);
+				if (!checkmarkFound) {
 
-				const div = document.createElement("span");
+					let myId = myRandomId();
+					while (this.checkmarkIds.has(myId)) {
 
-				div.id = myId;
-				div.style.verticalAlign = "middle";
+						myId = myRandomId();
+					}
+					this.checkmarkIds.add(myId);
 
-				div.appendChild(this.checkHtml.cloneNode(true));
-				const svg = div.querySelector('svg');
-				if (svg !== null) {
+					const div = document.createElement("span");
 
-					svg.style.color = "#2DB32D";//"#800080";
+					div.id = myId;
+					div.style.verticalAlign = "middle";
+
+					div.appendChild(this.checkHtml.cloneNode(true));
+					const svg = div.querySelector('svg');
+					if (svg !== null) {
+
+						svg.style.color = "#2DB32D";//"#800080";
+						// lowers chance of deleting our own checkmark when not showing blue
+						svg["data-testid"] = myId;
+					}
+
+					targetElement.appendChild(div);
 				}
-
-				targetElement.appendChild(div);
 			}
 		}
 
-		this._updateHeading(heading_selector, color, true);
+		this._updateHeading(heading_selector, color, verified);
 	}
 
 	_updateHeading(selector, color, verified) {
@@ -284,7 +307,7 @@ class CheckmarkManager {
 			// double equal checks for undefined as well
 			if (targetElement == null) {
 
-				console.log("Error: Original Birds could not locate checkmark parent.");
+				console.log("Warning: Original Birds could not locate checkmark parent.");
 				continue;
 			}
 
@@ -328,16 +351,16 @@ class CheckmarkManager {
 
 async function checkmarkManagerFactory() {
 
-	const properties = await getProperties(["handles", "checkmark", "supporters"]);
+	const properties = await getProperties(["handles", "checkmark", "showblue", "showlegacy", "supporters"]);
 
 	if (typeof properties.checkmark === 'undefined') {
 
-		console.log("Error: Original Birds could not load checkmark.");
+		console.error("Original Birds could not load checkmark.");
 		return null;
 	}
 	if (typeof properties.handles === 'undefined') {
 
-		console.log("Error: Original Birds could not load verified handles.");
+		console.error("Original Birds could not load verified handles.");
 		return null;
 	}
 
@@ -347,10 +370,13 @@ async function checkmarkManagerFactory() {
 	const checkHtml = checkDoc?.body?.firstChild;
 	if (checkHtml == null || checkDoc.querySelector("parsererror") !== null) {
 
-		console.log("Error: Original Birds could not load checkmark.");
+		console.error("Original Birds could not load checkmark.");
 		return;
 	}
 	const verifiedHandles = new Set(properties.handles);
+
+	const showBlue = typeof properties.showblue === 'undefined' ? true : properties.showblue;
+	const showLegacy = typeof properties.showlegacy === 'undefined' ? true : properties.showlegacy;
 
 	let donors, contributors;
 	// BEGIN SUPPORTER SECTION
@@ -388,7 +414,7 @@ async function checkmarkManagerFactory() {
 
 	// END SUPPORTER SECTION
 
-	return new CheckmarkManager(verifiedHandles, checkHtml, donors, contributors);
+	return new CheckmarkManager(verifiedHandles, checkHtml, showBlue, showLegacy, donors, contributors);
 }
 
 async function registerRecurringObserver(manager) {
@@ -406,6 +432,7 @@ async function registerRecurringObserver(manager) {
 
 			invocations -= 1;
 
+			//console.log(manager.showBlue + ", " + manager.showLegacy);
 			manager.updateUserPage(USER_SELECTOR, HEADING_SELECTOR);
 			manager.updateCheckmark(FEED_SELECTOR,
 				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 4),
@@ -441,7 +468,7 @@ async function registerRecurringObserver(manager) {
 	}
 	addCheckmark();
 
-	const observer = new MutationObserver((mutations) => {
+	function addCheckmarkInvoker(_) {
 
 		if (invocations <= 0) {
 
@@ -452,8 +479,24 @@ async function registerRecurringObserver(manager) {
 
 			invocations = Math.min(10, invocations + 1);
 		}
-	});
+	}
+
+	const observer = new MutationObserver(addCheckmarkInvoker);
 	observer.observe(document.body, { childList: true, subtree: true });
+
+	chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+
+		// console.log(msg);
+		if (msg.text == "settingschanged") {
+
+			chrome.storage.local.get(["showblue", "showlegacy"], (result) => {
+
+				manager.showBlue = typeof result.showblue === 'undefined' ? true : result.showblue;
+				manager.showLegacy = typeof result.showlegacy === 'undefined' ? true : result.showlegacy;
+				addCheckmarkInvoker(null);
+			});
+		}
+	});
 }
 
 chrome.runtime.sendMessage({ text: "tab_id?" }, response => {

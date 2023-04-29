@@ -25,7 +25,8 @@
 
 	"permissions": [
 		"storage",
-		"unlimitedStorage"
+		"unlimitedStorage",
+		"tabs"
 	],
 
 	"action": {

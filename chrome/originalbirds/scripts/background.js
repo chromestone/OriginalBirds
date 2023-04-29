@@ -1,16 +1,17 @@
-chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
+	console.log(msg);
 	if (msg.text == "tab_id?") {
 
 		sendResponse({tab : sender.tab.id});
 	}
 });
 
-chrome.storage.local.get("checkmark", function(result) {
+chrome.storage.local.get("checkmark", (result) => {
 
 	if (typeof result.checkmark === 'undefined') {
 
-		chrome.tabs.create({url : "https://twitter.com/elonmusk", active : false}, function(tab) {
+		chrome.tabs.create({url : "https://twitter.com/elonmusk", active : false}, (tab) => {
 
 			chrome.storage.local.set({closeme : tab.id});
 		});
