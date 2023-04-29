@@ -1,6 +1,5 @@
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
-	console.log(msg);
 	if (msg.text == "tab_id?") {
 
 		sendResponse({tab : sender.tab.id});

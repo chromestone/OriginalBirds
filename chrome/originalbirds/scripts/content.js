@@ -468,7 +468,7 @@ async function registerRecurringObserver(manager) {
 	}
 	addCheckmark();
 
-	function addCheckmarkInvoker(_) {
+	const observer = new MutationObserver((mutations) => {
 
 		if (invocations <= 0) {
 
@@ -479,11 +479,9 @@ async function registerRecurringObserver(manager) {
 
 			invocations = Math.min(10, invocations + 1);
 		}
-	}
-
-	const observer = new MutationObserver(addCheckmarkInvoker);
+	});
 	observer.observe(document.body, { childList: true, subtree: true });
-
+/*
 	chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
 		// console.log(msg);
@@ -496,7 +494,7 @@ async function registerRecurringObserver(manager) {
 				addCheckmarkInvoker(null);
 			});
 		}
-	});
+	});*/
 }
 
 chrome.runtime.sendMessage({ text: "tab_id?" }, response => {

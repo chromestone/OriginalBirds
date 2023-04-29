@@ -8,7 +8,7 @@ if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").match
 		element.style.color = "white";
 	}
 }
-
+/*
 function broadcastSettingsChanged() {
 
 	chrome.tabs.query({url : "https://*.twitter.com/*"}, (tabs) => {
@@ -32,7 +32,7 @@ function broadcastSettingsChanged() {
 		}
 	});
 }
-
+*/
 $('.toggle').toggles({type : "select"});
 
 chrome.storage.local.get(["showblue", "showlegacy"], (result) => {
@@ -46,7 +46,7 @@ chrome.storage.local.get(["showblue", "showlegacy"], (result) => {
 
 		chrome.storage.local.set({"showblue" : active});
 		//console.log("hi");
-		broadcastSettingsChanged();
+		//broadcastSettingsChanged();
 		// chrome.runtime.sendMessage({text : "settingschanged"});
 		//console.log("sent");
 	});
@@ -55,7 +55,7 @@ chrome.storage.local.get(["showblue", "showlegacy"], (result) => {
 
 		chrome.storage.local.set({"showlegacy" : active});
 		//console.log("hi");
-		broadcastSettingsChanged();
+		//broadcastSettingsChanged();
 		//chrome.runtime.sendMessage({text : "settingschanged"});
 		//console.log("sent");
 	});
