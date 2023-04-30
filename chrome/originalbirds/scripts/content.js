@@ -151,7 +151,8 @@ class CheckmarkManager {
 				continue;
 			}
 
-			svg.remove();
+			//svg.remove();
+			svg.style.maxWidth = "0";
 		}
 	}
 
@@ -267,7 +268,12 @@ class CheckmarkManager {
 
 		// END SUPPORTER SECTION
 
-		if (!verified) {
+		if (!this.showBlue) {
+
+			this._removeBlue(headingElement);
+		}
+
+		if (!(this.showLegacy && verified)) {
 
 			return;
 		}
@@ -507,7 +513,7 @@ async function registerRecurringObserver(manager) {
 				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.lastElementChild?.lastElementChild,
 				(element) => nth_element(nth_element(element, "parentElement", 5), "firstElementChild", 5));
 
-			window.setTimeout(addCheckmark, 500);
+			window.setTimeout(addCheckmark, 200);
 		}
 	}
 	addCheckmark();
@@ -517,7 +523,7 @@ async function registerRecurringObserver(manager) {
 		if (invocations <= 0) {
 
 			invocations = 1;
-			window.setTimeout(addCheckmark, 500);
+			window.setTimeout(addCheckmark, 200);
 		}
 		else {
 
