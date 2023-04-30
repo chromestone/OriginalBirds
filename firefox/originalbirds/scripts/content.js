@@ -29,6 +29,9 @@ const ACTIVE_MESSAGE_SELECTOR = 'div[data-testid="cellInnerDiv"] > ' + 'div > '.
 const EMBED_ORIGINAL_SELECTOR = 'article[role] >' + 'div > '.repeat(5) + 'a[dir]:nth-child(1) > span:nth-child(2)';
 const EMBED_TWEET_SELECTOR = 'article[role] >' + 'div > '.repeat(6) + 'a > div > div[dir] > span';
 
+const VERIFIED_ICON_SELECTOR = 'svg[data-testid="icon-verified"]';
+const TWITTER_BLUE_RGB = [29, 155, 240];
+
 function waitForElement(selector) {
 
 	return new Promise((resolve) => {
@@ -92,10 +95,12 @@ function nth_element(elem, dir, n) {
 
 class CheckmarkManager {
 
-	constructor(verifiedHandles, checkHtml, donors, contributors) {
+	constructor(verifiedHandles, checkHtml, showBlue, showLegacy, donors, contributors) {
 
 		this.verifiedHandles = verifiedHandles;
 		this.checkHtml = checkHtml;
+		this.showBlue = showBlue;
+		this.showLegacy = showLegacy;
 		this.donors = donors;
 		this.contributors = contributors;
 		this.checkmarkIds = new Set();
@@ -112,6 +117,40 @@ class CheckmarkManager {
 			return "#FFCDFF";
 		}
 		return null;
+	}
+
+	_removeBlue(targetElement) {
+
+		const verifiedIcons = targetElement.querySelectorAll(VERIFIED_ICON_SELECTOR);
+		for (const svg of verifiedIcons) {
+
+			if (this.checkmarkIds.has(svg["data-testid"])) {
+
+				continue;
+			}
+
+			const styles = getComputedStyle(svg);
+			const svgColor = styles.getPropertyValue("color");
+			const colorValues = svgColor.replace(/^(rgb|rgba)\(/,'').replace(/\)$/,'').replace(/\s/g,'').split(',');
+
+			if (colorValues.length < 3) {
+
+				console.log("Warning: Original Birds encountered invalid color: [" + svgColor + "]");
+				continue;
+			}
+
+			let absDistance = 0;
+			for (let i = 0; i < 3; i++) {
+
+				absDistance += Math.abs(parseInt(colorValues[i]) - TWITTER_BLUE_RGB[i]);
+			}
+			if (absDistance > 30) {
+
+				continue;
+			}
+
+			svg.style.maxWidth = "0";
+		}
 	}
 
 	updateUserPage(user_selector, heading_selector) {
@@ -134,63 +173,70 @@ class CheckmarkManager {
 			if (nameElement != null) {
 
 				nameElement.style.color = color;
-				// nameElement.style.backgroundColor = "black";
-				// nameElement.style.borderRadius = "1em";
 			}
 		}
 
 		// END SUPPORTER SECTION
 
-		if (!this.verifiedHandles.has(handle)) {
+		const verified = this.verifiedHandles.has(handle);
 
-			this._updateHeading(heading_selector, color, false);
-			return;
-		}
+		if (!this.showBlue || this.showLegacy) {
 
-		const targetElement = nth_element(parent, "firstElementChild", 6);
-		// this should not happen unless html structure changed
-		// double equal checks for undefined as well
-		if (targetElement == null) {
+			const targetElement = nth_element(parent, "firstElementChild", 6);
+			// this should not happen unless html structure changed
+			// double equal checks for undefined as well
+			if (targetElement == null) {
 
-			console.log("Error: Original Birds could not locate checkmark parent.");
-		}
-		else {
+				console.log("Warning: Original Birds could not locate checkmark parent.");
+			}
+			else {
 
-			let checkmarkFound = false;
-			for (const child of targetElement.children) {
+				if (!this.showBlue) {
 
-				if (this.checkmarkIds.has(child.id)) {
+					this._removeBlue(targetElement);
+				}
 
-					checkmarkFound = true;
-					break;
+				if (this.showLegacy && verified) {
+
+					let checkmarkFound = false;
+					for (const child of targetElement.children) {
+
+						if (this.checkmarkIds.has(child.id)) {
+
+							checkmarkFound = true;
+							break;
+						}
+					}
+					if (!checkmarkFound) {
+
+						let myId = myRandomId();
+						while (this.checkmarkIds.has(myId)) {
+
+							myId = myRandomId();
+						}
+						this.checkmarkIds.add(myId);
+
+						const div = document.createElement("span");
+
+						div.id = myId;
+						div.style.verticalAlign = "middle";
+
+						div.appendChild(this.checkHtml.cloneNode(true));
+						const svg = div.querySelector('svg');
+						if (svg !== null) {
+
+							svg.style.color = "#2DB32D";//"#800080";
+							// lowers chance of deleting our own checkmark when not showing blue
+							svg["data-testid"] = myId;
+						}
+
+						targetElement.appendChild(div);
+					}
 				}
 			}
-			if (!checkmarkFound) {
-
-				let myId = myRandomId();
-				while (this.checkmarkIds.has(myId)) {
-
-					myId = myRandomId();
-				}
-				this.checkmarkIds.add(myId);
-
-				const div = document.createElement("span");
-
-				div.id = myId;
-				div.style.verticalAlign = "middle";
-
-				div.appendChild(this.checkHtml.cloneNode(true));
-				const svg = div.querySelector('svg');
-				if (svg !== null) {
-
-					svg.style.color = "#2DB32D";//"#800080";
-				}
-
-				targetElement.appendChild(div);
-			}
 		}
 
-		this._updateHeading(heading_selector, color, true);
+		this._updateHeading(heading_selector, color, verified);
 	}
 
 	_updateHeading(selector, color, verified) {
@@ -210,14 +256,17 @@ class CheckmarkManager {
 			if (nameElement != null) {
 
 				nameElement.style.color = color;
-				// nameElement.style.backgroundColor = "black";
-				// nameElement.style.borderRadius = "1em";
 			}
 		}
 
 		// END SUPPORTER SECTION
 
-		if (!verified) {
+		if (!this.showBlue) {
+
+			this._removeBlue(headingElement);
+		}
+
+		if (!(this.showLegacy && verified)) {
 
 			return;
 		}
@@ -267,77 +316,92 @@ class CheckmarkManager {
 				if (nameElement != null) {
 
 					nameElement.style.color = color;
-					// nameElement.style.backgroundColor = "black";
-					// nameElement.style.borderRadius = "1em";
 				}
 			}
 
 			// END SUPPORTER SECTION
 
-			if (!this.verifiedHandles.has(handle)) {
+			// this combination of settings runs Twitter as normal
+			// nothing to do
+			if (this.showBlue && !this.showLegacy) {
 
 				continue;
 			}
 
-			const targetElement = element2Target(element);
-			// this should not happen unless html structure changed
-			// double equal checks for undefined as well
-			if (targetElement == null) {
+			const verified = this.showLegacy ? this.verifiedHandles.has(handle) : null;
 
-				console.log("Error: Original Birds could not locate checkmark parent.");
-				continue;
-			}
+			if (!this.showBlue || (this.showLegacy && verified)) {
 
-			let checkmarkFound = false;
-			for (const child of targetElement.children) {
+				const targetElement = element2Target(element);
+				// this should not happen unless html structure changed
+				// double equal checks for undefined as well
+				if (targetElement == null) {
 
-				if (this.checkmarkIds.has(child.id)) {
-
-					checkmarkFound = true;
-					break;
+					console.log("Warning: Original Birds could not locate checkmark parent.");
+					continue;
 				}
+
+				if (!this.showBlue) {
+
+					this._removeBlue(targetElement);
+				}
+
+				if (!(this.showLegacy && verified)) {
+
+					continue;
+				}
+
+				let checkmarkFound = false;
+				for (const child of targetElement.children) {
+
+					if (this.checkmarkIds.has(child.id)) {
+
+						checkmarkFound = true;
+						break;
+					}
+				}
+				if (checkmarkFound) {
+
+					continue;
+				}
+
+				let myId = myRandomId();
+				while (this.checkmarkIds.has(myId)) {
+
+					myId = myRandomId();
+				}
+				this.checkmarkIds.add(myId);
+
+				const div = document.createElement("span");
+
+				div.id = myId;
+				div.style.display = "flex";
+
+				div.appendChild(this.checkHtml.cloneNode(true));
+				const svg = div.querySelector('svg');
+				if (svg !== null) {
+
+					svg.style.color = "#2DB32D";
+				}
+
+				targetElement.appendChild(div);
 			}
-			if (checkmarkFound) {
-
-				continue;
-			}
-
-			let myId = myRandomId();
-			while (this.checkmarkIds.has(myId)) {
-
-				myId = myRandomId();
-			}
-			this.checkmarkIds.add(myId);
-
-			const div = document.createElement("span");
-
-			div.id = myId;
-			div.style.display = "flex";
-
-			div.appendChild(this.checkHtml.cloneNode(true));
-			const svg = div.querySelector('svg');
-			if (svg !== null) {
-
-				svg.style.color = "#2DB32D";
-			}
-
-			targetElement.appendChild(div);
 		}
 	}
 }
 
 async function checkmarkManagerFactory() {
 
-	const properties = await getProperties(["handles", "checkmark", "supporters"]);
+	const properties = await getProperties(["handles", "checkmark", "showblue", "showlegacy", "supporters"]);
 
 	if (typeof properties.checkmark === 'undefined') {
 
-		console.log("Error: Original Birds could not load checkmark.");
+		console.error("Original Birds could not load checkmark.");
 		return null;
 	}
 	if (typeof properties.handles === 'undefined') {
 
-		console.log("Error: Original Birds could not load verified handles.");
+		console.error("Original Birds could not load verified handles.");
 		return null;
 	}
 
@@ -347,10 +411,13 @@ async function checkmarkManagerFactory() {
 	const checkHtml = checkDoc?.body?.firstChild;
 	if (checkHtml == null || checkDoc.querySelector("parsererror") !== null) {
 
-		console.log("Error: Original Birds could not load checkmark.");
+		console.error("Original Birds could not load checkmark.");
 		return;
 	}
 	const verifiedHandles = new Set(properties.handles);
+
+	const showBlue = typeof properties.showblue === 'undefined' ? true : properties.showblue;
+	const showLegacy = typeof properties.showlegacy === 'undefined' ? true : properties.showlegacy;
 
 	let donors, contributors;
 	// BEGIN SUPPORTER SECTION
@@ -388,7 +455,7 @@ async function checkmarkManagerFactory() {
 
 	// END SUPPORTER SECTION
 
-	return new CheckmarkManager(verifiedHandles, checkHtml, donors, contributors);
+	return new CheckmarkManager(verifiedHandles, checkHtml, showBlue, showLegacy, donors, contributors);
 }
 
 async function registerRecurringObserver(manager) {
@@ -436,7 +503,7 @@ async function registerRecurringObserver(manager) {
 				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.lastElementChild?.lastElementChild,
 				(element) => nth_element(nth_element(element, "parentElement", 5), "firstElementChild", 5));
 
-			window.setTimeout(addCheckmark, 500);
+			window.setTimeout(addCheckmark, 200);
 		}
 	}
 	addCheckmark();
@@ -446,7 +513,7 @@ async function registerRecurringObserver(manager) {
 		if (invocations <= 0) {
 
 			invocations = 1;
-			window.setTimeout(addCheckmark, 500);
+			window.setTimeout(addCheckmark, 200);
 		}
 		else {
 

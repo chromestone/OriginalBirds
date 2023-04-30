@@ -142,8 +142,6 @@ class CheckmarkManager {
 			let absDistance = 0;
 			for (let i = 0; i < 3; i++) {
 
-				//console.log(Math.abs(parseInt(colorValues[i]) - TWITTER_BLUE_RGB[i]));
-				//console.log(colorValues[i] + ", " + TWITTER_BLUE_RGB[i])
 				absDistance += Math.abs(parseInt(colorValues[i]) - TWITTER_BLUE_RGB[i]);
 			}
 			if (absDistance > 30) {
@@ -151,7 +149,6 @@ class CheckmarkManager {
 				continue;
 			}
 
-			//svg.remove();
 			svg.style.maxWidth = "0";
 		}
 	}
@@ -176,8 +173,6 @@ class CheckmarkManager {
 			if (nameElement != null) {
 
 				nameElement.style.color = color;
-				// nameElement.style.backgroundColor = "black";
-				// nameElement.style.borderRadius = "1em";
 			}
 		}
 
@@ -261,8 +256,6 @@ class CheckmarkManager {
 			if (nameElement != null) {
 
 				nameElement.style.color = color;
-				// nameElement.style.backgroundColor = "black";
-				// nameElement.style.borderRadius = "1em";
 			}
 		}
 
@@ -323,8 +316,6 @@ class CheckmarkManager {
 				if (nameElement != null) {
 
 					nameElement.style.color = color;
-					// nameElement.style.backgroundColor = "black";
-					// nameElement.style.borderRadius = "1em";
 				}
 			}
 
@@ -482,7 +473,6 @@ async function registerRecurringObserver(manager) {
 
 			invocations -= 1;
 
-			//console.log(manager.showBlue + ", " + manager.showLegacy);
 			manager.updateUserPage(USER_SELECTOR, HEADING_SELECTOR);
 			manager.updateCheckmark(FEED_SELECTOR,
 				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 4),
@@ -531,20 +521,6 @@ async function registerRecurringObserver(manager) {
 		}
 	});
 	observer.observe(document.body, { childList: true, subtree: true });
-/*
-	chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-
-		// console.log(msg);
-		if (msg.text == "settingschanged") {
-
-			chrome.storage.local.get(["showblue", "showlegacy"], (result) => {
-
-				manager.showBlue = typeof result.showblue === 'undefined' ? true : result.showblue;
-				manager.showLegacy = typeof result.showlegacy === 'undefined' ? true : result.showlegacy;
-				addCheckmarkInvoker(null);
-			});
-		}
-	});*/
 }
 
 chrome.runtime.sendMessage({ text: "tab_id?" }, response => {

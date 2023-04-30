@@ -35,7 +35,8 @@
 			"48": "images/icon-48.png",
 			"128": "images/icon-128.png"
 		},
-		"default_title": "Original Birds"
+		"default_title": "Original Birds",
+		"default_popup": "popup.html"
 	},
 
 	"browser_specific_settings": {
