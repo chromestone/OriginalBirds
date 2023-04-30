@@ -25,49 +25,58 @@ function goCacheCheckmark() {
 	});
 }
 
+function displayNormalSpan() {
+
+	goCacheCheckmark();
+	chrome.storage.local.get(["showblue", "showlegacy"], (result) => {
+
+		$('#blue').toggles(typeof result.showblue === 'undefined' ? true : result.showblue);
+		$('#legacy').toggles(typeof result.showlegacy === 'undefined' ? true : result.showlegacy);
+	
+		$('#blue').on("toggle", (e, active) => {
+	
+			chrome.storage.local.set({"showblue" : active});
+		});
+	
+		$('#legacy').on("toggle", (e, active) => {
+	
+			chrome.storage.local.set({"showlegacy" : active});
+		});
+
+		$('.toggle').toggleClass("disabled", false);
+		$('#legacy').toggleClass("disabled", false);
+	});
+	$('#normal_span').attr("hidden", false);
+}
+
 function actionListener(e, active) {
 
+	$('#perm').toggleClass("disabled", true);
 	browser.permissions.request({ origins: ['https://*.twitter.com/*'] }).then((result) => {
 
 		if (result) {
 
-			goCacheCheckmark();
+			$('#permission_span').attr("hidden", true);
+			displayNormalSpan();
+		}
+		else {
+
+			$('#perm').toggles(false);
+			$('#perm').toggleClass("disabled", false);
 		}
 	});
-	window.close();
 }
 
 browser.permissions.contains({ origins: ["https://*.twitter.com/*"] }).then((result) => {
 
-	console.log(result);
 	if (result) {
 
-		goCacheCheckmark();
-		chrome.storage.local.get(["showblue", "showlegacy"], (result) => {
-
-			$('#blue').toggles(typeof result.showblue === 'undefined' ? true : result.showblue);
-			$('#legacy').toggles(typeof result.showlegacy === 'undefined' ? true : result.showlegacy);
-		
-			$('#blue').on("toggle", (e, active) => {
-		
-				chrome.storage.local.set({"showblue" : active});
-			});
-		
-			$('#legacy').on("toggle", (e, active) => {
-		
-				chrome.storage.local.set({"showlegacy" : active});
-			});
-
-			$('.toggle').toggleClass("disabled", false);
-			$('#legacy').toggleClass("disabled", false);
-		});
-		$('#normal_span').attr("hidden", false);
+		displayNormalSpan();
 	}
 	else {
 
 		$('#perm').on("toggle", actionListener);
 		$('#perm').toggleClass("disabled", false);
-		console.log("hi");
 		$('#permission_span').removeAttr("hidden");
 	}
 }).catch((error) => {
