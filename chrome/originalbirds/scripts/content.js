@@ -12,6 +12,9 @@ const FEED_SELECTOR = 'div[data-testid="User-Name"] > div > div > div > a > div 
 // targets user feed or thread reply with (nested) post
 const THREAD_REPLY_POST_SELECTOR = 'div[data-testid="User-Name"] > div:nth-child(2) > ' + 'div > '.repeat(4) + 'span';
 
+// targets user name when writing a popup reply
+const COMPOSE_REPLY_TWEET_SELECTOR = 'div[data-testid="User-Name"] > div:nth-child(2) > div > div > div[dir] > span';
+
 // targets overlay upon hovering on user
 const HOVER_CARD_SELECTOR = 'div[data-testid="HoverCard"] > ' + 'div > '.repeat(6) + 'a > div > :is(div, span) > span';
 
@@ -22,13 +25,28 @@ const RECOMMENDATION_SELECTOR = 'div[data-testid="UserCell"] > ' + 'div > '.repe
 const CONVERSATION_SELECTOR = 'div[data-testid="conversation"] > ' + 'div > '.repeat(12) + 'div[dir] > span';
 const ACTIVE_MESSAGE_SELECTOR = 'div[data-testid="cellInnerDiv"] > ' + 'div > '.repeat(5) + 'a > div > div[dir] > span';
 
-const SPAN_WITH_ID = 'span[id]';
+// targets embed tweets
+const EMBED_ORIGINAL_SELECTOR = 'article[role] >' + 'div > '.repeat(5) + 'a[dir]:nth-child(1) > span:nth-child(2)';
+const EMBED_TWEET_SELECTOR = 'article[role] >' + 'div > '.repeat(6) + 'a > div > div[dir] > span';
+
+const VERIFIED_ICON_SELECTOR = 'svg[data-testid="icon-verified"]';
+const TWITTER_BLUE_RGB = [29, 155, 240];
 
 function waitForElement(selector) {
+
 	return new Promise((resolve) => {
+
+		const targetElement = document.querySelector(selector);
+		if (targetElement !== null) {
+
+			resolve(targetElement);
+		}
+
 		const observer = new MutationObserver((mutations) => {
+
 			const targetElement = document.querySelector(selector);
-			if (targetElement) {
+			if (targetElement !== null) {
+
 				observer.disconnect();
 				resolve(targetElement);
 			}
@@ -44,36 +62,11 @@ function setCheckmark(targetElement) {
 	window.close();
 }
 
-function getCheckmark() {
+function getProperties(keys) {
 
 	return new Promise((resolve) => {
 
-		chrome.storage.local.get("checkmark", (result) => {
-
-			resolve(typeof result.checkmark === 'undefined' ? null : result.checkmark);
-		});
-	});
-}
-
-function getVerifiedHandles() {
-
-	return new Promise((resolve) => {
-
-		chrome.storage.local.get("handles", (result) => {
-
-			resolve(typeof result.handles === 'undefined' ? null : new Set(result.handles));
-		});
-	});
-}
-
-function getSupporters() {
-
-	return new Promise((resolve) => {
-
-		chrome.storage.local.get("supporters", (result) => {
-
-			resolve(typeof result.supporters === 'undefined' ? null : result.supporters);
-		});
+		chrome.storage.local.get(keys, resolve);
 	});
 }
 
@@ -102,10 +95,12 @@ function nth_element(elem, dir, n) {
 
 class CheckmarkManager {
 
-	constructor(verifiedHandles, checkHtml, donors, contributors) {
+	constructor(verifiedHandles, checkHtml, showBlue, showLegacy, donors, contributors) {
 
 		this.verifiedHandles = verifiedHandles;
 		this.checkHtml = checkHtml;
+		this.showBlue = showBlue;
+		this.showLegacy = showLegacy;
 		this.donors = donors;
 		this.contributors = contributors;
 		this.checkmarkIds = new Set();
@@ -124,6 +119,40 @@ class CheckmarkManager {
 		return null;
 	}
 
+	_removeBlue(targetElement) {
+
+		const verifiedIcons = targetElement.querySelectorAll(VERIFIED_ICON_SELECTOR);
+		for (const svg of verifiedIcons) {
+
+			if (this.checkmarkIds.has(svg["data-testid"])) {
+
+				continue;
+			}
+
+			const styles = getComputedStyle(svg);
+			const svgColor = styles.getPropertyValue("color");
+			const colorValues = svgColor.replace(/^(rgb|rgba)\(/,'').replace(/\)$/,'').replace(/\s/g,'').split(',');
+
+			if (colorValues.length < 3) {
+
+				console.log("Warning: Original Birds encountered invalid color: [" + svgColor + "]");
+				continue;
+			}
+
+			let absDistance = 0;
+			for (let i = 0; i < 3; i++) {
+
+				absDistance += Math.abs(parseInt(colorValues[i]) - TWITTER_BLUE_RGB[i]);
+			}
+			if (absDistance > 30) {
+
+				continue;
+			}
+
+			svg.style.maxWidth = "0";
+		}
+	}
+
 	updateUserPage(user_selector, heading_selector) {
 
 		const handleElement = document.querySelector(user_selector);
@@ -140,7 +169,7 @@ class CheckmarkManager {
 		const color = this._getSupporterColor(handle);
 		if (color !== null) {
 
-			const nameElement = nth_element(parent, "firstElementChild", 5);
+			const nameElement = nth_element(parent, "firstElementChild", 7);
 			if (nameElement != null) {
 
 				nameElement.style.color = color;
@@ -149,56 +178,65 @@ class CheckmarkManager {
 
 		// END SUPPORTER SECTION
 
-		if (!this.verifiedHandles.has(handle)) {
+		const verified = this.verifiedHandles.has(handle);
 
-			this._updateHeading(heading_selector, color, false);
-			return;
-		}
+		if (!this.showBlue || this.showLegacy) {
 
-		const targetElement = nth_element(parent, "firstElementChild", 6);
-		// this should not happen unless html structure changed
-		// double equal checks for undefined as well
-		if (targetElement == null) {
+			const targetElement = nth_element(parent, "firstElementChild", 6);
+			// this should not happen unless html structure changed
+			// double equal checks for undefined as well
+			if (targetElement == null) {
 
-			console.log("Error: Original Birds could not locate checkmark parent.");
-		}
-		else {
+				console.log("Warning: Original Birds could not locate checkmark parent.");
+			}
+			else {
 
-			let checkmarkFound = false;
-			for (const child of targetElement.children) {
+				if (!this.showBlue) {
 
-				if (this.checkmarkIds.has(child.id)) {
+					this._removeBlue(targetElement);
+				}
 
-					checkmarkFound = true;
-					break;
+				if (this.showLegacy && verified) {
+
+					let checkmarkFound = false;
+					for (const child of targetElement.children) {
+
+						if (this.checkmarkIds.has(child.id)) {
+
+							checkmarkFound = true;
+							break;
+						}
+					}
+					if (!checkmarkFound) {
+
+						let myId = myRandomId();
+						while (this.checkmarkIds.has(myId)) {
+
+							myId = myRandomId();
+						}
+						this.checkmarkIds.add(myId);
+
+						const div = document.createElement("span");
+
+						div.id = myId;
+						div.style.verticalAlign = "middle";
+
+						div.appendChild(this.checkHtml.cloneNode(true));
+						const svg = div.querySelector('svg');
+						if (svg !== null) {
+
+							svg.style.color = "#2DB32D";//"#800080";
+							// lowers chance of deleting our own checkmark when not showing blue
+							svg["data-testid"] = myId;
+						}
+
+						targetElement.appendChild(div);
+					}
 				}
 			}
-			if (!checkmarkFound) {
-
-				let myId = myRandomId();
-				while (this.checkmarkIds.has(myId)) {
-
-					myId = myRandomId();
-				}
-				this.checkmarkIds.add(myId);
-
-				const div = document.createElement("span");
-
-				div.id = myId;
-				div.style.verticalAlign = "middle";
-
-				div.innerHTML = this.checkHtml;
-				const svg = div.querySelector('svg');
-				if (svg !== null) {
-
-					svg.style.color = "#2DB32D";//"#800080";
-				}
-
-				targetElement.appendChild(div);
-			}
 		}
 
-		this._updateHeading(heading_selector, color, true);
+		this._updateHeading(heading_selector, color, verified);
 	}
 
 	_updateHeading(selector, color, verified) {
@@ -223,7 +261,12 @@ class CheckmarkManager {
 
 		// END SUPPORTER SECTION
 
-		if (!verified) {
+		if (!this.showBlue) {
+
+			this._removeBlue(headingElement);
+		}
+
+		if (!(this.showLegacy && verified)) {
 
 			return;
 		}
@@ -248,7 +291,7 @@ class CheckmarkManager {
 		div.id = myId;
 		div.style.display = "flex";
 
-		div.innerHTML = this.checkHtml;
+		div.appendChild(this.checkHtml.cloneNode(true));
 		const svg = div.querySelector('svg');
 		if (svg !== null) {
 	
@@ -258,11 +301,11 @@ class CheckmarkManager {
 		headingElement.appendChild(div);
 	}
 
-	updateCheckmark(selector, element2Target, element2Name) {
+	updateCheckmark(selector, element2Target, element2Name, start=1) {
 
 		for (const element of document.querySelectorAll(selector)) {
 
-			const handle = element.textContent?.substring(1).toLowerCase();
+			const handle = element.textContent?.substring(start).toLowerCase();
 
 			// BEGIN SUPPORTER SECTION
 
@@ -278,91 +321,149 @@ class CheckmarkManager {
 
 			// END SUPPORTER SECTION
 
-			if (!this.verifiedHandles.has(handle)) {
+			// this combination of settings runs Twitter as normal
+			// nothing to do
+			if (this.showBlue && !this.showLegacy) {
 
 				continue;
 			}
 
-			const targetElement = element2Target(element);
-			// this should not happen unless html structure changed
-			// double equal checks for undefined as well
-			if (targetElement == null) {
+			const verified = this.showLegacy ? this.verifiedHandles.has(handle) : null;
 
-				console.log("Error: Original Birds could not locate checkmark parent.");
-				continue;
-			}
+			if (!this.showBlue || (this.showLegacy && verified)) {
 
-			let checkmarkFound = false;
-			for (const child of targetElement.children) {
+				const targetElement = element2Target(element);
+				// this should not happen unless html structure changed
+				// double equal checks for undefined as well
+				if (targetElement == null) {
 
-				if (this.checkmarkIds.has(child.id)) {
-
-					checkmarkFound = true;
-					break;
+					console.log("Warning: Original Birds could not locate checkmark parent.");
+					continue;
 				}
+
+				if (!this.showBlue) {
+
+					this._removeBlue(targetElement);
+				}
+
+				if (!(this.showLegacy && verified)) {
+
+					continue;
+				}
+
+				let checkmarkFound = false;
+				for (const child of targetElement.children) {
+
+					if (this.checkmarkIds.has(child.id)) {
+
+						checkmarkFound = true;
+						break;
+					}
+				}
+				if (checkmarkFound) {
+
+					continue;
+				}
+
+				let myId = myRandomId();
+				while (this.checkmarkIds.has(myId)) {
+
+					myId = myRandomId();
+				}
+				this.checkmarkIds.add(myId);
+
+				const div = document.createElement("span");
+
+				div.id = myId;
+				div.style.display = "flex";
+
+				div.appendChild(this.checkHtml.cloneNode(true));
+				const svg = div.querySelector('svg');
+				if (svg !== null) {
+
+					svg.style.color = "#2DB32D";
+				}
+
+				targetElement.appendChild(div);
 			}
-			if (checkmarkFound) {
-
-				continue;
-			}
-
-			let myId = myRandomId();
-			while (this.checkmarkIds.has(myId)) {
-
-				myId = myRandomId();
-			}
-			this.checkmarkIds.add(myId);
-
-			const div = document.createElement("span");
-
-			div.id = myId;
-			div.style.display = "flex";
-
-			div.innerHTML = this.checkHtml;
-			const svg = div.querySelector('svg');
-			if (svg !== null) {
-
-				svg.style.color = "#2DB32D";
-			}
-
-			targetElement.appendChild(div);
 		}
 	}
 }
 
-async function registerRecurringObserver() {
+async function checkmarkManagerFactory() {
 
-	const verifiedHandles = await getVerifiedHandles();
-	if (verifiedHandles === null) {
+	const properties = await getProperties(["handles", "checkmark", "showblue", "showlegacy", "supporters"]);
 
-		console.log("Error: Original Birds could not load verified handles.");
+	if (typeof properties.checkmark === 'undefined') {
+
+		console.error("Original Birds could not load checkmark.");
+		return null;
+	}
+	if (typeof properties.handles === 'undefined') {
+
+		console.error("Original Birds could not load verified handles.");
+		return null;
+	}
+
+	const parser = new DOMParser();
+	const checkDoc = parser.parseFromString(properties.checkmark, "text/html");
+
+	const checkHtml = checkDoc?.body?.firstChild;
+	if (checkHtml == null || checkDoc.querySelector("parsererror") !== null) {
+
+		console.error("Original Birds could not load checkmark.");
 		return;
 	}
-	const checkHtml = await getCheckmark();
-	if (checkHtml === null) {
+	const verifiedHandles = new Set(properties.handles);
 
-		console.log("Error: Original Birds could not load checkmark.");
-		return;
-	}
+	const showBlue = typeof properties.showblue === 'undefined' ? true : properties.showblue;
+	const showLegacy = typeof properties.showlegacy === 'undefined' ? true : properties.showlegacy;
 
-	const supportersStr = await getSupporters();
-	if (supportersStr === null) {
+	let donors, contributors;
+	// BEGIN SUPPORTER SECTION
+
+	if (typeof properties.supporters === 'undefined') {
 
 		console.log("Warning: Original Birds could not load supporters :( .");
+		donors = new Set();
+		contributors = new Set();
 	}
-	const supporters = JSON.parse(supportersStr);
-	if (typeof supporters.donors === 'undefined') {
+	else {
 
-		console.log("Warning: Original Birds could not load donors :( .");
+		const supporters = JSON.parse(properties.supporters);
+
+		if (typeof supporters.donors === 'undefined') {
+	
+			console.log("Warning: Original Birds could not load donors :( .");
+			donors = new Set();
+		}
+		else {
+
+			donors = new Set(supporters.donors.map((obj) => obj.handle.toLowerCase()))
+		}
+
+		if (typeof supporters.contributors === 'undefined') {
+	
+			console.log("Warning: Original Birds could not load contributors :( .");
+			contributors = new Set();
+		}
+		else {
+
+			contributors =  new Set(supporters.contributors.map((obj) => obj.handle.toLowerCase()));
+		}
 	}
-	if (typeof supporters.contributors === 'undefined') {
 
-		console.log("Warning: Original Birds could not load contributors :( .");
+	// END SUPPORTER SECTION
+
+	return new CheckmarkManager(verifiedHandles, checkHtml, showBlue, showLegacy, donors, contributors);
+}
+
+async function registerRecurringObserver(manager) {
+
+	if (manager === null) {
+
+		return;
 	}
-	const donors = typeof supporters.donors === 'undefined' ? new Set() : new Set(supporters.donors.map((obj) => obj.handle.toLowerCase()));
-	const contributors = typeof supporters.contributors === 'undefined' ? new Set() : new Set(supporters.contributors.map((obj) => obj.handle.toLowerCase()));
-
-	const manager = new CheckmarkManager(verifiedHandles, checkHtml, donors, contributors);
 
 	var invocations = 10;
 
@@ -379,6 +480,9 @@ async function registerRecurringObserver() {
 			manager.updateCheckmark(THREAD_REPLY_POST_SELECTOR,
 				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 4),
 				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 7));
+			manager.updateCheckmark(COMPOSE_REPLY_TWEET_SELECTOR,
+				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 4),
+				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 6));
 			manager.updateCheckmark(HOVER_CARD_SELECTOR,
 				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.lastElementChild,
 				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.firstElementChild);
@@ -391,8 +495,15 @@ async function registerRecurringObserver() {
 			manager.updateCheckmark(ACTIVE_MESSAGE_SELECTOR,
 				(element) => nth_element(element, "parentElement", 6)?.firstElementChild?.firstElementChild?.firstElementChild,
 				(element) => nth_element(nth_element(element, "parentElement", 6), "firstElementChild", 6));
+			manager.updateCheckmark(EMBED_ORIGINAL_SELECTOR,
+				(element) => nth_element(nth_element(element, "parentElement", 3), "firstElementChild", 6)?.lastElementChild?.lastElementChild,
+				(element) => nth_element(nth_element(element, "parentElement", 3), "firstElementChild", 9),
+				0);
+			manager.updateCheckmark(EMBED_TWEET_SELECTOR,
+				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.lastElementChild?.lastElementChild,
+				(element) => nth_element(nth_element(element, "parentElement", 5), "firstElementChild", 5));
 
-			window.setTimeout(addCheckmark, 500);
+			window.setTimeout(addCheckmark, 200);
 		}
 	}
 	addCheckmark();
@@ -402,7 +513,7 @@ async function registerRecurringObserver() {
 		if (invocations <= 0) {
 
 			invocations = 1;
-			window.setTimeout(addCheckmark, 500);
+			window.setTimeout(addCheckmark, 200);
 		}
 		else {
 
@@ -423,7 +534,7 @@ chrome.runtime.sendMessage({ text: "tab_id?" }, response => {
 		}
 		else {
 
-			registerRecurringObserver();
+			checkmarkManagerFactory().then(registerRecurringObserver);
 		}
 	});
 });

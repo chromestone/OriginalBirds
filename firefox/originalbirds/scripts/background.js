@@ -1,61 +1,9 @@
-chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
-	console.log("hello");
 	if (msg.text == "tab_id?") {
 
 		sendResponse({tab : sender.tab.id});
-		console.log("sent");
 	}
-});
-
-function goCacheCheckmark() {
-
-	chrome.storage.local.get("checkmark", function(result) {
-
-		console.log(typeof result.checkmark);
-		if (typeof result.checkmark === 'undefined') {
-
-			chrome.tabs.create({url : "https://twitter.com/elonmusk", active : false}, function(tab) {
-
-				console.log(tab);
-				chrome.storage.local.set({closeme : tab.id});
-				console.log("set");
-			});
-		}
-	});
-}
-
-function actionListener(tab) {
-
-	console.log("hi");
-	browser.permissions.request({ origins: ['https://*.twitter.com/*'] }).then((result) => {
-
-		console.log("reached");
-		console.log(result);
-		if (result) {
-
-			browser.action.onClicked.removeListener(actionListener);
-			console.log("go do it");
-			goCacheCheckmark();
-		}
-	})
-}
-
-browser.permissions.contains({ origins: ["https://*.twitter.com/*"] }).then((result) => {
-
-	console.log(result);
-	if (result) {
-
-		console.log("perm found");
-		goCacheCheckmark();
-	}
-	else {
-
-		browser.action.onClicked.addListener(actionListener);
-	}
-}).catch((error) => {
-
-	console.log(`Original Birds encountered ERROR: ${error}`);
 });
 
 async function loadHandles() {
