@@ -5,50 +5,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 		sendResponse({tab : sender.tab.id});
 	}
 });
-/*
-function goCacheCheckmark() {
 
-	chrome.storage.local.get("checkmark", function(result) {
-
-		console.log(typeof result.checkmark);
-		if (typeof result.checkmark === 'undefined') {
-
-			chrome.tabs.create({url : "https://twitter.com/elonmusk", active : false}, function(tab) {
-
-				chrome.storage.local.set({closeme : tab.id});
-			});
-		}
-	});
-}
-
-function actionListener(tab) {
-
-	browser.permissions.request({ origins: ['https://*.twitter.com/*'] }).then((result) => {
-
-		if (result) {
-
-			browser.action.onClicked.removeListener(actionListener);
-			goCacheCheckmark();
-		}
-	})
-}
-
-browser.permissions.contains({ origins: ["https://*.twitter.com/*"] }).then((result) => {
-
-	console.log(result);
-	if (result) {
-
-		goCacheCheckmark();
-	}
-	else {
-
-		browser.action.onClicked.addListener(actionListener);
-	}
-}).catch((error) => {
-
-	console.error(error);
-});
-*/
 async function loadHandles() {
 
 	const response = await fetch("../data/verified_handles.txt");

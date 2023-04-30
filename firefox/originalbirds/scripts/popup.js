@@ -32,8 +32,6 @@ function actionListener(e, active) {
 		if (result) {
 
 			goCacheCheckmark();
-			//$('#permission_span').attr("hidden", true);
-			//$('#normal_span').attr("hidden", false);
 		}
 	});
 	window.close();
