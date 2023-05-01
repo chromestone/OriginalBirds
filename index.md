@@ -41,7 +41,7 @@ If you like using this extension, then please consider donating to support this 
 
 <details>
 	<summary><b>Q: Can I be added to the legacy verified list?</b></summary>
-	<p>A: As of right now we're only planning on this to be a static list (like a Wayback Machine). If we were to implement our own user verification then it would require volunteers or some external funding, which would 100% draw the ire of Twitter.<p>
+	<p>A: As of right now we're only planning on this to be a static list (like a Wayback Machine). If we were to implement our own user verification then it would require volunteers or some external funding, which would 100% draw the ire of Twitter.</p>
 	<p>Of course, you can always donate to us at the link above and get recognition! (Just be sure to give us your Twitter handle.)</p>
 </details>
 
