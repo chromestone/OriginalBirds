@@ -36,7 +36,7 @@ If you like using this extension, then please consider donating to support this 
 
 <details>
 	<summary><b>Q: Why do I need to grant permission to access data on Twitter?</b></summary>
-	<p>A: We access Twitter websites to read user handles in order to check if they are verified and write HTML to add checkmarks. We don't collect any user data. If you are concerned about privacy check out our <a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/privacy.html">privacy policy</a> or install from our open source <a target="_blank" rel="noopener noreferrer" href="https://github.com/chromestone/OriginalBirds">GitHub repository</a>.
+	<p>A: We access Twitter websites to read user handles in order to check if they are verified and write HTML to add checkmarks. We don't collect any user data. If you are concerned about privacy check out our <a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/privacy.html">privacy policy</a> or install from our open source <a target="_blank" rel="noopener noreferrer" href="https://github.com/chromestone/OriginalBirds">GitHub repository</a>.</p>
 </details>
 
 <details>
