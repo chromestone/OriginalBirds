@@ -1,4 +1,8 @@
 {
+    "supporters": {
+        "RealOpenBirds": {"type": "contributor"},
+        "No1mann": {"type": "contributor"}
+    },
     "donors": [
     ],
     "contributors": [

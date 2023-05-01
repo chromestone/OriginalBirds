@@ -1,19 +1,19 @@
 # Original Birds
 
-Original Birds is a browser extension that brings back the **legacy Twitter verified checkmarks**!!!
+Original Birds is a browser extension that brings back the **legacy Twitter verified checkmarks**!
 
-Tired of not knowing who was an Original Bird (**OB**)? Then this extension is for you! A **green checkmark** is added on Twitter to indicate who was an **OB** before the great purge of 2023.
+Tired of not knowing who was an Original Bird (**OB**)? Then this extension is for you! A **green checkmark** is added on Twitter to indicate who was an **OB** before the great purge of April 20th, 2023.
 
-<a href="https://chrome.google.com/webstore/detail/original-birds/chhgbpmapfgibdoimakecicdlhhmkpjn" style="display: inline"><img src="https://chromestone.github.io/OriginalBirds/images/chrome.png" alt="Get it for FREE on the Chrome Web Store."></a>
-<a href="https://addons.mozilla.org/en-US/firefox/addon/original-birds/" style="display: inline"><img src="https://chromestone.github.io/OriginalBirds/images/firefox.webp" alt="Get it for FREE for Firefox."></a>
-
-<img src="https://chromestone.github.io/OriginalBirds/images/reynolds.png" alt="Extension Demo" style="width: 50%;display: block;margin-left: auto;margin-right: auto">
+<a target="_blank" rel="noopener noreferrer" href="https://chrome.google.com/webstore/detail/original-birds/chhgbpmapfgibdoimakecicdlhhmkpjn" style="display: inline"><img src="https://chromestone.github.io/OriginalBirds/images/chrome.png" alt="Get it for FREE on the Chrome Web Store."></a>
+<a target="_blank" rel="noopener noreferrer" href="https://addons.mozilla.org/en-US/firefox/addon/original-birds/" style="display: inline"><img src="https://chromestone.github.io/OriginalBirds/images/firefox.webp" alt="Get it for FREE for Firefox."></a>
 
 YouTube Demo: [youtube.com/watch?v=R3rb2JZEjxo](https://www.youtube.com/watch?v=R3rb2JZEjxo)
 
+<img src="https://chromestone.github.io/OriginalBirds/images/reynolds.png" alt="Extension Demo" style="width: 50%;display: block;margin-left: auto;margin-right: auto">
+
 ## Donations
 
-Thank you to our [donors](donors.md) and [contributors](contributors.md)!!! Please go check them out and show them some love!
+Thank you to our [donors](donors.md) and [contributors](contributors.md)!!! Go check them out and show them some love!
 
 If you like using this extension, then please consider donating to support this project!<br />
 [buymeacoffee.com/openbirds](https://www.buymeacoffee.com/openbirds)
@@ -22,10 +22,11 @@ If you like using this extension, then please consider donating to support this 
 
 ## FAQ
 
-**Q: How do you determine who was legacy verified?**<br />
-A: Users will see a green checkmark beside OBs who were legacy verified around April 6th, 2023. This means that @verified followed them on Twitter at the time of data collection. We sourced our data from [thansen0](https://github.com/thansen0/verified_twitters). Please show them some love!
-
-**Note:** We are currently cross-referencing Twitter handles (because it would be costly to verify against the actual Twitter ID). We recognize that Twitter handles may have changed and will be working on it when we have the resources.
+<details>
+	<summary><b>How do you determine who was legacy verified?</b></summmary>
+	<p>Users will see a green checkmark beside OBs who were legacy verified before April 6th, 2023. This means that @verified followed them on Twitter at the time of data collection. We sourced our data from <a target="_blank" rel="noopener noreferrer" href="https://github.com/thansen0/verified_twitters">thansen0</a>. Please show them some love!</p>
+	<p><b>Note:</b> We are currently only comparing Twitter handles (because it would be costly to verify against the actual Twitter ID). We recognize that Twitter handles may have changed and will be working on it when we have the resources.</p>
+</details>
 
 **Q: Why is my browser randomly visiting Elon Musk's Twitter page?**<br />
 A: This is a normal operation to retrieve Twitter's checkmark that happens once on installation. Since Elon Musk owns Twitter, he is always verified and we obtain Twitter's checkmark from his page after installation. Our extension does not include any Twitter source code or assets to avoid copyright issues.
