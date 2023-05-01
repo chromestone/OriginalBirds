@@ -3,9 +3,8 @@ Where my OBs at?
 
 A browser extension that brings back the legacy Twitter verified checkmarks.
 
-Chrome                     | Firefox
-:-------------------------:|:-------------------------:
-[![Get it now for free on the Chrome Web Store.](https://chromestone.github.io/OriginalBirds/images/chrome.png)](https://chrome.google.com/webstore/detail/original-birds/chhgbpmapfgibdoimakecicdlhhmkpjn) | [![Get it for FREE for Firefox.](https://chromestone.github.io/OriginalBirds/images/firefox.webp)](https://addons.mozilla.org/en-US/firefox/addon/original-birds/)
+[![Get it now for free on the Chrome Web Store.](https://chromestone.github.io/OriginalBirds/images/chrome_white_bg.png)](https://chrome.google.com/webstore/detail/original-birds/chhgbpmapfgibdoimakecicdlhhmkpjn)
+[![Get it for FREE for Firefox.](https://chromestone.github.io/OriginalBirds/images/firefox.webp)](https://addons.mozilla.org/en-US/firefox/addon/original-birds/)
 
 ## For more information visit our [website](https://chromestone.github.io/OriginalBirds/).
 
@@ -15,6 +14,10 @@ Thank you to our [donors](https://chromestone.github.io/OriginalBirds/donors.htm
 If you like using this extension, then please consider [donating](https://www.buymeacoffee.com/openbirds) to support this project!<br />
 
 **Extension users will see all donor names in light orange and all contributor names in light purple on Twitter.**
+
+## Contributions
+
+Contributions are welcome! See our [contributions guidelines](CONTRIBUTING.md) before making an issue.
 
 ## Acknowledgements
 
