@@ -2,7 +2,10 @@
     "supporters": {
         "RealOpenBirds": {"type": "contributor"},
         "No1mann": {"type": "contributor"},
-        "sixteencharacter": {"type": "donor"}
+        "sixteencharacter": {"type": "donor"},
+        "seventeencharacte": {"type": "subscriber", "tier": "bronze"},
+        "eighteencharacters": {"type": "subscriber", "tier": "silver"},
+        "nineteencharacters_": {"type": "subscriber", "tier": "gold"}
     },
     "donors": [
     ],

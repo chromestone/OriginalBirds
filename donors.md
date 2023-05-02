@@ -22,21 +22,43 @@
 
 		// Extract the list of supporters from the JSON data
 		const supporters = data.supporters;
+		const gold = [];
+		const silver = [];
+		const bronze = [];
+		const donors = [];
 		// Loop through the list of supporters and create a list item for each one
 		for (const handle of Object.keys(supporters)) {
 
-			// filter for donors
-			if (supporters[handle].type != "donor") {
+			const donorType = supporters[handle].type;
+			if (donorType == "gold") {
 
-				continue;
+				gold.push(handle);
 			}
+			if (donorType == "silver") {
 
-			const listItem = document.createElement('li');
-			const linkElement = document.createElement('a');
-			linkElement.href = "https://twitter.com/" + handle;
-			linkElement.textContent = "@" + handle;
-			listItem.appendChild(linkElement);
-			container.appendChild(listItem);
+				silver.push(handle);
+			}
+			if (donorType == "bronze") {
+
+				bronze.push(handle);
+			}
+			if (donorType == "donor") {
+
+				donors.push(handle);
+			}
+		}
+
+		for (const arr of [gold, silver, bronze, donors]) {
+
+			for (const handle of arr) {
+
+				const listItem = document.createElement('li');
+				const linkElement = document.createElement('a');
+				linkElement.href = "https://twitter.com/" + handle;
+				linkElement.textContent = "@" + handle;
+				listItem.appendChild(linkElement);
+				container.appendChild(listItem);
+			}
 		}
 	})
 	.catch(error => console.error(error));

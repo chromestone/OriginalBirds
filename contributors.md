@@ -36,6 +36,7 @@
 			linkElement.textContent = "@" + handle;
 			listItem.appendChild(linkElement);
 			container.appendChild(listItem);
+		}
 	})
 	.catch(error => console.error(error));
 </script>
