@@ -29,20 +29,25 @@
 		// Loop through the list of supporters and create a list item for each one
 		for (const handle of Object.keys(supporters)) {
 
-			const donorType = supporters[handle].type;
-			if (donorType == "gold") {
+			const donor = supporters[handle];
+			const donorType = donor.type;
+			if (donorType == "subscriber") {
 
-				gold.push(handle);
-			}
-			if (donorType == "silver") {
+				const tier = donor.tier;
+				if (tier == "gold") {
 
-				silver.push(handle);
-			}
-			if (donorType == "bronze") {
+					gold.push(handle);
+				}
+				else if (tier == "silver") {
 
-				bronze.push(handle);
+					silver.push(handle);
+				}
+				else if (tier == "bronze") {
+
+					bronze.push(handle);
+				}
 			}
-			if (donorType == "donor") {
+			else if (donorType == "donor") {
 
 				donors.push(handle);
 			}
