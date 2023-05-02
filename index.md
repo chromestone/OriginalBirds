@@ -7,7 +7,10 @@ Tired of not knowing who was an Original Bird (**OB**)? Then this extension is f
 <a target="_blank" rel="noopener noreferrer" href="https://chrome.google.com/webstore/detail/original-birds/chhgbpmapfgibdoimakecicdlhhmkpjn" style="display: inline"><img src="https://chromestone.github.io/OriginalBirds/images/chrome.png" alt="Get it for FREE on the Chrome Web Store."></a>
 <a target="_blank" rel="noopener noreferrer" href="https://addons.mozilla.org/en-US/firefox/addon/original-birds/" style="display: inline"><img src="https://chromestone.github.io/OriginalBirds/images/firefox.webp" alt="Get it for FREE for Firefox."></a>
 
-<img src="https://chromestone.github.io/OriginalBirds/images/wrexham.gif" alt="Extension Demo" style="width: 50%;display: block;margin-left: auto;margin-right: auto">
+<div>
+	<img src="https://chromestone.github.io/OriginalBirds/images/reynolds.png" alt="Reynolds Demo" style="width: 50%">
+	<img src="https://chromestone.github.io/OriginalBirds/images/wrexham.gif" alt="Wrexham Demo" style="width: 39%">
+</div>
 
 ## Donations
 
