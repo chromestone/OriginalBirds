@@ -22,44 +22,43 @@ If you like using this extension, then please consider donating to support this 
 
 ## FAQ
 
-<details>
-	<summary>
-	<b>Q: How do you determine who was legacy verified?</b></summary>
-	<p>A: Users will see a green checkmark beside OBs who were legacy verified before April 6th, 2023. This means that @verified followed them on Twitter at the time of data collection. We sourced our data from <a target="_blank" rel="noopener noreferrer" href="https://github.com/thansen0/verified_twitters">thansen0</a>. Please show them some love!</p>
+<details open>
+	<summary>How do you determine who was legacy verified?</summary>
+	<p>Users will see a green checkmark beside OBs who were legacy verified before April 6th, 2023. This means that @verified followed them on Twitter at the time of data collection. We sourced our data from <a target="_blank" rel="noopener noreferrer" href="https://github.com/thansen0/verified_twitters">thansen0</a>. Please show them some love!</p>
 	<p><b>Note:</b> We are currently only comparing Twitter handles (because it would be costly to verify against the actual Twitter ID). We recognize that Twitter handles may have changed and will be working on it when we have the resources.</p>
 </details>
 
 <details>
-	<summary><b>Q: Why is my browser randomly visiting Elon Musk's Twitter page?</b></summary>
-	<p>A: This is a normal operation to retrieve Twitter's checkmark that happens once on installation. Since Elon Musk owns Twitter, he is always verified and we obtain Twitter's checkmark from his page after installation. Our extension does not include any Twitter source code or assets to avoid copyright issues.</p>
+	<summary>Why is my browser randomly visiting Elon Musk's Twitter page?</summary>
+	<p>This is a normal operation to retrieve Twitter's checkmark that happens once on installation. Since Elon Musk owns Twitter, he is always verified and we obtain Twitter's checkmark from his page after installation. Our extension does not include any Twitter source code or assets to avoid copyright issues.</p>
 </details>
 
 <details>
-	<summary><b>Q: Why do I need to grant permission to access data on Twitter?</b></summary>
-	<p>A: We access Twitter websites to read user handles in order to check if they are verified and write HTML to add checkmarks. We don't collect any user data. If you are concerned about privacy check out our <a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/privacy.html">privacy policy</a> or install from our open source <a target="_blank" rel="noopener noreferrer" href="https://github.com/chromestone/OriginalBirds">GitHub repository</a>.</p>
+	<summary>Why do I need to grant permission to access data on Twitter?</summary>
+	<p>We access Twitter websites to read user handles in order to check if they are verified and write HTML to add checkmarks. We don't collect any user data. If you are concerned about privacy check out our <a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/privacy.html">privacy policy</a> or install from our open source <a target="_blank" rel="noopener noreferrer" href="https://github.com/chromestone/OriginalBirds">GitHub repository</a>.</p>
 </details>
 
 <details>
-	<summary><b>Q: Can I be added to the legacy verified list?</b></summary>
-	<p>A: As of right now we're only planning on this to be a static list (like a Wayback Machine). If we were to implement our own user verification then it would require volunteers or some external funding, which would 100% draw the ire of Twitter.</p>
+	<summary>Can I be added to the legacy verified list?</summary>
+	<p>As of right now we're only planning on this to be a static list (like a Wayback Machine). If we were to implement our own user verification then it would require volunteers or some external funding, which would 100% draw the ire of Twitter.</p>
 	<p>Of course, you can always donate to us at the link above and get recognition! (Just be sure to give us your Twitter handle.)</p>
 </details>
 
 <details>
-	<summary><b>Q: I was a legacy verified user and I don't see a green checkmark anywhere. Can I be added?</b></summary>
-	<p><b>A: Please first read the instructions <a target="_blank" rel="noopener noreferrer" href="https://github.com/chromestone/OriginalBirds/blob/main/CONTRIBUTING.md">here</a>.</b></p>
+	<summary>I was a legacy verified user and I don't see a green checkmark anywhere. Can I be added?</summary>
+	<p><b>Please first read the instructions <a target="_blank" rel="noopener noreferrer" href="https://github.com/chromestone/OriginalBirds/blob/main/CONTRIBUTING.md">here</a>.</b></p>
 	<p>If you believe you have sufficient proof send us an email. Do not create a GitHub issue in this case. For bugs, please see below.</p>
 </details>
 
 <details>
-	<summary><b>Q: I found a bug. How do I report it?</b></summary>
-	<p><b>A: Please first read the <a target="_blank" rel="noopener noreferrer" href="https://github.com/chromestone/OriginalBirds/blob/main/CONTRIBUTING.md">contributing guidelines</a>.</b></p>
+	<summary>I found a bug. How do I report it?</summary>
+	<p><b>Please first read the <a target="_blank" rel="noopener noreferrer" href="https://github.com/chromestone/OriginalBirds/blob/main/CONTRIBUTING.md">contributing guidelines</a>.</b></p>
 	<p>Twitter can change its website on us anytime so don't hesitate to create an <a target="_blank" rel="noopener noreferrer" href="https://github.com/chromestone/OriginalBirds/issues">issue on GitHub</a> if checkmarks are missing! You can of course reach out to us at our email listed on the Chrome Web Store. However, for sanity purposes we request you stick to GitHub issues.</p>
 </details>
 
 <details>
-	<summary><b>Q: How do I become a contributor?</b></summary>
-	<p>A: Always consult the <a target="_blank" rel="noopener noreferrer" href="https://github.com/chromestone/OriginalBirds/blob/main/CONTRIBUTING.md">contributing guidelines</a> first and then make a GitHub issue. Remember to include your Twitter handle when you make your pull request. If it gets approved, then congrats, you're a contributor!</p>
+	<summary>How do I become a contributor?</summary>
+	<p>Always consult the <a target="_blank" rel="noopener noreferrer" href="https://github.com/chromestone/OriginalBirds/blob/main/CONTRIBUTING.md">contributing guidelines</a> first and then make a GitHub issue. Remember to include your Twitter handle when you make your pull request. If it gets approved, then congrats, you're a contributor!</p>
 	<p>(Discord for donors and contributors coming soon.)</p>
 </details>
 
