@@ -10,21 +10,34 @@
 
 	// Fetch the JSON data from the URL
 	fetch(url).then(response => response.json()).then(data => {
-		// Extract the list of donors from the JSON data
-		const donors = data.donors;
+
+		if (typeof data.supporters === 'undefined') {
+
+			console.error("Supporters undefined!");
+			return;
+		}
 
 		// Get the container element to display the list
 		const container = document.getElementById('donor-list');
 
-		// Loop through the list of donors and create a list item for each one
-		donors.forEach(donor => {
+		// Extract the list of supporters from the JSON data
+		const supporters = data.supporters;
+		// Loop through the list of supporters and create a list item for each one
+		for (const handle of Object.keys(supporters)) {
+
+			// filter for donors
+			if (supporters[handle].type != "donor") {
+
+				continue;
+			}
+
 			const listItem = document.createElement('li');
 			const linkElement = document.createElement('a');
-			linkElement.href = "https://twitter.com/" + donor.handle;
-			linkElement.textContent = "@" + donor.handle;
+			linkElement.href = "https://twitter.com/" + handle;
+			linkElement.textContent = "@" + handle;
 			listItem.appendChild(linkElement);
 			container.appendChild(listItem);
-		});
+		}
 	})
 	.catch(error => console.error(error));
 </script>
