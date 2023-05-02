@@ -1,19 +1,17 @@
 # Original Birds
 
-Original Birds is a browser extension that brings back the **legacy Twitter verified checkmarks**!
+is a browser extension that brings back the **legacy Twitter verified checkmarks**!
 
-Tired of not knowing who was an Original Bird (**OB**)? Then this extension is for you! A **green checkmark** is added on Twitter to indicate who was an **OB** before the great purge of April 20th, 2023.
+Tired of not knowing who was an Original Bird (**OB**)? Then this extension is for you! A **green checkmark** is added on Twitter to indicate who was an **OB** before the great purge of April 20th, 2023. Don't believe your eyes? Go watch our [YouTube video](https://www.youtube.com/watch?v=R3rb2JZEjxo) and read the [faq](#faq)!
 
 <a target="_blank" rel="noopener noreferrer" href="https://chrome.google.com/webstore/detail/original-birds/chhgbpmapfgibdoimakecicdlhhmkpjn" style="display: inline"><img src="https://chromestone.github.io/OriginalBirds/images/chrome.png" alt="Get it for FREE on the Chrome Web Store."></a>
 <a target="_blank" rel="noopener noreferrer" href="https://addons.mozilla.org/en-US/firefox/addon/original-birds/" style="display: inline"><img src="https://chromestone.github.io/OriginalBirds/images/firefox.webp" alt="Get it for FREE for Firefox."></a>
 
-YouTube Demo: [youtube.com/watch?v=R3rb2JZEjxo](https://www.youtube.com/watch?v=R3rb2JZEjxo)
-
-<img src="https://chromestone.github.io/OriginalBirds/images/reynolds.png" alt="Extension Demo" style="width: 50%;display: block;margin-left: auto;margin-right: auto">
+<img src="https://chromestone.github.io/OriginalBirds/images/wrexham.gif" alt="Extension Demo" style="width: 50%;display: block;margin-left: auto;margin-right: auto">
 
 ## Donations
 
-Thank you to all of our generous [donors](donors.md) and [contributors](contributors.md)!!! Go check them out and show them some love!
+Thank you to all of our generous [donors](donors.md) and [contributors](contributors.md)! Please go check them out and show them some love!!!
 
 If you like using this extension, then please consider donating to support this project!<br />
 [buymeacoffee.com/openbirds](https://www.buymeacoffee.com/openbirds)
@@ -40,6 +38,7 @@ If you like using this extension, then please consider donating to support this 
 
 <details>
 	<summary>Can I be added to the legacy verified list?</summary>
+	<p>No. (For previously verified users, please see below.)</p>
 	<p>As of right now we're only planning on this to be a static list (like a Wayback Machine). If we were to implement our own user verification then it would require volunteers or some external funding, which would 100% draw the ire of Twitter.</p>
 	<p>Of course, you can always donate to us at the link above and get recognition! (Just be sure to give us your Twitter handle.)</p>
 </details>
@@ -47,7 +46,7 @@ If you like using this extension, then please consider donating to support this 
 <details>
 	<summary>I was a legacy verified user and I don't see a green checkmark anywhere. Can I be added?</summary>
 	<p><b>Please first read the instructions <a target="_blank" rel="noopener noreferrer" href="https://github.com/chromestone/OriginalBirds/blob/main/CONTRIBUTING.md">here</a>.</b></p>
-	<p>If you believe you have sufficient proof send us an email. Do not create a GitHub issue in this case. For bugs, please see below.</p>
+	<p>If you believe you have sufficient proof, then send us an email. Do not create a GitHub issue in this case. For bugs, please see below.</p>
 </details>
 
 <details>
@@ -67,6 +66,4 @@ If you like using this extension, then please consider donating to support this 
 
 We take your privacy seriously and **do not** collect **any** user data. We will always be transparent and open source.
 
-For more information visit our privacy policy:
-
-[Privacy Policy](privacy.md)
+For more information please see our [Privacy Policy](privacy.md).
