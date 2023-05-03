@@ -40,6 +40,7 @@ function waitForElement(selector) {
 		if (targetElement !== null) {
 
 			resolve(targetElement);
+			return;
 		}
 
 		const observer = new MutationObserver((mutations) => {
