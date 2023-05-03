@@ -1,3 +1,7 @@
+---
+title: Original Birds
+---
+
 [![CodeQL](https://github.com/chromestone/OriginalBirds/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/chromestone/OriginalBirds/actions/workflows/github-code-scanning/codeql)
 
 Tired of not knowing who was an Original Bird (**OB**)? Then this extension is for you! A **green checkmark** is added on Twitter to indicate who was an **OB** before the great purge of April 20th, 2023. Don't believe your eyes? Go watch our [YouTube video](https://www.youtube.com/watch?v=R3rb2JZEjxo) and read the [FAQ](#faq)!
@@ -39,13 +43,13 @@ If you like using this extension, then please consider donating to support this 
 
 <details>
 	<summary>Can I be added to the legacy verified list?</summary>
-	<p>No. (For previously verified users, please see below.)</p>
+	<p>No. (For legacy verified users, please see below.)</p>
 	<p>As of right now we're only planning on this to be a static list (like a Wayback Machine). If we were to implement our own user verification then it would require volunteers or some external funding, which would 100% draw the ire of Twitter.</p>
 	<p>Of course, you can always donate to us at the link above and get recognition! (Just be sure to give us your Twitter handle.)</p>
 </details>
 
 <details>
-	<summary>I was a legacy verified user and I don't see a green checkmark anywhere. Can I be added?</summary>
+	<summary>I'm a legacy verified user and I don't have a green checkmark. Can I be added?</summary>
 	<p><b>Please first read the instructions <a target="_blank" rel="noopener noreferrer" href="https://github.com/chromestone/OriginalBirds/blob/main/CONTRIBUTING.md">here</a>.</b></p>
 	<p>If you believe you have sufficient proof, then send us an email. Do not create a GitHub issue in this case. For bugs, please see below.</p>
 </details>
