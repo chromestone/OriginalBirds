@@ -3,5 +3,8 @@ module.exports = {
     browser: true,
     jquery: true
   },
-  extends: ["eslint:recommended"]
+  extends: ["eslint:recommended"],
+  rules: {
+    "no-implicit-globals": "error"
+  }
 };

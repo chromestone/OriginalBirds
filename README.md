@@ -1,4 +1,6 @@
 [![CodeQL](https://github.com/chromestone/OriginalBirds/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/chromestone/OriginalBirds/actions/workflows/github-code-scanning/codeql)
+[![ESLint](https://github.com/chromestone/OriginalBirds/actions/workflows/eslint.yml/badge.svg)](https://github.com/chromestone/OriginalBirds/actions/workflows/eslint.yml)
+[![Twitter](https://img.shields.io/twitter/follow/RealOpenBirds?style=social)](https://twitter.com/RealOpenBirds)
 
 # OriginalBirds
 

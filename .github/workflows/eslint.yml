@@ -41,8 +41,6 @@ jobs:
           --ext .js,.jsx,.ts,.tsx
           --format @microsoft/eslint-formatter-sarif
           --output-file eslint-results.sarif
-          --ignore-pattern jquery.js
-          --ignore-pattern toggles.js
         continue-on-error: true
 
       - name: Upload analysis results to GitHub
