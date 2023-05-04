@@ -13,8 +13,8 @@ $('.toggle').toggles({type : "select"});
 
 chrome.storage.local.get(["showblue", "showlegacy"], (result) => {
 
-	$('#blue').toggles(typeof result.showblue === 'undefined' ? true : result.showblue);
-	$('#legacy').toggles(typeof result.showlegacy === 'undefined' ? true : result.showlegacy);
+	$('#blue').toggles(result.showblue ?? true);
+	$('#legacy').toggles(result.showlegacy ?? true);
 
 	$('#blue').on("toggle", (e, active) => {
 

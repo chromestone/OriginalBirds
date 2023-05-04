@@ -11,9 +11,9 @@ if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").match
 
 $('.toggle').toggles({type : "select"});
 
-function goCacheCheckmark() {
+function cacheCheckmark() {
 
-	chrome.storage.local.get("checkmark", function(result) {
+	chrome.storage.local.get("checkmark", (result) => {
 
 		if (typeof result.checkmark === 'undefined') {
 
@@ -27,12 +27,12 @@ function goCacheCheckmark() {
 
 function displayNormalSpan() {
 
-	goCacheCheckmark();
+	cacheCheckmark();
 	chrome.storage.local.get(["showblue", "showlegacy"], (result) => {
 
-		$('#blue').toggles(typeof result.showblue === 'undefined' ? true : result.showblue);
-		$('#legacy').toggles(typeof result.showlegacy === 'undefined' ? true : result.showlegacy);
-	
+		$('#blue').toggles(result.showblue ?? true);
+		$('#legacy').toggles(result.showlegacy ?? true);
+
 		$('#blue').on("toggle", (e, active) => {
 	
 			chrome.storage.local.set({"showblue" : active});

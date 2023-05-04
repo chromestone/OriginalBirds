@@ -1,5 +1,5 @@
 [![CodeQL](https://github.com/chromestone/OriginalBirds/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/chromestone/OriginalBirds/actions/workflows/github-code-scanning/codeql)
-[![ESLint](https://github.com/chromestone/OriginalBirds/actions/workflows/eslint.yml/badge.svg)](https://github.com/chromestone/OriginalBirds/actions/workflows/eslint.yml)
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Twitter](https://img.shields.io/twitter/follow/RealOpenBirds?style=social)](https://twitter.com/RealOpenBirds)
 
 # OriginalBirds

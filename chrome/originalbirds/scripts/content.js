@@ -58,9 +58,13 @@ function waitForElement(selector) {
 
 function setCheckmark(targetElement) {
 
-	chrome.storage.local.set({checkmark : targetElement.outerHTML});
-	chrome.storage.local.remove("closeme");
-	window.close();
+	return new Promise((resolve) => {
+
+		chrome.storage.local.set({checkmark : targetElement.outerHTML}, () => {
+
+			chrome.storage.local.remove("closeme", () => resolve(null));
+		});
+	});
 }
 
 function getProperties(keys) {
@@ -417,8 +421,8 @@ async function checkmarkManagerFactory() {
 	}
 	const verifiedHandles = new Set(properties.handles);
 
-	const showBlue = typeof properties.showblue === 'undefined' ? true : properties.showblue;
-	const showLegacy = typeof properties.showlegacy === 'undefined' ? true : properties.showlegacy;
+	const showBlue = properties.showblue ?? true;
+	const showLegacy = properties.showlegacy ?? true;
 
 	let donors, contributors;
 	// BEGIN SUPPORTER SECTION
@@ -459,7 +463,7 @@ async function checkmarkManagerFactory() {
 	return new CheckmarkManager(verifiedHandles, checkHtml, showBlue, showLegacy, donors, contributors);
 }
 
-async function registerRecurringObserver(manager) {
+function registerRecurringObserver(manager) {
 
 	if (manager === null) {
 
@@ -470,40 +474,39 @@ async function registerRecurringObserver(manager) {
 
 	function addCheckmark() {
 
+		manager.updateUserPage(USER_SELECTOR, HEADING_SELECTOR);
+		manager.updateCheckmark(FEED_SELECTOR,
+			(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 4),
+			(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 7));
+		manager.updateCheckmark(THREAD_REPLY_POST_SELECTOR,
+			(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 4),
+			(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 7));
+		manager.updateCheckmark(COMPOSE_REPLY_TWEET_SELECTOR,
+			(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 4),
+			(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 6));
+		manager.updateCheckmark(HOVER_CARD_SELECTOR,
+			(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.lastElementChild,
+			(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.firstElementChild);
+		manager.updateCheckmark(RECOMMENDATION_SELECTOR,
+			(element) => nth_element(element, "parentElement", 6)?.firstElementChild?.firstElementChild?.lastElementChild,
+			(element) => nth_element(nth_element(element, "parentElement", 6), "firstElementChild", 6));
+		manager.updateCheckmark(CONVERSATION_SELECTOR,
+			(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild,
+			(element) => nth_element(nth_element(element, "parentElement", 5), "firstElementChild", 5));
+		manager.updateCheckmark(ACTIVE_MESSAGE_SELECTOR,
+			(element) => nth_element(element, "parentElement", 6)?.firstElementChild?.firstElementChild?.firstElementChild,
+			(element) => nth_element(nth_element(element, "parentElement", 6), "firstElementChild", 6));
+		manager.updateCheckmark(EMBED_ORIGINAL_SELECTOR,
+			(element) => nth_element(nth_element(element, "parentElement", 3), "firstElementChild", 6)?.lastElementChild?.lastElementChild,
+			(element) => nth_element(nth_element(element, "parentElement", 3), "firstElementChild", 9),
+			0);
+		manager.updateCheckmark(EMBED_TWEET_SELECTOR,
+			(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.lastElementChild?.lastElementChild,
+			(element) => nth_element(nth_element(element, "parentElement", 5), "firstElementChild", 5));
+
 		if (invocations > 0) {
 
 			invocations -= 1;
-
-			manager.updateUserPage(USER_SELECTOR, HEADING_SELECTOR);
-			manager.updateCheckmark(FEED_SELECTOR,
-				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 4),
-				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 7));
-			manager.updateCheckmark(THREAD_REPLY_POST_SELECTOR,
-				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 4),
-				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 7));
-			manager.updateCheckmark(COMPOSE_REPLY_TWEET_SELECTOR,
-				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 4),
-				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 6));
-			manager.updateCheckmark(HOVER_CARD_SELECTOR,
-				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.lastElementChild,
-				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.firstElementChild);
-			manager.updateCheckmark(RECOMMENDATION_SELECTOR,
-				(element) => nth_element(element, "parentElement", 6)?.firstElementChild?.firstElementChild?.lastElementChild,
-				(element) => nth_element(nth_element(element, "parentElement", 6), "firstElementChild", 6));
-			manager.updateCheckmark(CONVERSATION_SELECTOR,
-				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild,
-				(element) => nth_element(nth_element(element, "parentElement", 5), "firstElementChild", 5));
-			manager.updateCheckmark(ACTIVE_MESSAGE_SELECTOR,
-				(element) => nth_element(element, "parentElement", 6)?.firstElementChild?.firstElementChild?.firstElementChild,
-				(element) => nth_element(nth_element(element, "parentElement", 6), "firstElementChild", 6));
-			manager.updateCheckmark(EMBED_ORIGINAL_SELECTOR,
-				(element) => nth_element(nth_element(element, "parentElement", 3), "firstElementChild", 6)?.lastElementChild?.lastElementChild,
-				(element) => nth_element(nth_element(element, "parentElement", 3), "firstElementChild", 9),
-				0);
-			manager.updateCheckmark(EMBED_TWEET_SELECTOR,
-				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.lastElementChild?.lastElementChild,
-				(element) => nth_element(nth_element(element, "parentElement", 5), "firstElementChild", 5));
-
 			window.setTimeout(addCheckmark, 200);
 		}
 	}
@@ -513,8 +516,8 @@ async function registerRecurringObserver(manager) {
 
 		if (invocations <= 0) {
 
-			invocations = 1;
-			window.setTimeout(addCheckmark, 200);
+			invocations = 2;
+			addCheckmark();
 		}
 		else {
 
@@ -531,7 +534,7 @@ chrome.runtime.sendMessage({ text: "tab_id?" }, response => {
 		// go to page known to contain checkmark and cache it
 		if (typeof result.closeme !== 'undefined' && result.closeme == response.tab) {
 
-			waitForElement(CHECK_SELECTOR).then(setCheckmark);
+			waitForElement(CHECK_SELECTOR).then(setCheckmark).then((_) => window.close());
 		}
 		else {
 
