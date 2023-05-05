@@ -471,52 +471,59 @@ function registerRecurringObserver(manager) {
 	}
 
 	var invocations = 10;
+	var stopped = false;
 
 	function addCheckmark() {
-
-		manager.updateUserPage(USER_SELECTOR, HEADING_SELECTOR);
-		manager.updateCheckmark(FEED_SELECTOR,
-			(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 4),
-			(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 7));
-		manager.updateCheckmark(THREAD_REPLY_POST_SELECTOR,
-			(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 4),
-			(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 7));
-		manager.updateCheckmark(COMPOSE_REPLY_TWEET_SELECTOR,
-			(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 4),
-			(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 6));
-		manager.updateCheckmark(HOVER_CARD_SELECTOR,
-			(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.lastElementChild,
-			(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.firstElementChild);
-		manager.updateCheckmark(RECOMMENDATION_SELECTOR,
-			(element) => nth_element(element, "parentElement", 6)?.firstElementChild?.firstElementChild?.lastElementChild,
-			(element) => nth_element(nth_element(element, "parentElement", 6), "firstElementChild", 6));
-		manager.updateCheckmark(CONVERSATION_SELECTOR,
-			(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild,
-			(element) => nth_element(nth_element(element, "parentElement", 5), "firstElementChild", 5));
-		manager.updateCheckmark(ACTIVE_MESSAGE_SELECTOR,
-			(element) => nth_element(element, "parentElement", 6)?.firstElementChild?.firstElementChild?.firstElementChild,
-			(element) => nth_element(nth_element(element, "parentElement", 6), "firstElementChild", 6));
-		manager.updateCheckmark(EMBED_ORIGINAL_SELECTOR,
-			(element) => nth_element(nth_element(element, "parentElement", 3), "firstElementChild", 6)?.lastElementChild?.lastElementChild,
-			(element) => nth_element(nth_element(element, "parentElement", 3), "firstElementChild", 9),
-			0);
-		manager.updateCheckmark(EMBED_TWEET_SELECTOR,
-			(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.lastElementChild?.lastElementChild,
-			(element) => nth_element(nth_element(element, "parentElement", 5), "firstElementChild", 5));
 
 		if (invocations > 0) {
 
 			invocations -= 1;
+			stopped = false;
+
+			manager.updateUserPage(USER_SELECTOR, HEADING_SELECTOR);
+			manager.updateCheckmark(FEED_SELECTOR,
+				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 4),
+				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 7));
+			manager.updateCheckmark(THREAD_REPLY_POST_SELECTOR,
+				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 4),
+				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 7));
+			manager.updateCheckmark(COMPOSE_REPLY_TWEET_SELECTOR,
+				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 4),
+				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 6));
+			manager.updateCheckmark(HOVER_CARD_SELECTOR,
+				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.lastElementChild,
+				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.firstElementChild);
+			manager.updateCheckmark(RECOMMENDATION_SELECTOR,
+				(element) => nth_element(element, "parentElement", 6)?.firstElementChild?.firstElementChild?.lastElementChild,
+				(element) => nth_element(nth_element(element, "parentElement", 6), "firstElementChild", 6));
+			manager.updateCheckmark(CONVERSATION_SELECTOR,
+				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild,
+				(element) => nth_element(nth_element(element, "parentElement", 5), "firstElementChild", 5));
+			manager.updateCheckmark(ACTIVE_MESSAGE_SELECTOR,
+				(element) => nth_element(element, "parentElement", 6)?.firstElementChild?.firstElementChild?.firstElementChild,
+				(element) => nth_element(nth_element(element, "parentElement", 6), "firstElementChild", 6));
+			manager.updateCheckmark(EMBED_ORIGINAL_SELECTOR,
+				(element) => nth_element(nth_element(element, "parentElement", 3), "firstElementChild", 6)?.lastElementChild?.lastElementChild,
+				(element) => nth_element(nth_element(element, "parentElement", 3), "firstElementChild", 9),
+				0);
+			manager.updateCheckmark(EMBED_TWEET_SELECTOR,
+				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.lastElementChild?.lastElementChild,
+				(element) => nth_element(nth_element(element, "parentElement", 5), "firstElementChild", 5));
+
 			window.setTimeout(addCheckmark, 200);
+		}
+		else {
+
+			stopped = true;
 		}
 	}
 	addCheckmark();
 
 	const observer = new MutationObserver((mutations) => {
 
-		if (invocations <= 0) {
+		if (stopped) {
 
-			invocations = 2;
+			invocations = 1;
 			addCheckmark();
 		}
 		else {

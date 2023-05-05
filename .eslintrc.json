@@ -1,0 +1,16 @@
+{
+	"env": {
+		"browser": true,
+		"es2020": true,
+		"jquery": true
+	},
+	"extends": ["eslint:recommended"],
+	"globals": {
+		"browser": "readonly",
+		"chrome": "readonly"
+	},
+	"rules": {
+		"no-implicit-globals": "error",
+		"no-unused-vars": ["error", {"args": "none"}]
+	}
+}
