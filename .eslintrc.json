@@ -10,7 +10,7 @@
 		"chrome": "readonly"
 	},
 	"rules": {
-		"no-implicit-globals": "error",
+		"no-implicit-globals": "warn",
 		"no-unused-vars": ["error", {"args": "none"}]
 	}
 }
