@@ -1,13 +1,23 @@
 if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
 
-	// Set the background color of your extension"s page to a dark color
-	document.body.style.backgroundColor = "#202124";//"black";
-	const textElements = document.getElementsByClassName("text-color");
-	for (const element of textElements) {
+	const headLink = document.createElement("link");
+	headLink.rel = "stylesheet";
+	headLink.href = "css/dark-hive/jquery-ui.css";
+	document.head.appendChild(headLink);
 
-		element.style.color = "white";
-	}
+	// Set the background color of your extension's page to a dark color
+	document.body.style.backgroundColor = "black";// "#202124";
+	$('.text-color').css("color", "white");
 }
+else {
+
+	const headLink = document.createElement("link");
+	headLink.rel = "stylesheet";
+	headLink.href = "css/base/jquery-ui.css";
+	document.head.appendChild(headLink);
+}
+
+$('#tabs').tabs();
 
 $('.toggle').toggles({type : "select"});
 
@@ -46,6 +56,9 @@ function displayNormalSpan() {
 		$('.toggle').toggleClass("disabled", false);
 		$('#legacy').toggleClass("disabled", false);
 	});
+	document.body.style["margin-top"] = "0";
+	document.body.style["margin-bottom"] = "0";
+	document.body.style["margin-left"] = "0";
 	$('#normal_span').attr("hidden", false);
 }
 

@@ -3,6 +3,9 @@
 <head>
 	<style>
 		body {
+			margin-top: 0;
+			margin-bottom: 0;
+			margin-left: 0;
 			min-width: 100vw;
 		}
 		a, a:visited {
@@ -17,19 +20,31 @@
 	<link rel="stylesheet" href="css/toggles.css">
 	<link rel="stylesheet" href="css/toggles-dark.css">
 	<script src="scripts/jquery.js"></script>
+	<script src="scripts/jquery-ui.js"></script>
 	<script src="scripts/toggles.js"></script>
 </head>
 <body>
-	<p class="text-color">Twitter&nbsp;Blue</p>
-	<div id="blue" class="toggle toggle-dark disabled" style="display: inline-block"></div>
-	<p class="text-color">Legacy&nbsp;Checkmark</p>
-	<div id="legacy" class="toggle toggle-dark disabled" style="display: inline-block"></div>
-	<p class="text-color">&#11088;&#11088;&#11088;&#11088;&#11088;Enjoying the extension? Please leave a <a target="_blank" rel="noopener noreferrer" href="https://chrome.google.com/webstore/detail/original-birds/chhgbpmapfgibdoimakecicdlhhmkpjn">review</a>.</p>
-	<p class="text-color">&#127968;Have a question? See our FAQ on our <a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/#faq">home page</a>.</p>
-	<p class="text-color">&#128030;Found a bug? See instructions on reporting it <a target="_blank" rel="noopener noreferrer" href="https://github.com/chromestone/OriginalBirds/blob/main/CONTRIBUTING.md">here</a>.</p>
-	<p class="text-color">&#9749;<a target="_blank" rel="noopener noreferrer" href="https://www.buymeacoffee.com/openbirds">Donations</a> are welcome!</p>
-	<p class="text-color">&#128156;Thank you to all of our generous <a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/contributors.html">donors</a> and <a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/contributors.html">contributors</a>!!! Go check them out and show them some &#128156;!</p>
-	<p class="text-color"><a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/privacy.html">Privacy Policy</a></p>
+	<div id="tabs">
+		<ul>
+			<li><a href="#general">General</a></li>
+			<li><a href="#advanced">Advanced</a></li>
+		</ul>
+		<div id="general">
+			<p class="text-color">Twitter&nbsp;Blue</p>
+			<div id="blue" class="toggle toggle-dark disabled" style="display: inline-block"></div>
+			<p class="text-color">Legacy&nbsp;Checkmark</p>
+			<div id="legacy" class="toggle toggle-dark disabled" style="display: inline-block"></div>
+			<p class="text-color">&#11088;&#11088;&#11088;&#11088;&#11088;Enjoying the extension? Please leave a <a target="_blank" rel="noopener noreferrer" href="https://chrome.google.com/webstore/detail/original-birds/chhgbpmapfgibdoimakecicdlhhmkpjn">review</a>.</p>
+			<p class="text-color">&#127968;Have a question? See our FAQ on our <a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/#faq">home page</a>.</p>
+			<p class="text-color">&#128030;Found a bug? See instructions on reporting it <a target="_blank" rel="noopener noreferrer" href="https://github.com/chromestone/OriginalBirds/blob/main/CONTRIBUTING.md">here</a>.</p>
+			<p class="text-color">&#9749;<a target="_blank" rel="noopener noreferrer" href="https://www.buymeacoffee.com/openbirds">Donations</a> are welcome!</p>
+			<p class="text-color">&#128156;Thank you to all of our generous <a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/contributors.html">donors</a> and <a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/contributors.html">contributors</a>!!! Go check them out and show them some &#128156;!</p>
+			<p class="text-color"><a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/privacy.html">Privacy Policy</a></p>
+		</div>
+		<div id="advanced">
+			<p class="text-color">Test</p>
+		</div>
+	</div>
 	<script src="scripts/popup.js"></script>
 </body>
 </html>
