@@ -21,20 +21,22 @@ $('#tabs').tabs();
 
 $('.toggle').toggles({type : "select"});
 
-chrome.storage.local.get(["showblue", "showlegacy"], (result) => {
+chrome.storage.local.get(["showblue", "showlegacy", "checkmark"], (result) => {
 
 	$('#blue').toggles(result.showblue ?? true);
 	$('#legacy').toggles(result.showlegacy ?? true);
 
-	$('#blue').on("toggle", (e, active) => {
+	$('#blue').on("toggle", (_, active) => {
 
 		chrome.storage.local.set({"showblue" : active});
 	});
 
-	$('#legacy').on("toggle", (e, active) => {
+	$('#legacy').on("toggle", (_, active) => {
 
 		chrome.storage.local.set({"showlegacy" : active});
 	});
 
 	$('.toggle').toggleClass("disabled", false);
+
+	$('#checkmarkhtml').val(result.checkmark ?? "");
 });

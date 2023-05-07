@@ -4,6 +4,8 @@
 
 ### Are you a legacy verified Twitter user missing your checkmark?
 
+Do **not** report this as a bug.
+
 It’s possible that we have holes in our verified users list. As mentioned on our [website](https://chromestone.github.io/OriginalBirds/), we are not a verification business. However, if you believe you have sufficient proof such as a Wayback Machine link (**more than a screenshot**), then email us at "open.birds.official _at_ gmail _dot_ com" with "Original Birds Data Rectification" in the subject line.
 
 ---
@@ -24,11 +26,18 @@ It’s possible that we have holes in our verified users list. As mentioned on o
 
 * Open a new GitHub pull request with the patch.
 
-* Ensure the pull request description clearly describes the problem and solution. Include the relevant issue number.
+* Ensure the pull request description clearly describes the problem and solution.
+
+  * Include the relevant issue number.
+  * Don't forget to test your modified extension!
+  * Make sure you're passing CodeQL and ESLint.
+  * Include your Twitter handle in the comments.
+
+* If you fix a bug, then we'll add you to our [contributors list](https://chromestone.github.io/OriginalBirds/contributors.html)!
 
 ### Did you fix whitespace, format code, or make a purely cosmetic patch?
 
-* Cosmetic changes to popup.html are welcome and encouraged.
+* Cosmetic changes to popup.html are welcome and encouraged. (Try to stay within using JQuery UI but we'll make exceptions for sleek designs.)
 
 * Changes that are cosmetic in nature and do not add anything substantial to the stability, functionality, or testability of Original Birds will generally not be accepted.
 
@@ -40,7 +49,14 @@ It’s possible that we have holes in our verified users list. As mentioned on o
 
 * Fork this repository and make changes.
 
-* When you are finished with your changes, create a pull request (include your Twitter handle in the comments). Don't forget to test your modified extension!
+* When you are finished with your changes, open a new GitHub pull request.
+
+* Ensure the pull request description clearly describes the problem and solution.
+
+  * Include the relevant issue number.
+  * Don't forget to test your modified extension!
+  * Make sure you're passing CodeQL and ESLint.
+  * Include your Twitter handle in the comments.
 
 * If we approve the change, then we'll add you to our [contributors list](https://chromestone.github.io/OriginalBirds/contributors.html)!
 
