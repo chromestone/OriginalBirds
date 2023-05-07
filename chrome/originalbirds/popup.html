@@ -14,7 +14,7 @@
 		.text-color {
 			color: black;
 			font-family: Arial, Helvetica, sans-serif;
-			font-size: 16px;
+			font-size: 12pt;
 		}
 	</style>
 	<link rel="stylesheet" href="css/toggles.css">
@@ -30,9 +30,9 @@
 			<li><a href="#advanced">Advanced</a></li>
 		</ul>
 		<div id="general">
-			<p class="text-color">Twitter&nbsp;Blue</p>
+			<p class="text-color"><b>Twitter&nbsp;Blue</b></p>
 			<div id="blue" class="toggle toggle-dark disabled" style="display: inline-block"></div>
-			<p class="text-color">Legacy&nbsp;Checkmark</p>
+			<p class="text-color"><b>Legacy&nbsp;Checkmark</b></p>
 			<div id="legacy" class="toggle toggle-dark disabled" style="display: inline-block"></div>
 			<p class="text-color">&#11088;&#11088;&#11088;&#11088;&#11088;Enjoying the extension? Please leave a <a target="_blank" rel="noopener noreferrer" href="https://chrome.google.com/webstore/detail/original-birds/chhgbpmapfgibdoimakecicdlhhmkpjn">review</a>.</p>
 			<p class="text-color">&#127968;Have a question? See our FAQ on our <a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/#faq">home page</a>.</p>
@@ -42,9 +42,21 @@
 			<p class="text-color"><a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/privacy.html">Privacy Policy</a></p>
 		</div>
 		<div id="advanced">
-			<h3>Checkmark HTML</h3>
+			<p class="text-color"><b>Checkmark&nbsp;HTML</b></p>
 			<textarea id="checkmarkhtml" rows="4" cols="32" readonly></textarea><br />
 			<button id="reloadcheckmark">Reload Checkmark</button>
+			<p class="text-color">
+				<b>Polling&nbsp;Rate</b><br />
+				How long to wait between checkmark polls.
+			</p>
+			<input id="polldelay">
+			<button id="polldelaybutton">&#8617;</button>
+			<p class="text-color">
+				<b>Number&nbsp;of&nbsp;Polls</b><br />
+				Number of times to poll after the latest change in page.
+			</p>
+			<input id="invocations">
+			<button id="invocationsbutton">&#8617;</button>
 		</div>
 	</div>
 	<script src="scripts/popup.js"></script>

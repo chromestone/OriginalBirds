@@ -19,6 +19,9 @@ else {
 
 $('#tabs').tabs();
 $('button').button();
+$('#polldelay,#invocations').spinner({icons: {down: "ui-icon-blank", up: "ui-icon-blank"}});
+$('.ui-spinner-input').css("margin-right", ".4em");
+$('.ui-spinner a.ui-spinner-button').css("display", "none");
 
 $('.toggle').toggles({type : "select"});
 
@@ -56,4 +59,15 @@ $('#reloadcheckmark').on("click", function() {
 
 	$(this).prop("disabled", true);
 	chrome.runtime.sendMessage({text: "cachecheckmark!"});
+});
+
+$('#reloadcheckmark').on("click", function() {
+
+	$(this).prop("disabled", true);
+	chrome.runtime.sendMessage({text: "cachecheckmark!"});
+});
+
+$('#polldelaybutton').on("click", function() {
+
+	console.log($('#polldelay').spinner("value"));
 });
