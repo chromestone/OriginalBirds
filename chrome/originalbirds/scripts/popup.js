@@ -19,35 +19,40 @@ else {
 
 $('#tabs').tabs();
 $('button').button();
-$('#polldelay,#invocations').spinner({icons: {down: "ui-icon-blank", up: "ui-icon-blank"}});
-$('.ui-spinner-input').css("margin-right", ".4em");
-$('.ui-spinner a.ui-spinner-button').css("display", "none");
+//$('#polldelay,#invocations').spinner({icons: {down: "ui-icon-blank", up: "ui-icon-blank"}});
+//$('.ui-spinner-input').css("margin-right", ".4em");
+//$('.ui-spinner a.ui-spinner-button').css("display", "none");
 
-$('.toggle').toggles({type : "select"});
+$('.toggle').toggles({type: "select"});
 
-chrome.storage.local.get(["showblue", "showlegacy", "checkmark"], (result) => {
+chrome.storage.local.get(["showblue", "showlegacy", "checkmark", "invocations", "polldelay"], (result) => {
 
 	$('#blue').toggles(result.showblue ?? true);
 	$('#legacy').toggles(result.showlegacy ?? true);
 
 	$('#blue').on("toggle", (_, active) => {
 
-		chrome.storage.local.set({"showblue" : active});
+		chrome.storage.local.set({"showblue": active});
 	});
 
 	$('#legacy').on("toggle", (_, active) => {
 
-		chrome.storage.local.set({"showlegacy" : active});
+		chrome.storage.local.set({"showlegacy": active});
 	});
 
 	$('.toggle').toggleClass("disabled", false);
 
-	$('#checkmarkhtml').val(result.checkmark ?? "");
+	const checkHtml = result.checkmark ?? "";
+	const checkBlob = new Blob([checkHtml], {type: "text/plain"});
+	$('#checkmarkdownload').attr("href", URL.createObjectURL(checkBlob));
+	$('#checkmarkhtml').val(checkHtml);
+
+	$('#invocations').val(result.invocations ?? 10);
+	$('#polldelay').val(result.polldelay ?? 200);
 });
 
 chrome.storage.onChanged.addListener((changes) => {
 
-	console.log(changes);
 	if (changes.hasOwnProperty("checkmark")) {
 
 		$('#checkmarkhtml').val(changes.checkmark.newValue ?? "");
@@ -61,13 +66,32 @@ $('#reloadcheckmark').on("click", function() {
 	chrome.runtime.sendMessage({text: "cachecheckmark!"});
 });
 
-$('#reloadcheckmark').on("click", function() {
+$('#invocationsbutton').on("click", function() {
 
 	$(this).prop("disabled", true);
-	chrome.runtime.sendMessage({text: "cachecheckmark!"});
+	const value = $('#invocations').val() ?? "";
+	if (value.match(/^[1-9]\d{0,6}$/)) {
+
+		chrome.storage.local.set({"invocations": parseInt(value)}, () => $(this).prop("disabled", false));
+	}
+	else {
+
+		$('#invocations').effect("shake");
+		$(this).prop("disabled", false);
+	}
 });
 
 $('#polldelaybutton').on("click", function() {
 
-	console.log($('#polldelay').spinner("value"));
+	$(this).prop("disabled", true);
+	const value = $('#polldelay').val() ?? "";
+	if (value.match(/^[1-9]\d{0,6}$/)) {
+
+		chrome.storage.local.set({"polldelay": parseInt(value)}, () => $(this).prop("disabled", false));
+	}
+	else {
+
+		$('#polldelay').effect("shake");
+		$(this).prop("disabled", false);
+	}
 });

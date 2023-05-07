@@ -219,6 +219,7 @@ class CheckmarkManager {
 
 						div.id = myId;
 						div.style.verticalAlign = "middle";
+						div.setAttribute("title", "This handle is in the legacy verified list.");
 
 						div.appendChild(this.checkHtml.cloneNode(true));
 						const svg = div.querySelector('svg');
@@ -289,6 +290,7 @@ class CheckmarkManager {
 
 		div.id = myId;
 		div.style.display = "flex";
+		div.setAttribute("title", "This handle is in the legacy verified list.");
 
 		div.appendChild(this.checkHtml.cloneNode(true));
 		const svg = div.querySelector('svg');
@@ -375,6 +377,7 @@ class CheckmarkManager {
 
 				div.id = myId;
 				div.style.display = "flex";
+				div.setAttribute("title", "This handle is in the legacy verified list.");
 
 				div.appendChild(this.checkHtml.cloneNode(true));
 				const svg = div.querySelector('svg');

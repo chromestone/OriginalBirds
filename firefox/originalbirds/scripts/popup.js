@@ -24,7 +24,7 @@ $('.toggle').toggles({type: "select"});
 
 function displayNormalSpan() {
 
-	chrome.storage.local.get(["showblue", "showlegacy", "checkmark"], (result) => {
+	chrome.storage.local.get(["showblue", "showlegacy", "checkmark", "invocations", "polldelay"], (result) => {
 
 		if (typeof result.checkmark === 'undefined') {
 
@@ -36,17 +36,23 @@ function displayNormalSpan() {
 
 		$('#blue').on("toggle", (_, active) => {
 	
-			chrome.storage.local.set({"showblue" : active});
+			chrome.storage.local.set({"showblue": active});
 		});
 	
 		$('#legacy').on("toggle", (_, active) => {
 	
-			chrome.storage.local.set({"showlegacy" : active});
+			chrome.storage.local.set({"showlegacy": active});
 		});
 
 		$('.toggle').toggleClass("disabled", false);
 
-		$('#checkmarkhtml').val(result.checkmark ?? "");
+		const checkHtml = result.checkmark ?? "";
+		const checkBlob = new Blob([checkHtml], {type: "text/plain"});
+		$('#checkmarkdownload').attr("href", URL.createObjectURL(checkBlob));
+		$('#checkmarkhtml').val(checkHtml);
+
+		$('#invocations').val(result.invocations ?? 10);
+		$('#polldelay').val(result.polldelay ?? 200);
 	});
 
 	chrome.storage.onChanged.addListener((changes) => {
@@ -62,6 +68,36 @@ function displayNormalSpan() {
 	
 		$(this).prop("disabled", true);
 		chrome.runtime.sendMessage({text: "cachecheckmark!"});
+	});
+
+	$('#invocationsbutton').on("click", function() {
+
+		$(this).prop("disabled", true);
+		const value = $('#invocations').val() ?? "";
+		if (value.match(/^[1-9]\d{0,6}$/)) {
+
+			chrome.storage.local.set({"invocations": parseInt(value)}, () => $(this).prop("disabled", false));
+		}
+		else {
+
+			$('#invocations').effect("shake");
+			$(this).prop("disabled", false);
+		}
+	});
+
+	$('#polldelaybutton').on("click", function() {
+
+		$(this).prop("disabled", true);
+		const value = $('#polldelay').val() ?? "";
+		if (value.match(/^[1-9]\d{0,6}$/)) {
+
+			chrome.storage.local.set({"polldelay": parseInt(value)}, () => $(this).prop("disabled", false));
+		}
+		else {
+
+			$('#polldelay').effect("shake");
+			$(this).prop("disabled", false);
+		}
 	});
 
 	document.body.style["margin-top"] = "0";

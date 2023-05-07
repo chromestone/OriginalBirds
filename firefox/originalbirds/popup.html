@@ -23,7 +23,7 @@
 <body>
 	<span hidden id="permission_span">
 		<p class="text-color">Original Birds needs access to Twitter to function.</p>
-		<div id="perm" class="toggle toggle-dark disabled" style="display: inline-block"></div>
+		<div id="perm" class="toggle toggle-dark disabled" style="display: inline-block;"></div>
 		<p class="text-color">Why? See our FAQ on our <a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/#faq">home page</a>.</p>
 		<p class="text-color">Note: Your browser will briefly visit Elon Musk's Twitter to retrieve Twitter's checkmark.</p>
 	</span>
@@ -34,10 +34,10 @@
 				<li><a href="#advanced">Advanced</a></li>
 			</ul>
 			<div id="general">
-				<p class="text-color">Twitter&nbsp;Blue</p>
-				<div id="blue" class="toggle toggle-dark disabled" style="display: inline-block"></div>
-				<p class="text-color">Legacy&nbsp;Checkmark</p>
-				<div id="legacy" class="toggle toggle-dark disabled" style="display: inline-block"></div>
+				<p class="text-color"><b>Twitter&nbsp;Blue</b></p>
+				<div id="blue" class="toggle toggle-dark disabled" style="display: inline-block;"></div>
+				<p class="text-color"><b>Legacy&nbsp;Checkmark</b></p>
+				<div id="legacy" class="toggle toggle-dark disabled" style="display: inline-block;"></div>
 				<p class="text-color">&#11088;&#11088;&#11088;&#11088;&#11088;Enjoying the extension? Please leave a <a target="_blank" rel="noopener noreferrer" href="https://addons.mozilla.org/en-US/firefox/addon/original-birds/">review</a>.</p>
 				<p class="text-color">&#127968;Have a question? See our FAQ on our <a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/#faq">home page</a>.</p>
 				<p class="text-color">&#128030;Found a bug? See instructions on reporting it <a target="_blank" rel="noopener noreferrer" href="https://github.com/chromestone/OriginalBirds/blob/main/CONTRIBUTING.md">here</a>.</p>
@@ -46,9 +46,25 @@
 				<p class="text-color"><a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/privacy.html">Privacy Policy</a></p>
 			</div>
 			<div id="advanced">
-				<h3>Checkmark HTML</h3>
-				<textarea id="checkmarkhtml" rows="4" cols="32" readonly></textarea><br />
+				<p class="text-color"><b>Checkmark&nbsp;HTML</b></p>
+				<details style="margin-bottom: 1em;">
+					<summary class="text-color">Inspect</summary>
+					<textarea id="checkmarkhtml" rows="4" cols="32" readonly style="vertical-align: middle;"></textarea>
+					<a id="checkmarkdownload" download="checkmark.txt"><button style="font-size: 1.5rem; font-weight: bold;">&#10515;</button></a>
+				</details>
 				<button id="reloadcheckmark">Reload Checkmark</button>
+				<p class="text-color">
+					<b>Number&nbsp;of&nbsp;Polls</b><br />
+					Number of times to poll after the latest change in page.
+				</p>
+				<input id="invocations" title="Number must be between 1 to 9999999." style="vertical-align: middle;">
+				<button id="invocationsbutton">&#8617;</button>
+				<p class="text-color">
+					<b>Polling&nbsp;Rate</b><br />
+					How long to wait between checkmark polls in milliseconds.
+				</p>
+				<input id="polldelay" title="Number must be between 1 to 9999999." style="vertical-align: middle;">
+				<button id="polldelaybutton">&#8617;</button>
 			</div>
 		</div>
 	</span>
