@@ -7,6 +7,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 		closemeListener(sender, sendResponse);
 		return true;
 	}
+	else if (msg.text == "cachecheckmark!") {
+
+		cacheCheckmark();
+	}
 	return false;
 });
 
@@ -38,10 +42,10 @@ async function getSupporters() {
 	const response = await fetch("https://chromestone.github.io/OriginalBirds/supporters.json");
 	const data = await response.text();
 
-	chrome.storage.local.set({supporters : data});
+	chrome.storage.local.set({supporters: data});
 	const theDate = new Date();
 	theDate.setHours(0,0,0,0);
-	chrome.storage.local.set({lastlaunch : theDate.toJSON()});
+	chrome.storage.local.set({lastlaunch: theDate.toJSON()});
 }
 
 chrome.storage.local.get(["checkmark", "handles", "supporters", "lastlaunch"], (result) => {

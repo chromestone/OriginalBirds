@@ -18,6 +18,7 @@ else {
 }
 
 $('#tabs').tabs();
+$('button').button();
 
 $('.toggle').toggles({type : "select"});
 
@@ -39,4 +40,20 @@ chrome.storage.local.get(["showblue", "showlegacy", "checkmark"], (result) => {
 	$('.toggle').toggleClass("disabled", false);
 
 	$('#checkmarkhtml').val(result.checkmark ?? "");
+});
+
+chrome.storage.onChanged.addListener((changes) => {
+
+	console.log(changes);
+	if (changes.hasOwnProperty("checkmark")) {
+
+		$('#checkmarkhtml').val(changes.checkmark.newValue ?? "");
+		$('#reloadcheckmark').prop("disabled", false);
+	}
+});
+
+$('#reloadcheckmark').on("click", function() {
+
+	$(this).prop("disabled", true);
+	chrome.runtime.sendMessage({text: "cachecheckmark!"});
 });

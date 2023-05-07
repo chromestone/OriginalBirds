@@ -18,27 +18,18 @@ else {
 }
 
 $('#tabs').tabs();
+$('button').button();
 
-$('.toggle').toggles({type : "select"});
-
-function cacheCheckmark() {
-
-	chrome.storage.local.get("checkmark", (result) => {
-
-		if (typeof result.checkmark === 'undefined') {
-
-			chrome.tabs.create({url : "https://twitter.com/elonmusk", active : false}, function(tab) {
-
-				chrome.storage.local.set({closeme : tab.id});
-			});
-		}
-	});
-}
+$('.toggle').toggles({type: "select"});
 
 function displayNormalSpan() {
 
-	cacheCheckmark();
 	chrome.storage.local.get(["showblue", "showlegacy", "checkmark"], (result) => {
+
+		if (typeof result.checkmark === 'undefined') {
+
+			chrome.runtime.sendMessage({text: "cachecheckmark!"});
+		}
 
 		$('#blue').toggles(result.showblue ?? true);
 		$('#legacy').toggles(result.showlegacy ?? true);
@@ -57,16 +48,32 @@ function displayNormalSpan() {
 
 		$('#checkmarkhtml').val(result.checkmark ?? "");
 	});
+
+	chrome.storage.onChanged.addListener((changes) => {
+
+		if (changes.hasOwnProperty("checkmark")) {
+	
+			$('#checkmarkhtml').val(changes.checkmark.newValue ?? "");
+			$('#reloadcheckmark').prop("disabled", false);
+		}
+	});
+
+	$('#reloadcheckmark').on("click", function() {
+	
+		$(this).prop("disabled", true);
+		chrome.runtime.sendMessage({text: "cachecheckmark!"});
+	});
+
 	document.body.style["margin-top"] = "0";
 	document.body.style["margin-bottom"] = "0";
 	document.body.style["margin-left"] = "0";
 	$('#normal_span').attr("hidden", false);
 }
 
-function actionListener(e, active) {
+function actionListener(_, __) {
 
 	$('#perm').toggleClass("disabled", true);
-	browser.permissions.request({ origins: ['https://*.twitter.com/*'] }).then((result) => {
+	browser.permissions.request({origins: ['https://*.twitter.com/*']}).then((result) => {
 
 		if (result) {
 
@@ -81,7 +88,7 @@ function actionListener(e, active) {
 	});
 }
 
-browser.permissions.contains({ origins: ["https://*.twitter.com/*"] }).then((result) => {
+browser.permissions.contains({origins: ["https://*.twitter.com/*"]}).then((result) => {
 
 	if (result) {
 

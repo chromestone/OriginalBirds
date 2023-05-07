@@ -43,7 +43,7 @@ function waitForElement(selector) {
 			return;
 		}
 
-		const observer = new MutationObserver((mutations) => {
+		const observer = new MutationObserver((_) => {
 
 			const targetElement = document.querySelector(selector);
 			if (targetElement !== null) {
@@ -52,27 +52,21 @@ function waitForElement(selector) {
 				resolve(targetElement);
 			}
 		});
-		observer.observe(document.body, { childList: true, subtree: true });
+		observer.observe(document.body, {childList: true, subtree: true});
 	});
 }
 
 function setCheckmark(targetElement) {
 
-	return new Promise((resolve) => {
-
-		chrome.storage.local.set({checkmark : targetElement.outerHTML}, () => {
-
-			chrome.storage.local.remove("closeme", () => resolve(null));
-		});
-	});
+	return new Promise((resolve) =>
+		chrome.storage.local.set({checkmark: targetElement.outerHTML}, () =>
+			chrome.storage.local.remove("closeme", () =>
+				resolve(null))));
 }
 
 function getProperties(keys) {
 
-	return new Promise((resolve) => {
-
-		chrome.storage.local.get(keys, resolve);
-	});
+	return new Promise((resolve) => chrome.storage.local.get(keys, resolve));
 }
 
 function myRandomId() {
@@ -519,7 +513,7 @@ function registerRecurringObserver(manager) {
 	}
 	addCheckmark();
 
-	const observer = new MutationObserver((mutations) => {
+	const observer = new MutationObserver((_) => {
 
 		if (stopped) {
 
@@ -531,21 +525,18 @@ function registerRecurringObserver(manager) {
 			invocations = Math.min(10, invocations + 1);
 		}
 	});
-	observer.observe(document.body, { childList: true, subtree: true });
+	observer.observe(document.body, {childList: true, subtree: true});
 }
 
-chrome.runtime.sendMessage({ text: "tab_id?" }, response => {
+chrome.runtime.sendMessage({text: "closeme?"}, (response) => {
 
-	chrome.storage.local.get("closeme", (result) => {
+	// go to page known to contain checkmark and cache it
+	if (response.closeme) {
 
-		// go to page known to contain checkmark and cache it
-		if (typeof result.closeme !== 'undefined' && result.closeme == response.tab) {
+		waitForElement(CHECK_SELECTOR).then(setCheckmark).then((_) => window.close());
+	}
+	else {
 
-			waitForElement(CHECK_SELECTOR).then(setCheckmark).then((_) => window.close());
-		}
-		else {
-
-			checkmarkManagerFactory().then(registerRecurringObserver);
-		}
-	});
+		checkmarkManagerFactory().then(registerRecurringObserver);
+	}
 });
