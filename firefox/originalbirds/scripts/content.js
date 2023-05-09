@@ -94,12 +94,15 @@ function nth_element(elem, dir, n) {
 
 class CheckmarkManager {
 
-	constructor(verifiedHandles, checkHtml, showBlue, showLegacy, donors, contributors) {
+	constructor(verifiedHandles, checkHtml, showBlue, showLegacy, invocations, pollDelay, donors, contributors) {
 
 		this.verifiedHandles = verifiedHandles;
 		this.checkHtml = checkHtml;
-		this.showBlue = showBlue;
-		this.showLegacy = showLegacy;
+		// do not use new here
+		this.showBlue = Boolean(showBlue);
+		this.showLegacy = Boolean(showLegacy);
+		this.invocations = Math.max(1, parseInt(invocations));
+		this.pollDelay = Math.max(0, parseInt(pollDelay));
 		this.donors = donors;
 		this.contributors = contributors;
 		this.checkmarkIds = new Set();
@@ -219,6 +222,7 @@ class CheckmarkManager {
 
 						div.id = myId;
 						div.style.verticalAlign = "middle";
+						div.setAttribute("title", "This handle is in the legacy verified list.");
 
 						div.appendChild(this.checkHtml.cloneNode(true));
 						const svg = div.querySelector('svg');
@@ -289,6 +293,7 @@ class CheckmarkManager {
 
 		div.id = myId;
 		div.style.display = "flex";
+		div.setAttribute("title", "This handle is in the legacy verified list.");
 
 		div.appendChild(this.checkHtml.cloneNode(true));
 		const svg = div.querySelector('svg');
@@ -375,6 +380,7 @@ class CheckmarkManager {
 
 				div.id = myId;
 				div.style.display = "flex";
+				div.setAttribute("title", "This handle is in the legacy verified list.");
 
 				div.appendChild(this.checkHtml.cloneNode(true));
 				const svg = div.querySelector('svg');
@@ -391,7 +397,7 @@ class CheckmarkManager {
 
 async function checkmarkManagerFactory() {
 
-	const properties = await getProperties(["handles", "checkmark", "showblue", "showlegacy", "supporters"]);
+	const properties = await getProperties(["handles", "checkmark", "showblue", "showlegacy", "invocations", "polldelay", "supporters"]);
 
 	if (typeof properties.checkmark === 'undefined') {
 
@@ -418,8 +424,12 @@ async function checkmarkManagerFactory() {
 	const showBlue = properties.showblue ?? true;
 	const showLegacy = properties.showlegacy ?? true;
 
-	let donors, contributors;
+	const invocations = properties.invocations ?? 10;
+	const pollDelay = properties.polldelay ?? 200;
+
 	// BEGIN SUPPORTER SECTION
+
+	let donors, contributors;
 
 	if (typeof properties.supporters === 'undefined') {
 
@@ -454,7 +464,7 @@ async function checkmarkManagerFactory() {
 
 	// END SUPPORTER SECTION
 
-	return new CheckmarkManager(verifiedHandles, checkHtml, showBlue, showLegacy, donors, contributors);
+	return new CheckmarkManager(verifiedHandles, checkHtml, showBlue, showLegacy, invocations, pollDelay, donors, contributors);
 }
 
 function registerRecurringObserver(manager) {
@@ -464,7 +474,7 @@ function registerRecurringObserver(manager) {
 		return;
 	}
 
-	var invocations = 10;
+	var invocations = manager.invocations;
 	var stopped = false;
 
 	function addCheckmark() {
@@ -504,7 +514,7 @@ function registerRecurringObserver(manager) {
 				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.lastElementChild?.lastElementChild,
 				(element) => nth_element(nth_element(element, "parentElement", 5), "firstElementChild", 5));
 
-			window.setTimeout(addCheckmark, 200);
+			window.setTimeout(addCheckmark, manager.pollDelay);
 		}
 		else {
 
@@ -522,7 +532,8 @@ function registerRecurringObserver(manager) {
 		}
 		else {
 
-			invocations = Math.min(10, invocations + 1);
+			// don't let invocations exceed the maximum dictated by the manager
+			invocations = Math.min(manager.invocations, invocations + 1);
 		}
 	});
 	observer.observe(document.body, {childList: true, subtree: true});

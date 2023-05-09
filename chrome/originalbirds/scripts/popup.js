@@ -55,7 +55,11 @@ chrome.storage.onChanged.addListener((changes) => {
 
 	if (changes.hasOwnProperty("checkmark")) {
 
-		$('#checkmarkhtml').val(changes.checkmark.newValue ?? "");
+		const checkHtml = changes.checkmark.newValue ?? "";
+		const checkBlob = new Blob([checkHtml], {type: "text/plain"});
+		$('#checkmarkdownload').attr("href", URL.createObjectURL(checkBlob));
+		$('#checkmarkhtml').val(checkHtml);
+
 		$('#reloadcheckmark').prop("disabled", false);
 	}
 });
