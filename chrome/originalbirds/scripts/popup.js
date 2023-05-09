@@ -17,34 +17,57 @@ else {
 	document.head.appendChild(headLink);
 }
 
+// INITIALIZATION
+
 $('#tabs').tabs();
 $('button').button();
 $('#fieldsetblue > input[type="radio"]').checkboxradio().change(function() {
-	$('#fieldsetblue > div.radiocontent').attr("hidden", true);
-	if ($(this).attr("id") == "radiobluetext") {
 
-		$('#divbluetext').attr("hidden", false);
+	$('#fieldsetblue > div.radiocontent').prop("hidden", true);
+
+	const id = $(this).attr("id");
+	if (id == "radiobluetext") {
+
+		$('#divbluetext').prop("hidden", false);
+	}
+	else if (id == "radioblueimage") {
+
+		$('#divblueimage').prop("hidden", false);
 	}
 	else {
 
-		$('#divbluedefault').attr("hidden", false);
+		$('#divbluedefault').prop("hidden", false);
 	}
 });
 $('#fieldsetlegacy > input[type="radio"]').checkboxradio().change(function() {
-	$('#fieldsetlegacy > div.radiocontent').attr("hidden", true);
-	if ($(this).attr("id") == "radiolegacytext") {
 
-		$('#divlegacytext').attr("hidden", false);
+	$('#fieldsetlegacy > div.radiocontent').prop("hidden", true);
+
+	const id = $(this).attr("id");
+	if (id == "radiolegacytext") {
+
+		$('#divlegacytext').prop("hidden", false);
+	}
+	else if (id == "radiolegacyimage") {
+
+		$('#divlegacyimage').prop("hidden", false);
 	}
 	else {
 
-		$('#divlegacydefault').attr("hidden", false);
+		$('#divlegacydefault').prop("hidden", false);
 	}
 });
 
 $('.toggle').toggles({type: "select"});
 
-chrome.storage.local.get(["showblue", "showlegacy", "checkmark", "invocations", "polldelay"], (result) => {
+// POPULATE VALUES
+
+chrome.storage.local.get([
+	"showblue", "showlegacy", "checkmark", "invocations", "polldelay", "bluelook", "legacylook",
+	"bluecolor", "legacycolor", "bluetext", "legacytext", "blueimage", "legacyimage"
+], (result) => {
+
+	// GENERAL
 
 	$('#blue').toggles(result.showblue ?? true);
 	$('#legacy').toggles(result.showlegacy ?? true);
@@ -61,6 +84,66 @@ chrome.storage.local.get(["showblue", "showlegacy", "checkmark", "invocations", 
 
 	$('.toggle').toggleClass("disabled", false);
 
+	// APPEARANCE
+
+	const blueLook = result.bluelook ?? "default";
+	const legacyLook = result.legacylook ?? "default";
+
+	if (blueLook == "text") {
+
+		$('#radiobluetext').trigger("click");
+	}
+	else if (blueLook == "image") {
+
+		$('#radioblueimage').trigger("click");
+	}
+
+	if (legacyLook == "text") {
+
+		$('#radiolegacytext').trigger("click");
+	}
+	else if (legacyLook == "image") {
+
+		$('#radiolegacyimage').trigger("click");
+	}
+
+	$('#bluecolor').val(result.bluecolor ?? "#1D9BF0");
+	$('#legacycolor').val(result.legacycolor ?? "#2DB32D");
+
+	$('#bluetext').val(result.bluetext ?? "");
+	$('#legacytext').val(result.legacytext ?? "");
+
+	const blueURL = result.blueimage ?? "";
+	const legacyURL = result.legacyimage ?? "";
+
+	if (blueURL.length > 0) {
+
+		const inputImg = document.createElement("img");
+		$(inputImg).on("load", function() {
+
+			const canvas = document.getElementById("canvasblueimage");
+			const context = canvas.getContext("2d");
+			context.drawImage(inputImg, 0, 0, 64, 64);
+			$(canvas).prop("hidden", false);
+		});
+		$(inputImg).attr("src", blueURL);
+	}
+
+	if (legacyURL.length > 0) {
+
+		const inputImg = document.createElement("img");
+		$(inputImg).on("load", function() {
+
+			const canvas = document.getElementById("canvaslegacyimage");
+			const context = canvas.getContext("2d");
+			context.drawImage(inputImg, 0, 0, 64, 64);
+			$(canvas).prop("hidden", false);
+		});
+		$(inputImg).attr("src", legacyURL);
+	}
+
+	// ADVANCED
+
 	const checkHtml = result.checkmark ?? "";
 	const checkBlob = new Blob([checkHtml], {type: "text/plain"});
 	$('#checkmarkdownload').attr("href", URL.createObjectURL(checkBlob));
@@ -70,12 +153,151 @@ chrome.storage.local.get(["showblue", "showlegacy", "checkmark", "invocations", 
 	$('#polldelay').val(result.polldelay ?? 200);
 });
 
+// APPEARANCE
+
+$('#blueimage').on("change", function() {
+
+	const files = $(this).prop("files");
+	if ((files?.length ?? 0) > 0) {
+
+		const inputURL = URL.createObjectURL(files[0]);
+		const inputImg = document.createElement("img");
+		$(inputImg).on("load", function() {
+
+			const canvas = document.getElementById("canvasblueimage");
+			const context = canvas.getContext("2d");
+			context.drawImage(inputImg, 0, 0, 64, 64);
+			$(canvas).prop("hidden", false);
+
+			URL.revokeObjectURL(inputURL);
+		});
+		$(inputImg).attr("src", inputURL);
+	}
+});
+
+$('#legacyimage').on("change", function() {
+
+	const files = $(this).prop("files");
+	if ((files?.length ?? 0) > 0) {
+
+		const inputURL = URL.createObjectURL(files[0]);
+		const inputImg = document.createElement("img");
+		$(inputImg).on("load", function() {
+
+			const canvas = document.getElementById("canvaslegacyimage");
+			const context = canvas.getContext("2d");
+			context.drawImage(inputImg, 0, 0, 64, 64);
+			$(canvas).prop("hidden", false);
+
+			URL.revokeObjectURL(inputURL);
+		});
+		$(inputImg).attr("src", inputURL);
+	}
+});
+
+$('#savebluebutton').on("click", function() {
+
+	$(this).prop("disabled", true);
+
+	const color = $('#bluecolor').val() ?? "";
+	if (color.match(/#[0-9A-F]{6}/i)) {
+
+		const radioId = $('#fieldsetblue > input[type="radio"]:checked').attr("id");
+		let look;
+		if (radioId == "radiobluetext") {
+
+			look = "text";
+		}
+		else if (radioId == "radioblueimage") {
+
+			look = "image";
+		}
+		else {
+
+			look = "default";
+		}
+
+		const canvas = document.getElementById("canvasblueimage");
+		const imageURL = (canvas == null || $(canvas).prop("hidden")) ? "" : canvas.toDataURL();
+
+		if (look != "image" || imageURL.length > 0) {
+
+			$('#blueerror').prop("hidden", true);
+
+			const text = $('#bluetext').val()?.substring(0, 64) ?? "";
+
+			chrome.storage.local.set({
+				"bluelook": look,
+				"bluecolor": color,
+				"bluetext": text,
+				"blueimage": imageURL
+			}, () => $(this).prop("disabled", false));
+			return;
+		}
+	}
+
+	$('#blueerror').prop("hidden", false);
+	$(this).prop("disabled", false);
+});
+
+$('#savelegacybutton').on("click", function() {
+
+	$(this).prop("disabled", true);
+
+	const color = $('#legacycolor').val() ?? "";
+	if (color.match(/#[0-9A-F]{6}/i)) {
+
+		const radioId = $('#fieldsetlegacy > input[type="radio"]:checked').attr("id");
+		let look;
+		if (radioId == "radiolegacytext") {
+
+			look = "text";
+		}
+		else if (radioId == "radiolegacyimage") {
+
+			look = "image";
+		}
+		else {
+
+			look = "default";
+		}
+
+		const canvas = document.getElementById("canvaslegacyimage");
+		const imageURL = (canvas == null || $(canvas).prop("hidden")) ? "" : canvas.toDataURL();
+
+		if (look != "image" || imageURL.length > 0) {
+
+			$('#legacyerror').prop("hidden", true);
+
+			const text = $('#legacytext').val()?.substring(0, 64) ?? "";
+
+			chrome.storage.local.set({
+				"legacylook": look,
+				"legacycolor": color,
+				"legacytext": text,
+				"legacyimage": imageURL
+			}, () => $(this).prop("disabled", false));
+			return;
+		}
+	}
+
+	$('#legacyerror').prop("hidden", false);
+	$(this).prop("disabled", false);
+});
+
+// ADVANCED
+
 chrome.storage.onChanged.addListener((changes) => {
 
 	if (changes.hasOwnProperty("checkmark")) {
 
 		const checkHtml = changes.checkmark.newValue ?? "";
 		const checkBlob = new Blob([checkHtml], {type: "text/plain"});
+		const prevURL = $('#checkmarkdownload').attr("href");
+		if (prevURL != null) {
+
+			URL.revokeObjectURL(prevURL);
+		}
 		$('#checkmarkdownload').attr("href", URL.createObjectURL(checkBlob));
 		$('#checkmarkhtml').val(checkHtml);
 
@@ -99,8 +321,10 @@ $('#invocationsbutton').on("click", function() {
 	}
 	else {
 
-		$('#invocations').effect("shake");
-		$(this).prop("disabled", false);
+		$('#invocations').effect({
+			effect: "shake",
+			complete: () => $(this).prop("disabled", false)
+		});
 	}
 });
 
@@ -114,7 +338,9 @@ $('#polldelaybutton').on("click", function() {
 	}
 	else {
 
-		$('#polldelay').effect("shake");
-		$(this).prop("disabled", false);
+		$('#polldelay').effect({
+			effect: "shake",
+			complete: () => $(this).prop("disabled", false)
+		});
 	}
 });

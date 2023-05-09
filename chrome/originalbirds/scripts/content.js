@@ -431,7 +431,9 @@ class CheckmarkManager {
 
 async function checkmarkManagerFactory() {
 
-	const properties = await getProperties(["handles", "checkmark", "showblue", "showlegacy", "invocations", "polldelay", "supporters"]);
+	const properties = await getProperties([
+		"handles", "checkmark", "showblue", "showlegacy", "invocations", "polldelay", "supporters"
+	]);
 
 	if (typeof properties.checkmark === 'undefined') {
 

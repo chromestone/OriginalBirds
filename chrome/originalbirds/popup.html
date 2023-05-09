@@ -52,6 +52,8 @@
 				<input id="radiobluedefault" type="radio" name="radioblue" checked>
 				<label for="radiobluetext">Text</label>
 				<input id="radiobluetext" type="radio" name="radioblue">
+				<label for="radioblueimage">Image</label>
+				<input id="radioblueimage" type="radio" name="radioblue">
 				<div id="divbluedefault" class="radiocontent">
 					<label for="bluecolor">
 						<p class="text-color"><b>Color</b></p>
@@ -62,9 +64,18 @@
 					<label for="bluetext">
 						<p class="text-color"><b>Text</b></p>
 					</label>
-					<input id="bluetext">
+					<input id="bluetext" maxlength="64">
 				</div>
-				<div class="ui-widget ui-state-error ui-corner-all" style="margin-top: 0.5rem;" hidden>
+				<div id="divblueimage" class="radiocontent" hidden>
+					<label for="blueimage">
+						<p class="text-color"><b>Text</b></p>
+					</label>
+					<input id="blueimage" type="file" accept=".jpg, .jpeg, .png, .svg, .apng, .webp, .gif">
+					<div>
+						<canvas id="canvasblueimage" width="64" height="64" style="margin-top: 0.5rem;" hidden></canvas>
+					</div>
+				</div>
+				<div id="blueerror" class="ui-widget ui-state-error ui-corner-all" style="margin-top: 0.5rem;" hidden>
 					<p><strong>Alert:</strong> Invalid input found (could be in default or text).</p>
 				</div>
 				<button id="savebluebutton" style="margin-top: 0.5rem;">Save</button>
@@ -75,6 +86,8 @@
 				<input id="radiolegacydefault" type="radio" name="radiolegacy" checked>
 				<label for="radiolegacytext">Text</label>
 				<input id="radiolegacytext" type="radio" name="radiolegacy">
+				<label for="radiolegacyimage">Image</label>
+				<input id="radiolegacyimage" type="radio" name="radiolegacy">
 				<div id="divlegacydefault" class="radiocontent">
 					<label for="legacycolor">
 						<p class="text-color"><b>Color</b></p>
@@ -85,7 +98,19 @@
 					<label for="legacytext">
 						<p class="text-color"><b>Text</b></p>
 					</label>
-					<input id="legacytext">
+					<input id="legacytext" maxlength="64">
+				</div>
+				<div id="divlegacyimage" class="radiocontent" hidden>
+					<label for="legacyimage">
+						<p class="text-color"><b>Text</b></p>
+					</label>
+					<input id="legacyimage" type="file" accept=".jpg, .jpeg, .png, .svg, .apng, .webp, .gif">
+					<div>
+						<canvas id="canvaslegacyimage" width="64" height="64" style="margin-top: 0.5rem;" hidden></canvas>
+					</div>
+				</div>
+				<div id="legacyerror" class="ui-widget ui-state-error ui-corner-all" style="margin-top: 0.5rem;" hidden>
+					<p><strong>Alert:</strong> Invalid input found (could be in default or text).</p>
 				</div>
 				<button id="savelegacybutton" style="margin-top: 0.5rem;">Save</button>
 			</fieldset>
