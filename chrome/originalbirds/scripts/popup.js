@@ -19,9 +19,28 @@ else {
 
 $('#tabs').tabs();
 $('button').button();
-//$('#polldelay,#invocations').spinner({icons: {down: "ui-icon-blank", up: "ui-icon-blank"}});
-//$('.ui-spinner-input').css("margin-right", ".4em");
-//$('.ui-spinner a.ui-spinner-button').css("display", "none");
+$('#fieldsetblue > input[type="radio"]').checkboxradio().change(function() {
+	$('#fieldsetblue > div.radiocontent').attr("hidden", true);
+	if ($(this).attr("id") == "radiobluetext") {
+
+		$('#divbluetext').attr("hidden", false);
+	}
+	else {
+
+		$('#divbluedefault').attr("hidden", false);
+	}
+});
+$('#fieldsetlegacy > input[type="radio"]').checkboxradio().change(function() {
+	$('#fieldsetlegacy > div.radiocontent').attr("hidden", true);
+	if ($(this).attr("id") == "radiolegacytext") {
+
+		$('#divlegacytext').attr("hidden", false);
+	}
+	else {
+
+		$('#divlegacydefault').attr("hidden", false);
+	}
+});
 
 $('.toggle').toggles({type: "select"});
 

@@ -94,18 +94,52 @@ function nth_element(elem, dir, n) {
 
 class CheckmarkManager {
 
-	constructor(verifiedHandles, checkHtml, showBlue, showLegacy, invocations, pollDelay, donors, contributors) {
+	constructor(verifiedHandles, checkHtml, properties) {
 
 		this.verifiedHandles = verifiedHandles;
 		this.checkHtml = checkHtml;
+
 		// do not use new here
-		this.showBlue = Boolean(showBlue);
-		this.showLegacy = Boolean(showLegacy);
-		this.invocations = Math.max(1, parseInt(invocations));
-		this.pollDelay = Math.max(0, parseInt(pollDelay));
-		this.donors = donors;
-		this.contributors = contributors;
+		this.showBlue = Boolean(properties.showblue ?? true);
+		this.showLegacy = Boolean(properties.showlegacy ?? true);
+
+		this.invocations = Math.max(1, parseInt(properties.invocations ?? 10));
+		this.pollDelay = Math.max(0, parseInt(properties.polldelay ?? 200));
+
 		this.checkmarkIds = new Set();
+
+		// BEGIN SUPPORTER SECTION
+
+		if (typeof properties.supporters === 'undefined') {
+
+			console.log("Warning: Original Birds could not load supporters :( .");
+			this.donors = new Set();
+			this.contributors = new Set();
+		}
+		else {
+
+			const supporters = JSON.parse(properties.supporters);
+
+			if (typeof supporters.donors === 'undefined') {
+		
+				console.log("Warning: Original Birds could not load donors :( .");
+				this.donors = new Set();
+			}
+			else {
+
+				this.donors = new Set(supporters.donors.map((obj) => obj.handle.toLowerCase()))
+			}
+
+			if (typeof supporters.contributors === 'undefined') {
+		
+				console.log("Warning: Original Birds could not load contributors :( .");
+				this.contributors = new Set();
+			}
+			else {
+
+				this.contributors =  new Set(supporters.contributors.map((obj) => obj.handle.toLowerCase()));
+			}
+		}
 	}
 
 	_getSupporterColor(handle) {
@@ -421,50 +455,7 @@ async function checkmarkManagerFactory() {
 	}
 	const verifiedHandles = new Set(properties.handles);
 
-	const showBlue = properties.showblue ?? true;
-	const showLegacy = properties.showlegacy ?? true;
-
-	const invocations = properties.invocations ?? 10;
-	const pollDelay = properties.polldelay ?? 200;
-
-	// BEGIN SUPPORTER SECTION
-
-	let donors, contributors;
-
-	if (typeof properties.supporters === 'undefined') {
-
-		console.log("Warning: Original Birds could not load supporters :( .");
-		donors = new Set();
-		contributors = new Set();
-	}
-	else {
-
-		const supporters = JSON.parse(properties.supporters);
-
-		if (typeof supporters.donors === 'undefined') {
-	
-			console.log("Warning: Original Birds could not load donors :( .");
-			donors = new Set();
-		}
-		else {
-
-			donors = new Set(supporters.donors.map((obj) => obj.handle.toLowerCase()))
-		}
-
-		if (typeof supporters.contributors === 'undefined') {
-	
-			console.log("Warning: Original Birds could not load contributors :( .");
-			contributors = new Set();
-		}
-		else {
-
-			contributors =  new Set(supporters.contributors.map((obj) => obj.handle.toLowerCase()));
-		}
-	}
-
-	// END SUPPORTER SECTION
-
-	return new CheckmarkManager(verifiedHandles, checkHtml, showBlue, showLegacy, invocations, pollDelay, donors, contributors);
+	return new CheckmarkManager(verifiedHandles, checkHtml, properties);
 }
 
 function registerRecurringObserver(manager) {
