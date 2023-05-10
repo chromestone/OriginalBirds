@@ -200,7 +200,7 @@ $('#savebluebutton').on("click", function() {
 	$(this).prop("disabled", true);
 
 	const color = $('#bluecolor').val() ?? "";
-	if (color.match(/#[0-9A-F]{6}/i)) {
+	if (color.match(/^#[0-9A-F]{6}$/i)) {
 
 		const radioId = $('#fieldsetblue > input[type="radio"]:checked').attr("id");
 		let look;
@@ -246,7 +246,7 @@ $('#savelegacybutton').on("click", function() {
 	$(this).prop("disabled", true);
 
 	const color = $('#legacycolor').val() ?? "";
-	if (color.match(/#[0-9A-F]{6}/i)) {
+	if (color.match(/^#[0-9A-F]{6}$/i)) {
 
 		const radioId = $('#fieldsetlegacy > input[type="radio"]:checked').attr("id");
 		let look;
@@ -263,22 +263,23 @@ $('#savelegacybutton').on("click", function() {
 			look = "default";
 		}
 
-		const canvas = document.getElementById("canvaslegacyimage");
-		const imageURL = (canvas == null || $(canvas).prop("hidden")) ? "" : canvas.toDataURL();
+		const text = $('#legacytext').val()?.substring(0, 64) ?? "";
+		if (look != "text" || text.length > 0) {
 
-		if (look != "image" || imageURL.length > 0) {
+			const canvas = document.getElementById("canvaslegacyimage");
+			const imageURL = (canvas == null || $(canvas).prop("hidden")) ? "" : canvas.toDataURL();
+			if (look != "image" || imageURL.length > 0) {
 
-			$('#legacyerror').prop("hidden", true);
+				$('#legacyerror').prop("hidden", true);
 
-			const text = $('#legacytext').val()?.substring(0, 64) ?? "";
-
-			chrome.storage.local.set({
-				"legacylook": look,
-				"legacycolor": color,
-				"legacytext": text,
-				"legacyimage": imageURL
-			}, () => $(this).prop("disabled", false));
-			return;
+				chrome.storage.local.set({
+					"legacylook": look,
+					"legacycolor": color,
+					"legacytext": text,
+					"legacyimage": imageURL
+				}, () => $(this).prop("disabled", false));
+				return;
+			}
 		}
 	}
 

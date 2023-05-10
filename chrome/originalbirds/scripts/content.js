@@ -102,74 +102,44 @@ class CheckmarkManager {
 		// do not use new here
 		this.showBlue = Boolean(properties.showblue ?? true);
 		this.showLegacy = Boolean(properties.showlegacy ?? true);
+		this.blueColor = String(properties.bluecolor ?? "");
+		this.legacyColor = String(properties.legacycolor ?? "#2DB32D");
 
-		this.useBlueDefault = false;
+		this.useBlueColor = this.blueColor.length > 0;
+
 		this.useBlueText = false;
 		this.useBlueImage = false;
 		if (properties.bluelook == "text") {
 
-			this.blueText = properties.bluetext ?? "";
-			if (this.blueText.length > 0) {
-
-				this.useBlueText = true;
-			}
-			else {
-
-				this.useBlueDefault = true;
-			}
+			// do not use new here
+			this.blueText = String(properties.bluetext ?? "").substring(0, 64);
+			this.useBlueText = this.blueText.length > 0;
 		}
 		else if (properties.bluelook == "image") {
 
-			this.blueURL = properties.blueimage ?? "";
-			if (this.blueURL.length > 0) {
-
-				this.useBlueImage = true;
-			}
-			else {
-
-				this.useBlueDefault = true;
-			}
-		}
-		else {
-
-			this.useBlueDefault = true;
+			// do not use new here
+			this.blueURL = String(properties.blueimage ?? "");
+			this.useBlueImage = this.blueURL.length > 0;
 		}
 
-		this.useLegacyDefault = false;
 		this.useLegacyText = false;
 		this.useLegacyImage = false;
 		if (properties.legacylook == "text") {
 
-			this.LegacyText = properties.Legacytext ?? "";
-			if (this.LegacyText.length > 0) {
-
-				this.useLegacyText = true;
-			}
-			else {
-
-				this.useLegacyDefault = true;
-			}
+			// do not use new here
+			this.legacyText = String(properties.legacytext ?? "").substring(0, 64);
+			this.useLegacyText = this.legacyText.length > 0;
 		}
 		else if (properties.legacylook == "image") {
 
-			this.LegacyURL = properties.Legacyimage ?? "";
-			if (this.LegacyURL.length > 0) {
-
-				this.useLegacyImage = true;
-			}
-			else {
-
-				this.useLegacyDefault = true;
-			}
-		}
-		else {
-
-			this.useLegacyDefault = true;
+			this.legacyURL = String(properties.legacyimage ?? "");
+			this.useLegacyImage = this.legacyURL.length > 0;
 		}
 
 		this.invocations = Math.max(1, parseInt(properties.invocations ?? 10));
 		this.pollDelay = Math.max(0, parseInt(properties.polldelay ?? 200));
 
+		this.updateBlue = !this.showBlue || this.useBlueColor || this.useBlueText || this.useBlueText;
 		this.checkmarkIds = new Set();
 
 		// BEGIN SUPPORTER SECTION
@@ -219,7 +189,7 @@ class CheckmarkManager {
 		return null;
 	}
 
-	_removeBlue(targetElement) {
+	_updateBlue(targetElement, blueStyles) {
 
 		const verifiedIcons = targetElement.querySelectorAll(VERIFIED_ICON_SELECTOR);
 		for (const svg of verifiedIcons) {
@@ -249,7 +219,73 @@ class CheckmarkManager {
 				continue;
 			}
 
-			svg.style.maxWidth = "0";
+			if (!this.showBlue || this.useBlueText || this.useBlueImage) {
+
+				//svg.style.maxWidth = "0";
+				svg.style.display = "none";
+			}
+			else if (this.useBlueColor) {
+
+				svg.style.color = this.blueColor;
+			}
+
+			if (this.useBlueText || this.useBlueImage) {
+
+				if (targetElement == svg.parentElement) {
+
+					// console.log("Warning: Original Birds encountered unexpected Twitter Blue svg.");
+					// break;
+					const wrapper = document.createElement("span");
+					svg.parentElement.insertBefore(wrapper, svg);
+					wrapper.appendChild(svg);
+				}
+
+				let checkmarkFound = false;
+				for (const child of svg.parentElement.children) {
+
+					if (this.checkmarkIds.has(child.id)) {
+
+						checkmarkFound = true;
+						break;
+					}
+				}
+				if (checkmarkFound) {
+
+					continue;
+				}
+
+				let myId;
+				while (this.checkmarkIds.has(myId = myRandomId()));
+				this.checkmarkIds.add(myId);
+
+				const div = document.createElement("span");
+				div.id = myId;
+
+				if (this.useBlueText) {
+
+					div.style.color = blueStyles.getPropertyValue("color");
+					div.style["font-family"] = blueStyles.getPropertyValue("font-family");
+					div.style["font-size"] = blueStyles.getPropertyValue("font-size");
+					div.style["margin-left"] = "2px";
+
+					div.textContent = this.blueText;
+				}
+				else if (this.useBlueImage) {
+
+					div.style.display = "flex";
+					div.style["margin-left"] = "2px";
+
+					const blueImg = document.createElement("img");
+					blueImg.width = 20;
+					blueImg.height = 20;
+					blueImg.src = this.blueURL;
+					div.appendChild(blueImg);
+				}
+
+				svg.parentElement.appendChild(div);
+			}
+
+			break;
 		}
 	}
 
@@ -291,9 +327,9 @@ class CheckmarkManager {
 			}
 			else {
 
-				if (!this.showBlue) {
+				if (this.updateBlue) {
 
-					this._removeBlue(targetElement);
+					this._updateBlue(targetElement, getComputedStyle(handleElement));
 				}
 
 				if (this.showLegacy && verified) {
@@ -337,10 +373,10 @@ class CheckmarkManager {
 			}
 		}
 
-		this._updateHeading(heading_selector, color, verified);
+		this._updateHeading(heading_selector, color, verified, getComputedStyle(handleElement));
 	}
 
-	_updateHeading(selector, color, verified) {
+	_updateHeading(selector, color, verified, blueStyles) {
 
 		const headingElement = document.querySelector(selector);
 		if (headingElement === null) {
@@ -362,9 +398,9 @@ class CheckmarkManager {
 
 		// END SUPPORTER SECTION
 
-		if (!this.showBlue) {
+		if (this.updateBlue) {
 
-			this._removeBlue(headingElement);
+			this._updateBlue(headingElement, blueStyles);
 		}
 
 		if (!(this.showLegacy && verified)) {
@@ -425,14 +461,14 @@ class CheckmarkManager {
 
 			// this combination of settings runs Twitter as normal
 			// nothing to do
-			if (this.showBlue && !this.showLegacy) {
+			if (!(this.updateBlue || this.showLegacy)) {
 
 				continue;
 			}
 
 			const verified = this.showLegacy ? this.verifiedHandles.has(handle) : null;
 
-			if (!this.showBlue || (this.showLegacy && verified)) {
+			if (this.updateBlue || (this.showLegacy && verified)) {
 
 				const targetElement = element2Target(element);
 				// this should not happen unless html structure changed
@@ -443,9 +479,9 @@ class CheckmarkManager {
 					continue;
 				}
 
-				if (!this.showBlue) {
+				if (this.updateBlue) {
 
-					this._removeBlue(targetElement);
+					this._updateBlue(targetElement, getComputedStyle(element));
 				}
 
 				if (!(this.showLegacy && verified)) {
@@ -475,18 +511,34 @@ class CheckmarkManager {
 				this.checkmarkIds.add(myId);
 
 				const div = document.createElement("span");
+				div.id = myId;
 
 				if (this.useLegacyText) {
 
-					// TODO
+					const styles = getComputedStyle(element);
+					div.style.color = styles.getPropertyValue("color");
+					div.style["font-family"] = styles.getPropertyValue("font-family");
+					div.style["font-size"] = styles.getPropertyValue("font-size");
+					div.style["margin-left"] = "2px";
+					//div.color = rgb(113, 118, 123);
+					//div.color = "#71767B";
+					//div["font-family"] = 'TwitterChirp, -apple-system, "system-ui", "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+
+					div.textContent = this.legacyText;
 				}
 				else if (this.useLegacyImage) {
 
-					// TODO
+					div.style.display = "flex";
+					div.style["margin-left"] = "2px";
+
+					const legacyImg = document.createElement("img");
+					legacyImg.width = 20;
+					legacyImg.height = 20;
+					legacyImg.src = this.legacyURL;
+					div.appendChild(legacyImg);
 				}
 				else {
 
-					div.id = myId;
 					div.style.display = "flex";
 					div.setAttribute("title", "This handle is in the legacy verified list.");
 
@@ -494,11 +546,11 @@ class CheckmarkManager {
 					const svg = div.querySelector('svg');
 					if (svg !== null) {
 
-						svg.style.color = "#2DB32D";
+						svg.style.color = this.legacyColor;
 					}
-
-					targetElement.appendChild(div);
 				}
+
+				targetElement.appendChild(div);
 			}
 		}
 	}
