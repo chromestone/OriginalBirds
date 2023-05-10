@@ -103,6 +103,70 @@ class CheckmarkManager {
 		this.showBlue = Boolean(properties.showblue ?? true);
 		this.showLegacy = Boolean(properties.showlegacy ?? true);
 
+		this.useBlueDefault = false;
+		this.useBlueText = false;
+		this.useBlueImage = false;
+		if (properties.bluelook == "text") {
+
+			this.blueText = properties.bluetext ?? "";
+			if (this.blueText.length > 0) {
+
+				this.useBlueText = true;
+			}
+			else {
+
+				this.useBlueDefault = true;
+			}
+		}
+		else if (properties.bluelook == "image") {
+
+			this.blueURL = properties.blueimage ?? "";
+			if (this.blueURL.length > 0) {
+
+				this.useBlueImage = true;
+			}
+			else {
+
+				this.useBlueDefault = true;
+			}
+		}
+		else {
+
+			this.useBlueDefault = true;
+		}
+
+		this.useLegacyDefault = false;
+		this.useLegacyText = false;
+		this.useLegacyImage = false;
+		if (properties.legacylook == "text") {
+
+			this.LegacyText = properties.Legacytext ?? "";
+			if (this.LegacyText.length > 0) {
+
+				this.useLegacyText = true;
+			}
+			else {
+
+				this.useLegacyDefault = true;
+			}
+		}
+		else if (properties.legacylook == "image") {
+
+			this.LegacyURL = properties.Legacyimage ?? "";
+			if (this.LegacyURL.length > 0) {
+
+				this.useLegacyImage = true;
+			}
+			else {
+
+				this.useLegacyDefault = true;
+			}
+		}
+		else {
+
+			this.useLegacyDefault = true;
+		}
+
 		this.invocations = Math.max(1, parseInt(properties.invocations ?? 10));
 		this.pollDelay = Math.max(0, parseInt(properties.polldelay ?? 200));
 
@@ -412,18 +476,29 @@ class CheckmarkManager {
 
 				const div = document.createElement("span");
 
-				div.id = myId;
-				div.style.display = "flex";
-				div.setAttribute("title", "This handle is in the legacy verified list.");
+				if (this.useLegacyText) {
 
-				div.appendChild(this.checkHtml.cloneNode(true));
-				const svg = div.querySelector('svg');
-				if (svg !== null) {
-
-					svg.style.color = "#2DB32D";
+					// TODO
 				}
+				else if (this.useLegacyImage) {
 
-				targetElement.appendChild(div);
+					// TODO
+				}
+				else {
+
+					div.id = myId;
+					div.style.display = "flex";
+					div.setAttribute("title", "This handle is in the legacy verified list.");
+
+					div.appendChild(this.checkHtml.cloneNode(true));
+					const svg = div.querySelector('svg');
+					if (svg !== null) {
+
+						svg.style.color = "#2DB32D";
+					}
+
+					targetElement.appendChild(div);
+				}
 			}
 		}
 	}
@@ -432,7 +507,9 @@ class CheckmarkManager {
 async function checkmarkManagerFactory() {
 
 	const properties = await getProperties([
-		"handles", "checkmark", "showblue", "showlegacy", "invocations", "polldelay", "supporters"
+		"handles", "checkmark", "showblue", "showlegacy", "bluelook", "legacylook",
+		"bluecolor", "legacycolor", "bluetext", "legacytext", "blueimage", "legacyimage",
+		"invocations", "polldelay", "supporters"
 	]);
 
 	if (typeof properties.checkmark === 'undefined') {

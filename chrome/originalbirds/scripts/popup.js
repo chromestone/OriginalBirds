@@ -63,8 +63,8 @@ $('.toggle').toggles({type: "select"});
 // POPULATE VALUES
 
 chrome.storage.local.get([
-	"showblue", "showlegacy", "checkmark", "invocations", "polldelay", "bluelook", "legacylook",
-	"bluecolor", "legacycolor", "bluetext", "legacytext", "blueimage", "legacyimage"
+	"checkmark", "showblue", "showlegacy", "bluelook", "legacylook", "bluecolor", "legacycolor",
+	"bluetext", "legacytext", "blueimage", "legacyimage", "invocations", "polldelay"
 ], (result) => {
 
 	// GENERAL
@@ -217,22 +217,23 @@ $('#savebluebutton').on("click", function() {
 			look = "default";
 		}
 
-		const canvas = document.getElementById("canvasblueimage");
-		const imageURL = (canvas == null || $(canvas).prop("hidden")) ? "" : canvas.toDataURL();
+		const text = $('#bluetext').val()?.substring(0, 64) ?? "";
+		if (look != "text" || text.length > 0) {
 
-		if (look != "image" || imageURL.length > 0) {
+			const canvas = document.getElementById("canvasblueimage");
+			const imageURL = (canvas == null || $(canvas).prop("hidden")) ? "" : canvas.toDataURL();
+			if (look != "image" || imageURL.length > 0) {
 
-			$('#blueerror').prop("hidden", true);
+				$('#blueerror').prop("hidden", true);
 
-			const text = $('#bluetext').val()?.substring(0, 64) ?? "";
-
-			chrome.storage.local.set({
-				"bluelook": look,
-				"bluecolor": color,
-				"bluetext": text,
-				"blueimage": imageURL
-			}, () => $(this).prop("disabled", false));
-			return;
+				chrome.storage.local.set({
+					"bluelook": look,
+					"bluecolor": color,
+					"bluetext": text,
+					"blueimage": imageURL
+				}, () => $(this).prop("disabled", false));
+				return;
+			}
 		}
 	}
 
