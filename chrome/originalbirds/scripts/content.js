@@ -89,7 +89,7 @@ function nth_element(elem, dir, n) {
 			i += 1;
 		}
 	}
-	return i == n ? elem : null;
+	return i === n ? elem : null;
 }
 
 class CheckmarkManager {
@@ -114,13 +114,13 @@ class CheckmarkManager {
 
 		this.useBlueText = false;
 		this.useBlueImage = false;
-		if (properties.bluelook == "text") {
+		if (properties.bluelook === "text") {
 
 			// do not use new here
 			this.blueText = String(properties.bluetext ?? "").substring(0, 64);
 			this.useBlueText = this.blueText.length > 0;
 		}
-		else if (properties.bluelook == "image") {
+		else if (properties.bluelook === "image") {
 
 			// do not use new here
 			this.blueURL = String(properties.blueimage ?? "");
@@ -129,13 +129,13 @@ class CheckmarkManager {
 
 		this.useLegacyText = false;
 		this.useLegacyImage = false;
-		if (properties.legacylook == "text") {
+		if (properties.legacylook === "text") {
 
 			// do not use new here
 			this.legacyText = String(properties.legacytext ?? "").substring(0, 64);
 			this.useLegacyText = this.legacyText.length > 0;
 		}
-		else if (properties.legacylook == "image") {
+		else if (properties.legacylook === "image") {
 
 			// do not use new here
 			this.legacyURL = String(properties.legacyimage ?? "");
@@ -145,7 +145,7 @@ class CheckmarkManager {
 		this.invocations = Math.max(1, parseInt(properties.invocations ?? 10));
 		this.pollDelay = Math.max(0, parseInt(properties.polldelay ?? 200));
 
-		this.doBlueUpdate = !this.showBlue || this.useBlueColor || this.useBlueText || this.useBlueText;
+		this.doBlueUpdate = !this.showBlue || this.useBlueColor || this.useBlueText || this.useBlueImage;
 		this.checkmarkIds = new Set();
 
 		// BEGIN SUPPORTER SECTION
@@ -195,7 +195,7 @@ class CheckmarkManager {
 		return null;
 	}
 
-	_updateBlue(targetElement, blueStyles, location=null) {
+	_updateBlue(targetElement, blueStyle, location = null) {
 
 		const verifiedIcons = targetElement.querySelectorAll(VERIFIED_ICON_SELECTOR);
 		for (const svg of verifiedIcons) {
@@ -205,8 +205,7 @@ class CheckmarkManager {
 				continue;
 			}
 
-			const styles = getComputedStyle(svg);
-			const svgColor = styles.getPropertyValue("color");
+			const svgColor = getComputedStyle(svg).getPropertyValue("color");
 			const colorValues = svgColor.replace(/^(rgb|rgba)\(/,'').replace(/\)$/,'').replace(/\s/g,'').split(',');
 
 			if (colorValues.length < 3) {
@@ -236,8 +235,9 @@ class CheckmarkManager {
 
 			if (this.useBlueText || this.useBlueImage) {
 
-				if (targetElement == svg.parentElement) {
+				if (targetElement === svg.parentElement) {
 
+					console.log("test");
 					const wrapper = document.createElement("span");
 					svg.parentElement.insertBefore(wrapper, svg);
 					wrapper.appendChild(svg);
@@ -266,7 +266,7 @@ class CheckmarkManager {
 
 				if (this.useBlueText) {
 
-					if (location == "bio") {
+					if (location === "bio") {
 
 						let furthestParent = svg.parentElement;
 						while (furthestParent.parentElement != targetElement) {
@@ -275,14 +275,14 @@ class CheckmarkManager {
 						}
 						furthestParent.style["vertical-align"] = "baseline";
 					}
-					else if (location == "heading") {
+					else if (location === "heading") {
 
 						targetElement.style.display = "inline";
 					}
 
-					div.style.color = blueStyles.getPropertyValue("color");
-					div.style["font-family"] = blueStyles.getPropertyValue("font-family");
-					div.style["font-size"] = blueStyles.getPropertyValue("font-size");
+					div.style.color = blueStyle.getPropertyValue("color");
+					div.style["font-family"] = blueStyle.getPropertyValue("font-family");
+					div.style["font-size"] = blueStyle.getPropertyValue("font-size");
 					div.style["margin-left"] = "2px";
 					// div.style["text-overflow"] = "ellipsis";
 
@@ -300,10 +300,56 @@ class CheckmarkManager {
 					div.appendChild(blueImg);
 				}
 
-				svg.parentElement.appendChild(div);
+				svg.after(div);
 			}
 
 			break;
+		}
+	}
+
+	_updateLegacy(div, handleStyle, location = null) {
+
+		if (this.useLegacyText) {
+
+			div.style.color = handleStyle.getPropertyValue("color");
+			div.style["font-family"] = handleStyle.getPropertyValue("font-family");
+			div.style["font-size"] = handleStyle.getPropertyValue("font-size");
+			div.style["margin-left"] = "2px";
+
+			div.textContent = this.legacyText;
+		}
+		else if (this.useLegacyImage) {
+
+			if (location !== "bio") {
+
+				div.style.display = "flex";
+			}
+
+			div.style["margin-left"] = "2px";
+
+			const legacyImg = document.createElement("img");
+			legacyImg.width = 20;
+			legacyImg.height = 20;
+			legacyImg.src = this.legacyURL;
+			div.appendChild(legacyImg);
+		}
+		else {
+
+			if (location !== "bio") {
+
+				div.style.display = "flex";
+			}
+
+			div.setAttribute("title", "This handle is in the legacy verified list.");
+
+			div.appendChild(this.checkHtml.cloneNode(true));
+			const svg = div.querySelector('svg');
+			if (svg !== null) {
+
+				svg.style.color = this.legacyColor;//"#800080";
+				// lowers chance of deleting our own checkmark when not showing blue
+				svg.setAttribute("data-testid", div.id);
+			}
 		}
 	}
 
@@ -317,6 +363,7 @@ class CheckmarkManager {
 
 		const handle = handleElement.textContent?.substring(1).toLowerCase();
 		const parent = nth_element(handleElement, "parentElement", 7);
+		const handleStyle = getComputedStyle(handleElement);
 
 		// BEGIN SUPPORTER SECTION
 
@@ -347,7 +394,7 @@ class CheckmarkManager {
 
 				if (this.doBlueUpdate) {
 
-					this._updateBlue(targetElement, getComputedStyle(handleElement), "bio");
+					this._updateBlue(targetElement, handleStyle, "bio");
 				}
 
 				if (this.showLegacy && verified) {
@@ -371,39 +418,7 @@ class CheckmarkManager {
 						div.id = myId;
 						div.style["vertical-align"] = "middle";
 
-						if (this.useLegacyText) {
-
-							const styles = getComputedStyle(handleElement);
-							div.style.color = styles.getPropertyValue("color");
-							div.style["font-family"] = styles.getPropertyValue("font-family");
-							div.style["font-size"] = styles.getPropertyValue("font-size");
-							div.style["margin-left"] = "2px";
-
-							div.textContent = this.legacyText;
-						}
-						else if (this.useLegacyImage) {
-
-							div.style["margin-left"] = "2px";
-
-							const legacyImg = document.createElement("img");
-							legacyImg.width = 20;
-							legacyImg.height = 20;
-							legacyImg.src = this.legacyURL;
-							div.appendChild(legacyImg);
-						}
-						else {
-
-							div.setAttribute("title", "This handle is in the legacy verified list.");
-
-							div.appendChild(this.checkHtml.cloneNode(true));
-							const svg = div.querySelector('svg');
-							if (svg !== null) {
-
-								svg.style.color = "#2DB32D";//"#800080";
-								// lowers chance of deleting our own checkmark when not showing blue
-								svg.setAttribute("data-testid", myId);
-							}
-						}
+						this._updateLegacy(div, handleStyle, "bio");
 
 						targetElement.appendChild(div);
 					}
@@ -411,10 +426,10 @@ class CheckmarkManager {
 			}
 		}
 
-		this._updateHeading(heading_selector, color, verified, getComputedStyle(handleElement));
+		this._updateHeading(heading_selector, color, verified, handleStyle);
 	}
 
-	_updateHeading(selector, color, verified, blueStyles) {
+	_updateHeading(selector, color, verified, handleStyle) {
 
 		const headingElement = document.querySelector(selector);
 		if (headingElement === null) {
@@ -438,7 +453,7 @@ class CheckmarkManager {
 
 		if (this.doBlueUpdate) {
 
-			this._updateBlue(headingElement, blueStyles, "heading");
+			this._updateBlue(headingElement, handleStyle, "heading");
 		}
 
 		if (!(this.showLegacy && verified)) {
@@ -461,38 +476,7 @@ class CheckmarkManager {
 		const div = document.createElement("span");
 		div.id = myId;
 
-		if (this.useLegacyText) {
-
-			div.style.color = blueStyles.getPropertyValue("color");
-			div.style["font-family"] = blueStyles.getPropertyValue("font-family");
-			div.style["font-size"] = blueStyles.getPropertyValue("font-size");
-			div.style["margin-left"] = "2px";
-
-			div.textContent = this.legacyText;
-		}
-		else if (this.useLegacyImage) {
-
-			div.style.display = "flex";
-			div.style["margin-left"] = "2px";
-
-			const legacyImg = document.createElement("img");
-			legacyImg.width = 20;
-			legacyImg.height = 20;
-			legacyImg.src = this.legacyURL;
-			div.appendChild(legacyImg);
-		}
-		else {
-
-			div.style.display = "flex";
-			div.setAttribute("title", "This handle is in the legacy verified list.");
-
-			div.appendChild(this.checkHtml.cloneNode(true));
-			const svg = div.querySelector('svg');
-			if (svg !== null) {
-
-				svg.style.color = this.legacyColor;
-			}
-		}
+		this._updateLegacy(div, handleStyle);
 
 		headingElement.appendChild(div);
 	}
@@ -540,9 +524,11 @@ class CheckmarkManager {
 				continue;
 			}
 
+			const handleStyle = getComputedStyle(element);
+
 			if (this.doBlueUpdate) {
 
-				this._updateBlue(targetElement, getComputedStyle(element));
+				this._updateBlue(targetElement, handleStyle);
 			}
 
 			if (!(this.showLegacy && verified)) {
@@ -571,40 +557,7 @@ class CheckmarkManager {
 			const div = document.createElement("span");
 			div.id = myId;
 
-			if (this.useLegacyText) {
-
-				const styles = getComputedStyle(element);
-				div.style.color = styles.getPropertyValue("color");
-				div.style["font-family"] = styles.getPropertyValue("font-family");
-				div.style["font-size"] = styles.getPropertyValue("font-size");
-				div.style["margin-left"] = "2px";
-				// div.style["text-overflow"] = "ellipsis";
-
-				div.textContent = this.legacyText;
-			}
-			else if (this.useLegacyImage) {
-
-				div.style.display = "flex";
-				div.style["margin-left"] = "2px";
-
-				const legacyImg = document.createElement("img");
-				legacyImg.width = 20;
-				legacyImg.height = 20;
-				legacyImg.src = this.legacyURL;
-				div.appendChild(legacyImg);
-			}
-			else {
-
-				div.style.display = "flex";
-				div.setAttribute("title", "This handle is in the legacy verified list.");
-
-				div.appendChild(this.checkHtml.cloneNode(true));
-				const svg = div.querySelector('svg');
-				if (svg !== null) {
-
-					svg.style.color = this.legacyColor;
-				}
-			}
+			this._updateLegacy(div, handleStyle);
 
 			targetElement.appendChild(div);
 		}
