@@ -107,8 +107,8 @@ chrome.storage.local.get([
 		$('#radiolegacyimage').trigger("click");
 	}
 
-	$('#bluecolor').val(result.bluecolor ?? "#1D9BF0");
-	$('#legacycolor').val(result.legacycolor ?? "#2DB32D");
+	$('#bluecolor').val(result.bluecolor ?? "");
+	$('#legacycolor').val(result.legacycolor ?? "");
 
 	$('#bluetext').val(result.bluetext ?? "");
 	$('#legacytext').val(result.legacytext ?? "");
@@ -200,7 +200,7 @@ $('#savebluebutton').on("click", function() {
 	$(this).prop("disabled", true);
 
 	const color = $('#bluecolor').val() ?? "";
-	if (color.match(/^#[0-9A-F]{6}$/i)) {
+	if (color.length === 0 || color.match(/^#[0-9A-F]{6}$/i)) {
 
 		const radioId = $('#fieldsetblue > input[type="radio"]:checked').attr("id");
 		let look;
@@ -246,7 +246,7 @@ $('#savelegacybutton').on("click", function() {
 	$(this).prop("disabled", true);
 
 	const color = $('#legacycolor').val() ?? "";
-	if (color.match(/^#[0-9A-F]{6}$/i)) {
+	if (color.length === 0 || color.match(/^#[0-9A-F]{6}$/i)) {
 
 		const radioId = $('#fieldsetlegacy > input[type="radio"]:checked').attr("id");
 		let look;
