@@ -275,10 +275,6 @@ class CheckmarkManager {
 						}
 						furthestParent.style["vertical-align"] = "baseline";
 					}
-					else if (location === "heading") {
-
-						targetElement.style.display = "inline";
-					}
 
 					div.style.color = blueStyle.getPropertyValue("color");
 					div.style["font-family"] = blueStyle.getPropertyValue("font-family");
@@ -311,6 +307,13 @@ class CheckmarkManager {
 
 		if (this.useLegacyText) {
 
+			if (location === "heading") {
+
+				const span = document.createElement("span");
+				div.appendChild(span);
+				div = span;
+			}
+
 			div.style.color = handleStyle.getPropertyValue("color");
 			div.style["font-family"] = handleStyle.getPropertyValue("font-family");
 			div.style["font-size"] = handleStyle.getPropertyValue("font-size");
@@ -320,7 +323,15 @@ class CheckmarkManager {
 		}
 		else if (this.useLegacyImage) {
 
-			if (location !== "bio") {
+			if (location === "bio") {
+
+				div.style["vertical-align"] = "middle";
+			}
+			else if (location === "heading") {
+
+				div.style.display = "inline-flex";
+			}
+			else {
 
 				div.style.display = "flex";
 			}
@@ -335,7 +346,15 @@ class CheckmarkManager {
 		}
 		else {
 
-			if (location !== "bio") {
+			if (location === "bio") {
+
+				div.style["vertical-align"] = "middle";
+			}
+			else if (location === "heading") {
+
+				div.style.display = "inline-flex";
+			}
+			else {
 
 				div.style.display = "flex";
 			}
@@ -416,7 +435,6 @@ class CheckmarkManager {
 
 						const div = document.createElement("span");
 						div.id = myId;
-						div.style["vertical-align"] = "middle";
 
 						this._updateLegacy(div, handleStyle, "bio");
 
@@ -476,7 +494,7 @@ class CheckmarkManager {
 		const div = document.createElement("span");
 		div.id = myId;
 
-		this._updateLegacy(div, handleStyle);
+		this._updateLegacy(div, handleStyle, "heading");
 
 		headingElement.appendChild(div);
 	}
