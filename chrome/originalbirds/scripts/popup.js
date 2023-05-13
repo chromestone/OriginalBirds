@@ -19,6 +19,8 @@ else {
 
 // INITIALIZATION
 
+$('.toggle').toggles({type: "select"});
+
 $('#tabs').tabs();
 $('button').button();
 $('#fieldsetblue > input[type="radio"]').checkboxradio().change(function() {
@@ -57,8 +59,6 @@ $('#fieldsetlegacy > input[type="radio"]').checkboxradio().change(function() {
 		$('#divlegacydefault').prop("hidden", false);
 	}
 });
-
-$('.toggle').toggles({type: "select"});
 
 // POPULATE VALUES
 

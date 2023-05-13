@@ -89,23 +89,97 @@ function nth_element(elem, dir, n) {
 			i += 1;
 		}
 	}
-	return i == n ? elem : null;
+	return i === n ? elem : null;
 }
 
 class CheckmarkManager {
 
-	constructor(verifiedHandles, checkHtml, showBlue, showLegacy, invocations, pollDelay, donors, contributors) {
+	constructor(verifiedHandles, checkHtml, properties) {
 
 		this.verifiedHandles = verifiedHandles;
 		this.checkHtml = checkHtml;
+
 		// do not use new here
-		this.showBlue = Boolean(showBlue);
-		this.showLegacy = Boolean(showLegacy);
-		this.invocations = Math.max(1, parseInt(invocations));
-		this.pollDelay = Math.max(0, parseInt(pollDelay));
-		this.donors = donors;
-		this.contributors = contributors;
+		this.showBlue = Boolean(properties.showblue ?? true);
+		this.showLegacy = Boolean(properties.showlegacy ?? true);
+		this.blueColor = String(properties.bluecolor ?? "");
+		this.legacyColor = String(properties.legacycolor ?? "");
+
+		this.useBlueColor = this.blueColor.length > 0;
+
+		if (this.legacyColor.length === 0) {
+
+			this.legacyColor = "#2DB32D";
+		}
+
+		this.useBlueText = false;
+		this.useBlueImage = false;
+		if (properties.bluelook === "text") {
+
+			// do not use new here
+			this.blueText = String(properties.bluetext ?? "").substring(0, 64);
+			this.useBlueText = this.blueText.length > 0;
+		}
+		else if (properties.bluelook === "image") {
+
+			// do not use new here
+			this.blueURL = String(properties.blueimage ?? "");
+			this.useBlueImage = this.blueURL.length > 0;
+		}
+
+		this.useLegacyText = false;
+		this.useLegacyImage = false;
+		if (properties.legacylook === "text") {
+
+			// do not use new here
+			this.legacyText = String(properties.legacytext ?? "").substring(0, 64);
+			this.useLegacyText = this.legacyText.length > 0;
+		}
+		else if (properties.legacylook === "image") {
+
+			// do not use new here
+			this.legacyURL = String(properties.legacyimage ?? "");
+			this.useLegacyImage = this.legacyURL.length > 0;
+		}
+
+		this.invocations = Math.max(1, parseInt(properties.invocations ?? 10));
+		this.pollDelay = Math.max(0, parseInt(properties.polldelay ?? 200));
+
+		this.doBlueUpdate = !this.showBlue || this.useBlueColor || this.useBlueText || this.useBlueImage;
 		this.checkmarkIds = new Set();
+
+		// BEGIN SUPPORTER SECTION
+
+		if (typeof properties.supporters === 'undefined') {
+
+			console.log("Warning: Original Birds could not load supporters :( .");
+			this.donors = new Set();
+			this.contributors = new Set();
+		}
+		else {
+
+			const supporters = JSON.parse(properties.supporters);
+
+			if (typeof supporters.donors === 'undefined') {
+		
+				console.log("Warning: Original Birds could not load donors :( .");
+				this.donors = new Set();
+			}
+			else {
+
+				this.donors = new Set(supporters.donors.map((obj) => obj.handle.toLowerCase()))
+			}
+
+			if (typeof supporters.contributors === 'undefined') {
+		
+				console.log("Warning: Original Birds could not load contributors :( .");
+				this.contributors = new Set();
+			}
+			else {
+
+				this.contributors =  new Set(supporters.contributors.map((obj) => obj.handle.toLowerCase()));
+			}
+		}
 	}
 
 	_getSupporterColor(handle) {
@@ -121,7 +195,7 @@ class CheckmarkManager {
 		return null;
 	}
 
-	_removeBlue(targetElement) {
+	_updateBlue(targetElement, handleStyle, location = null) {
 
 		const verifiedIcons = targetElement.querySelectorAll(VERIFIED_ICON_SELECTOR);
 		for (const svg of verifiedIcons) {
@@ -131,8 +205,7 @@ class CheckmarkManager {
 				continue;
 			}
 
-			const styles = getComputedStyle(svg);
-			const svgColor = styles.getPropertyValue("color");
+			const svgColor = getComputedStyle(svg).getPropertyValue("color");
 			const colorValues = svgColor.replace(/^(rgb|rgba)\(/,'').replace(/\)$/,'').replace(/\s/g,'').split(',');
 
 			if (colorValues.length < 3) {
@@ -151,7 +224,149 @@ class CheckmarkManager {
 				continue;
 			}
 
-			svg.style.maxWidth = "0";
+			if (!this.showBlue || this.useBlueText || this.useBlueImage) {
+
+				svg.style["display"] = "none";
+			}
+			else if (this.useBlueColor) {
+
+				svg.style["color"] = this.blueColor;
+			}
+
+			if (this.useBlueText || this.useBlueImage) {
+
+				if (targetElement === svg.parentElement) {
+
+					const wrapper = document.createElement("span");
+					svg.parentElement.insertBefore(wrapper, svg);
+					wrapper.appendChild(svg);
+				}
+
+				let checkmarkFound = false;
+				for (const child of svg.parentElement.children) {
+
+					if (this.checkmarkIds.has(child.id)) {
+
+						checkmarkFound = true;
+						break;
+					}
+				}
+				if (checkmarkFound) {
+
+					continue;
+				}
+
+				let myId;
+				while (this.checkmarkIds.has(myId = myRandomId()));
+				this.checkmarkIds.add(myId);
+
+				const div = document.createElement("span");
+				div.id = myId;
+
+				if (this.useBlueText) {
+
+					if (location === "bio") {
+
+						let furthestParent = svg.parentElement;
+						while (furthestParent.parentElement != targetElement) {
+
+							furthestParent = furthestParent.parentElement;
+						}
+						furthestParent.style["vertical-align"] = "baseline";
+					}
+
+					div.style["color"] = handleStyle.getPropertyValue("color");
+					div.style["font-family"] = handleStyle.getPropertyValue("font-family");
+					div.style["font-size"] = handleStyle.getPropertyValue("font-size");
+					div.style["margin-left"] = "2px";
+
+					div.textContent = this.blueText;
+				}
+				else if (this.useBlueImage) {
+
+					div.style["display"] = "flex";
+					div.style["margin-left"] = "2px";
+
+					const blueImg = document.createElement("img");
+					blueImg.width = 20;
+					blueImg.height = 20;
+					blueImg.src = this.blueURL;
+					div.appendChild(blueImg);
+				}
+
+				svg.after(div);
+			}
+
+			break;
+		}
+	}
+
+	_updateLegacy(div, handleStyle, location = null) {
+
+		if (this.useLegacyText) {
+
+			if (location === "heading") {
+
+				const span = document.createElement("span");
+				div.appendChild(span);
+				div = span;
+			}
+
+			div.style["color"] = handleStyle.getPropertyValue("color");
+			div.style["font-family"] = handleStyle.getPropertyValue("font-family");
+			div.style["font-size"] = handleStyle.getPropertyValue("font-size");
+			div.style["margin-left"] = "2px";
+
+			div.textContent = this.legacyText;
+		}
+		else if (this.useLegacyImage) {
+
+			if (location === "bio") {
+
+				div.style["vertical-align"] = "middle";
+			}
+			else if (location === "heading") {
+
+				div.style["display"] = "inline-flex";
+			}
+			else {
+
+				div.style["display"] = "flex";
+			}
+
+			div.style["margin-left"] = "2px";
+
+			const legacyImg = document.createElement("img");
+			legacyImg.width = 20;
+			legacyImg.height = 20;
+			legacyImg.src = this.legacyURL;
+			div.appendChild(legacyImg);
+		}
+		else {
+
+			if (location === "bio") {
+
+				div.style["vertical-align"] = "middle";
+			}
+			else if (location === "heading") {
+
+				div.style["display"] = "inline-flex";
+			}
+			else {
+
+				div.style["display"] = "flex";
+			}
+
+			div.setAttribute("title", "This handle is in the legacy verified list.");
+
+			div.appendChild(this.checkHtml.cloneNode(true));
+			const svg = div.querySelector('svg');
+			if (svg !== null) {
+
+				svg.style["color"] = this.legacyColor;//"#800080";
+				// lowers chance of deleting our own checkmark when not showing blue
+				svg.setAttribute("data-testid", div.id);
+			}
 		}
 	}
 
@@ -165,6 +380,7 @@ class CheckmarkManager {
 
 		const handle = handleElement.textContent?.substring(1).toLowerCase();
 		const parent = nth_element(handleElement, "parentElement", 7);
+		const handleStyle = getComputedStyle(handleElement);
 
 		// BEGIN SUPPORTER SECTION
 
@@ -174,7 +390,7 @@ class CheckmarkManager {
 			const nameElement = nth_element(parent, "firstElementChild", 7);
 			if (nameElement != null) {
 
-				nameElement.style.color = color;
+				nameElement.style["color"] = color;
 			}
 		}
 
@@ -182,7 +398,7 @@ class CheckmarkManager {
 
 		const verified = this.verifiedHandles.has(handle);
 
-		if (!this.showBlue || this.showLegacy) {
+		if (this.doBlueUpdate || this.showLegacy) {
 
 			const targetElement = nth_element(parent, "firstElementChild", 6);
 			// this should not happen unless html structure changed
@@ -193,9 +409,9 @@ class CheckmarkManager {
 			}
 			else {
 
-				if (!this.showBlue) {
+				if (this.doBlueUpdate) {
 
-					this._removeBlue(targetElement);
+					this._updateBlue(targetElement, handleStyle, "bio");
 				}
 
 				if (this.showLegacy && verified) {
@@ -211,27 +427,14 @@ class CheckmarkManager {
 					}
 					if (!checkmarkFound) {
 
-						let myId = myRandomId();
-						while (this.checkmarkIds.has(myId)) {
-
-							myId = myRandomId();
-						}
+						let myId;
+						while (this.checkmarkIds.has(myId = myRandomId()));
 						this.checkmarkIds.add(myId);
 
 						const div = document.createElement("span");
-
 						div.id = myId;
-						div.style.verticalAlign = "middle";
-						div.setAttribute("title", "This handle is in the legacy verified list.");
 
-						div.appendChild(this.checkHtml.cloneNode(true));
-						const svg = div.querySelector('svg');
-						if (svg !== null) {
-
-							svg.style.color = "#2DB32D";//"#800080";
-							// lowers chance of deleting our own checkmark when not showing blue
-							svg["data-testid"] = myId;
-						}
+						this._updateLegacy(div, handleStyle, "bio");
 
 						targetElement.appendChild(div);
 					}
@@ -239,10 +442,10 @@ class CheckmarkManager {
 			}
 		}
 
-		this._updateHeading(heading_selector, color, verified);
+		this._updateHeading(heading_selector, color, verified, handleStyle);
 	}
 
-	_updateHeading(selector, color, verified) {
+	_updateHeading(selector, color, verified, handleStyle) {
 
 		const headingElement = document.querySelector(selector);
 		if (headingElement === null) {
@@ -258,15 +461,15 @@ class CheckmarkManager {
 				firstElementChild?.firstElementChild?.firstElementChild;
 			if (nameElement != null) {
 
-				nameElement.style.color = color;
+				nameElement.style["color"] = color;
 			}
 		}
 
 		// END SUPPORTER SECTION
 
-		if (!this.showBlue) {
+		if (this.doBlueUpdate) {
 
-			this._removeBlue(headingElement);
+			this._updateBlue(headingElement, handleStyle, "heading");
 		}
 
 		if (!(this.showLegacy && verified)) {
@@ -282,25 +485,14 @@ class CheckmarkManager {
 			}
 		}
 
-		let myId = myRandomId();
-		while (this.checkmarkIds.has(myId)) {
-
-			myId = myRandomId();
-		}
+		let myId;
+		while (this.checkmarkIds.has(myId = myRandomId()));
 		this.checkmarkIds.add(myId);
 
 		const div = document.createElement("span");
-
 		div.id = myId;
-		div.style.display = "flex";
-		div.setAttribute("title", "This handle is in the legacy verified list.");
 
-		div.appendChild(this.checkHtml.cloneNode(true));
-		const svg = div.querySelector('svg');
-		if (svg !== null) {
-	
-			svg.style.color = "#2DB32D";
-		}
+		this._updateLegacy(div, handleStyle, "heading");
 
 		headingElement.appendChild(div);
 	}
@@ -319,7 +511,7 @@ class CheckmarkManager {
 				const nameElement = element2Name(element);
 				if (nameElement != null) {
 
-					nameElement.style.color = color;
+					nameElement.style["color"] = color;
 				}
 			}
 
@@ -327,77 +519,74 @@ class CheckmarkManager {
 
 			// this combination of settings runs Twitter as normal
 			// nothing to do
-			if (this.showBlue && !this.showLegacy) {
+			if (!(this.doBlueUpdate || this.showLegacy)) {
 
 				continue;
 			}
 
 			const verified = this.showLegacy ? this.verifiedHandles.has(handle) : null;
 
-			if (!this.showBlue || (this.showLegacy && verified)) {
+			if (!(this.doBlueUpdate || (this.showLegacy && verified))) {
 
-				const targetElement = element2Target(element);
-				// this should not happen unless html structure changed
-				// double equal checks for undefined as well
-				if (targetElement == null) {
-
-					console.log("Warning: Original Birds could not locate checkmark parent.");
-					continue;
-				}
-
-				if (!this.showBlue) {
-
-					this._removeBlue(targetElement);
-				}
-
-				if (!(this.showLegacy && verified)) {
-
-					continue;
-				}
-
-				let checkmarkFound = false;
-				for (const child of targetElement.children) {
-
-					if (this.checkmarkIds.has(child.id)) {
-
-						checkmarkFound = true;
-						break;
-					}
-				}
-				if (checkmarkFound) {
-
-					continue;
-				}
-
-				let myId = myRandomId();
-				while (this.checkmarkIds.has(myId)) {
-
-					myId = myRandomId();
-				}
-				this.checkmarkIds.add(myId);
-
-				const div = document.createElement("span");
-
-				div.id = myId;
-				div.style.display = "flex";
-				div.setAttribute("title", "This handle is in the legacy verified list.");
-
-				div.appendChild(this.checkHtml.cloneNode(true));
-				const svg = div.querySelector('svg');
-				if (svg !== null) {
-
-					svg.style.color = "#2DB32D";
-				}
-
-				targetElement.appendChild(div);
+				continue;
 			}
+
+			const targetElement = element2Target(element);
+			// this should not happen unless html structure changed
+			// double equal checks for undefined as well
+			if (targetElement == null) {
+
+				console.log("Warning: Original Birds could not locate checkmark parent.");
+				continue;
+			}
+
+			const handleStyle = getComputedStyle(element);
+
+			if (this.doBlueUpdate) {
+
+				this._updateBlue(targetElement, handleStyle);
+			}
+
+			if (!(this.showLegacy && verified)) {
+
+				continue;
+			}
+
+			let checkmarkFound = false;
+			for (const child of targetElement.children) {
+
+				if (this.checkmarkIds.has(child.id)) {
+
+					checkmarkFound = true;
+					break;
+				}
+			}
+			if (checkmarkFound) {
+
+				continue;
+			}
+
+			let myId;
+			while (this.checkmarkIds.has(myId = myRandomId()));
+			this.checkmarkIds.add(myId);
+
+			const div = document.createElement("span");
+			div.id = myId;
+
+			this._updateLegacy(div, handleStyle);
+
+			targetElement.appendChild(div);
 		}
 	}
 }
 
 async function checkmarkManagerFactory() {
 
-	const properties = await getProperties(["handles", "checkmark", "showblue", "showlegacy", "invocations", "polldelay", "supporters"]);
+	const properties = await getProperties([
+		"handles", "checkmark", "showblue", "showlegacy", "bluelook", "legacylook",
+		"bluecolor", "legacycolor", "bluetext", "legacytext", "blueimage", "legacyimage",
+		"invocations", "polldelay", "supporters"
+	]);
 
 	if (typeof properties.checkmark === 'undefined') {
 
@@ -421,50 +610,7 @@ async function checkmarkManagerFactory() {
 	}
 	const verifiedHandles = new Set(properties.handles);
 
-	const showBlue = properties.showblue ?? true;
-	const showLegacy = properties.showlegacy ?? true;
-
-	const invocations = properties.invocations ?? 10;
-	const pollDelay = properties.polldelay ?? 200;
-
-	// BEGIN SUPPORTER SECTION
-
-	let donors, contributors;
-
-	if (typeof properties.supporters === 'undefined') {
-
-		console.log("Warning: Original Birds could not load supporters :( .");
-		donors = new Set();
-		contributors = new Set();
-	}
-	else {
-
-		const supporters = JSON.parse(properties.supporters);
-
-		if (typeof supporters.donors === 'undefined') {
-	
-			console.log("Warning: Original Birds could not load donors :( .");
-			donors = new Set();
-		}
-		else {
-
-			donors = new Set(supporters.donors.map((obj) => obj.handle.toLowerCase()))
-		}
-
-		if (typeof supporters.contributors === 'undefined') {
-	
-			console.log("Warning: Original Birds could not load contributors :( .");
-			contributors = new Set();
-		}
-		else {
-
-			contributors =  new Set(supporters.contributors.map((obj) => obj.handle.toLowerCase()));
-		}
-	}
-
-	// END SUPPORTER SECTION
-
-	return new CheckmarkManager(verifiedHandles, checkHtml, showBlue, showLegacy, invocations, pollDelay, donors, contributors);
+	return new CheckmarkManager(verifiedHandles, checkHtml, properties);
 }
 
 function registerRecurringObserver(manager) {

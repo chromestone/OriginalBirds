@@ -195,7 +195,7 @@ class CheckmarkManager {
 		return null;
 	}
 
-	_updateBlue(targetElement, blueStyle, location = null) {
+	_updateBlue(targetElement, handleStyle, location = null) {
 
 		const verifiedIcons = targetElement.querySelectorAll(VERIFIED_ICON_SELECTOR);
 		for (const svg of verifiedIcons) {
@@ -226,18 +226,17 @@ class CheckmarkManager {
 
 			if (!this.showBlue || this.useBlueText || this.useBlueImage) {
 
-				svg.style.display = "none";
+				svg.style["display"] = "none";
 			}
 			else if (this.useBlueColor) {
 
-				svg.style.color = this.blueColor;
+				svg.style["color"] = this.blueColor;
 			}
 
 			if (this.useBlueText || this.useBlueImage) {
 
 				if (targetElement === svg.parentElement) {
 
-					console.log("test");
 					const wrapper = document.createElement("span");
 					svg.parentElement.insertBefore(wrapper, svg);
 					wrapper.appendChild(svg);
@@ -276,17 +275,16 @@ class CheckmarkManager {
 						furthestParent.style["vertical-align"] = "baseline";
 					}
 
-					div.style.color = blueStyle.getPropertyValue("color");
-					div.style["font-family"] = blueStyle.getPropertyValue("font-family");
-					div.style["font-size"] = blueStyle.getPropertyValue("font-size");
+					div.style["color"] = handleStyle.getPropertyValue("color");
+					div.style["font-family"] = handleStyle.getPropertyValue("font-family");
+					div.style["font-size"] = handleStyle.getPropertyValue("font-size");
 					div.style["margin-left"] = "2px";
-					// div.style["text-overflow"] = "ellipsis";
 
 					div.textContent = this.blueText;
 				}
 				else if (this.useBlueImage) {
 
-					div.style.display = "flex";
+					div.style["display"] = "flex";
 					div.style["margin-left"] = "2px";
 
 					const blueImg = document.createElement("img");
@@ -314,7 +312,7 @@ class CheckmarkManager {
 				div = span;
 			}
 
-			div.style.color = handleStyle.getPropertyValue("color");
+			div.style["color"] = handleStyle.getPropertyValue("color");
 			div.style["font-family"] = handleStyle.getPropertyValue("font-family");
 			div.style["font-size"] = handleStyle.getPropertyValue("font-size");
 			div.style["margin-left"] = "2px";
@@ -329,11 +327,11 @@ class CheckmarkManager {
 			}
 			else if (location === "heading") {
 
-				div.style.display = "inline-flex";
+				div.style["display"] = "inline-flex";
 			}
 			else {
 
-				div.style.display = "flex";
+				div.style["display"] = "flex";
 			}
 
 			div.style["margin-left"] = "2px";
@@ -352,11 +350,11 @@ class CheckmarkManager {
 			}
 			else if (location === "heading") {
 
-				div.style.display = "inline-flex";
+				div.style["display"] = "inline-flex";
 			}
 			else {
 
-				div.style.display = "flex";
+				div.style["display"] = "flex";
 			}
 
 			div.setAttribute("title", "This handle is in the legacy verified list.");
@@ -365,7 +363,7 @@ class CheckmarkManager {
 			const svg = div.querySelector('svg');
 			if (svg !== null) {
 
-				svg.style.color = this.legacyColor;//"#800080";
+				svg.style["color"] = this.legacyColor;//"#800080";
 				// lowers chance of deleting our own checkmark when not showing blue
 				svg.setAttribute("data-testid", div.id);
 			}
@@ -392,7 +390,7 @@ class CheckmarkManager {
 			const nameElement = nth_element(parent, "firstElementChild", 7);
 			if (nameElement != null) {
 
-				nameElement.style.color = color;
+				nameElement.style["color"] = color;
 			}
 		}
 
@@ -400,7 +398,7 @@ class CheckmarkManager {
 
 		const verified = this.verifiedHandles.has(handle);
 
-		if (!this.showBlue || this.showLegacy) {
+		if (this.doBlueUpdate || this.showLegacy) {
 
 			const targetElement = nth_element(parent, "firstElementChild", 6);
 			// this should not happen unless html structure changed
@@ -463,7 +461,7 @@ class CheckmarkManager {
 				firstElementChild?.firstElementChild?.firstElementChild;
 			if (nameElement != null) {
 
-				nameElement.style.color = color;
+				nameElement.style["color"] = color;
 			}
 		}
 
@@ -513,7 +511,7 @@ class CheckmarkManager {
 				const nameElement = element2Name(element);
 				if (nameElement != null) {
 
-					nameElement.style.color = color;
+					nameElement.style["color"] = color;
 				}
 			}
 
