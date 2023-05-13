@@ -6,7 +6,7 @@ if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").match
 	document.head.appendChild(headLink);
 
 	// Set the background color of your extension's page to a dark color
-	document.body.style.backgroundColor = "black";// "#202124";
+	document.body.style["background-color"] = "black";// "#202124";
 	$('.text-color').css("color", "white");
 }
 else {

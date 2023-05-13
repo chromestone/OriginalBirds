@@ -19,6 +19,9 @@
 		fieldset > div.radiocontent {
 			margin-top: 0.5rem;
 		}
+		details > ul {
+			margin: 0;
+		}
 	</style>
 	<link rel="stylesheet" href="css/toggles.css">
 	<link rel="stylesheet" href="css/toggles-dark.css">
@@ -70,13 +73,27 @@
 					<label for="blueimage">
 						<p class="text-color"><b>Image</b></p>
 					</label>
-					<input id="blueimage" type="file" accept=".jpg, .jpeg, .png, .svg, .apng, .webp, .gif">
+					<input id="blueimage" type="file" accept=".jpg, .jpeg, .png, .svg, .webp">
 					<div>
 						<canvas id="canvasblueimage" width="64" height="64" style="margin-top: 0.5rem;" hidden></canvas>
 					</div>
 				</div>
-				<div id="blueerror" class="ui-widget ui-state-error ui-corner-all" style="margin-top: 0.5rem;" hidden>
-					<p><strong>Alert:</strong> Invalid input found (could be in default or text).</p>
+				<div id="blueerror" class="ui-widget ui-state-error ui-corner-all" style="margin-top: 0.5rem; padding: 0.2rem;" hidden>
+					<strong>Alert:</strong> Invalid input found (could be in default, text, or image).
+					<details>
+						<summary>Help</summary>
+						<ul>
+							<li>Make sure the default color is in hexadecimal of form "#rrggbb". Valid ranges are 0 to 9 and A to F like "#029A2F".</li>
+							<li>If you are saving text, make sure the box isn't empty; spaces are allowed. The limit is 64 characters.</li>
+							<li>
+								If you are saving an image, make sure you've uploaded an image and that it appears below the "Choose File" button.
+								<ul>
+									<li>Large files may not display properly due to URL length restrictions. Try lowering their quality first.</li>
+									<li>If nothing shows up below the "Choose File" button then it's likely a bug. Please report bugs!</li>
+								</ul>
+							</li>
+						</ul>
+					</details>
 				</div>
 				<button id="savebluebutton" style="margin-top: 0.5rem;">Save</button>
 			</fieldset>
@@ -104,20 +121,34 @@
 					<label for="legacyimage">
 						<p class="text-color"><b>Image</b></p>
 					</label>
-					<input id="legacyimage" type="file" accept=".jpg, .jpeg, .png, .svg, .apng, .webp, .gif">
+					<input id="legacyimage" type="file" accept=".jpg, .jpeg, .png, .svg, .webp">
 					<div>
 						<canvas id="canvaslegacyimage" width="64" height="64" style="margin-top: 0.5rem;" hidden></canvas>
 					</div>
 				</div>
-				<div id="legacyerror" class="ui-widget ui-state-error ui-corner-all" style="margin-top: 0.5rem;" hidden>
-					<p><strong>Alert:</strong> Invalid input found (could be in default or text).</p>
+				<div id="legacyerror" class="ui-widget ui-state-error ui-corner-all" style="margin-top: 0.5rem; padding: 0.2rem;" hidden>
+					<strong>Alert:</strong> Invalid input found (could be in default, text, or image).
+					<details>
+						<summary>Help</summary>
+						<ul>
+							<li>Make sure the default color is in hexadecimal of form "#rrggbb". Valid ranges are 0 to 9 and A to F like "#029A2F".</li>
+							<li>If you are saving text, make sure the box isn't empty; spaces are allowed. The limit is 64 characters.</li>
+							<li>
+								If you are saving an image, make sure you've uploaded an image and that it appears below the "Choose File" button.
+								<ul>
+									<li>Large files may not display properly due to URL length restrictions. Try lowering their quality first.</li>
+									<li>If nothing shows up below the "Choose File" button then it's likely a bug. Please report bugs!</li>
+								</ul>
+							</li>
+						</ul>
+					</details>
 				</div>
 				<button id="savelegacybutton" style="margin-top: 0.5rem;">Save</button>
 			</fieldset>
 		</div>
 		<div id="advanced">
 			<p class="text-color"><b>Checkmark&nbsp;HTML</b></p>
-			<details style="margin-bottom: 1em;">
+			<details style="margin-bottom: 1rem;">
 				<summary class="text-color">Inspect</summary>
 				<textarea id="checkmarkhtml" rows="4" cols="32" readonly style="vertical-align: middle;"></textarea>
 				<a id="checkmarkdownload" download="checkmark.txt"><button style="font-size: 1.5rem; font-weight: bold;">&#10515;</button></a>

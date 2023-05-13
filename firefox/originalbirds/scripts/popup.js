@@ -6,7 +6,7 @@ if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").match
 	document.head.appendChild(headLink);
 
 	// Set the background color of your extension's page to a dark color
-	document.body.style.backgroundColor = "black";// "#202124";
+	document.body.style["background-color"] = "black";// "#202124";
 	$('.text-color').css("color", "white");
 }
 else {
@@ -169,44 +169,14 @@ function displayNormalSpan() {
 
 	// APPEARANCE
 
-	$('#blueimage').on("change", function() {
+	$('#blueimage').on("click", function() {
 
-		const files = $(this).prop("files");
-		if ((files?.length ?? 0) > 0) {
-
-			const inputURL = URL.createObjectURL(files[0]);
-			const inputImg = document.createElement("img");
-			$(inputImg).on("load", function() {
-
-				const canvas = document.getElementById("canvasblueimage");
-				const context = canvas.getContext("2d");
-				context.drawImage(inputImg, 0, 0, 64, 64);
-				$(canvas).prop("hidden", false);
-
-				URL.revokeObjectURL(inputURL);
-			});
-			$(inputImg).attr("src", inputURL);
-		}
+		browser.runtime.openOptionsPage();
 	});
 
-	$('#legacyimage').on("change", function() {
+	$('#legacyimage').on("click", function() {
 
-		const files = $(this).prop("files");
-		if ((files?.length ?? 0) > 0) {
-
-			const inputURL = URL.createObjectURL(files[0]);
-			const inputImg = document.createElement("img");
-			$(inputImg).on("load", function() {
-
-				const canvas = document.getElementById("canvaslegacyimage");
-				const context = canvas.getContext("2d");
-				context.drawImage(inputImg, 0, 0, 64, 64);
-				$(canvas).prop("hidden", false);
-
-				URL.revokeObjectURL(inputURL);
-			});
-			$(inputImg).attr("src", inputURL);
-		}
+		browser.runtime.openOptionsPage();
 	});
 
 	$('#savebluebutton').on("click", function() {
