@@ -396,9 +396,9 @@ class CheckmarkManager {
 
 		// END SUPPORTER SECTION
 
-		const verified = this.verifiedHandles.has(handle);
+		const verified = this.showLegacy ? this.verifiedHandles.has(handle) : false;
 
-		if (this.doBlueUpdate || this.showLegacy) {
+		if (this.doBlueUpdate || verified) {
 
 			const targetElement = nth_element(parent, "firstElementChild", 6);
 			// this should not happen unless html structure changed
@@ -414,7 +414,7 @@ class CheckmarkManager {
 					this._updateBlue(targetElement, handleStyle, "bio");
 				}
 
-				if (this.showLegacy && verified) {
+				if (verified) {
 
 					let checkmarkFound = false;
 					for (const child of targetElement.children) {
@@ -472,7 +472,7 @@ class CheckmarkManager {
 			this._updateBlue(headingElement, handleStyle, "heading");
 		}
 
-		if (!(this.showLegacy && verified)) {
+		if (!verified) {
 
 			return;
 		}
@@ -517,16 +517,11 @@ class CheckmarkManager {
 
 			// END SUPPORTER SECTION
 
+			const verified = this.showLegacy ? this.verifiedHandles.has(handle) : false;
+
 			// this combination of settings runs Twitter as normal
 			// nothing to do
-			if (!(this.doBlueUpdate || this.showLegacy)) {
-
-				continue;
-			}
-
-			const verified = this.showLegacy ? this.verifiedHandles.has(handle) : null;
-
-			if (!(this.doBlueUpdate || (this.showLegacy && verified))) {
+			if (!(this.doBlueUpdate || verified)) {
 
 				continue;
 			}
@@ -547,7 +542,7 @@ class CheckmarkManager {
 				this._updateBlue(targetElement, handleStyle);
 			}
 
-			if (!(this.showLegacy && verified)) {
+			if (!verified) {
 
 				continue;
 			}
