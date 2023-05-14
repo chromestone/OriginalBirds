@@ -262,7 +262,7 @@ class CheckmarkManager {
 				}
 				if (checkmarkFound) {
 
-					continue;
+					break;
 				}
 
 				let myId;
