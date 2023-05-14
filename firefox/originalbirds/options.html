@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+<head>
+	<style>
+		.text-color {
+			color: black;
+			font-family: Arial, Helvetica, sans-serif;
+			font-size: 12pt;
+		}
+		details > ul {
+			margin: 0;
+		}
+	</style>
+	<link rel="stylesheet" href="css/toggles.css">
+	<link rel="stylesheet" href="css/toggles-dark.css">
+	<script src="scripts/jquery.js"></script>
+	<script src="scripts/jquery-ui.js"></script>
+</head>
+<body>
+	<div class="ui-widget ui-corner-bottom ui-widget-content" style="padding: 0.5rem 0.5rem 1rem;">
+		<fieldset id="fieldsetblue">
+			<legend class="text-color"><b>Twitter&nbsp;Blue</b></legend>
+			<div style="margin-top: 0.5rem;">
+				<label for="blueimage">
+					<p class="text-color"><b>Image</b></p>
+				</label>
+				<input id="blueimage" type="file" accept=".jpg, .jpeg, .png, .svg, .webp">
+				<div>
+					<canvas id="canvasblueimage" width="64" height="64" style="margin-top: 0.5rem;" hidden></canvas>
+				</div>
+			</div>
+			<div id="blueerror" class="ui-widget ui-state-error ui-corner-all" style="margin-top: 0.5rem; padding: 0.2rem;" hidden>
+				<strong>Alert:</strong> Please upload an image to save.
+				<details>
+					<summary>Help</summary>
+					<ul>
+						<li>Make sure you've uploaded an image and that it appears below the "Choose File" button.</li>
+						<li>Large files may not display properly due to URL length restrictions. Try lowering their quality first.</li>
+						<li>If nothing shows up below the "Choose File" button then it's likely a bug. Please report bugs!</li>
+					</ul>
+				</details>
+			</div>
+			<button id="savebluebutton" style="margin-top: 0.5rem;">Save</button>
+		</fieldset>
+		<fieldset id="fieldsetlegacy" style="margin-top: 0.5rem;">
+			<legend class="text-color"><b>Legacy&nbsp;Checkmark</b></legend>
+			<div style="margin-top: 0.5rem;">
+				<label for="legacyimage">
+					<p class="text-color"><b>Image</b></p>
+				</label>
+				<input id="legacyimage" type="file" accept=".jpg, .jpeg, .png, .svg, .webp">
+				<div>
+					<canvas id="canvaslegacyimage" width="64" height="64" style="margin-top: 0.5rem;" hidden></canvas>
+				</div>
+			</div>
+			<div id="legacyerror" class="ui-widget ui-state-error ui-corner-all" style="margin-top: 0.5rem; padding: 0.2rem;" hidden>
+				<strong>Alert:</strong> Please upload an image to save.
+				<details>
+					<summary>Help</summary>
+					<ul>
+						<li>Make sure you've uploaded an image and that it appears below the "Choose File" button.</li>
+						<li>Large files may not display properly due to URL length restrictions. Try lowering their quality first.</li>
+						<li>If nothing shows up below the "Choose File" button then it's likely a bug. Please report bugs!</li>
+					</ul>
+				</details>
+			</div>
+			<button id="savelegacybutton" style="margin-top: 0.5rem;">Save</button>
+		</fieldset>
+	</div>
+	<script src="scripts/options.js"></script>
+</body>
+</html>
