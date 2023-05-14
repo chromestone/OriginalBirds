@@ -224,16 +224,29 @@ class CheckmarkManager {
 				continue;
 			}
 
-			if (!this.showBlue || this.useBlueText || this.useBlueImage) {
+			if (!this.showBlue) {
 
-				svg.style["display"] = "none";
+				if (location === "bio") {
+
+					let furthestParent = svg;
+					while (furthestParent.parentElement != targetElement) {
+
+						furthestParent = furthestParent.parentElement;
+					}
+					furthestParent.style["display"] = "none";
+				}
+				else {
+
+					svg.style["display"] = "none";
+				}
 			}
 			else if (this.useBlueColor) {
 
 				svg.style["color"] = this.blueColor;
 			}
+			else if (this.useBlueText || this.useBlueImage) {
 
-			if (this.showBlue && (this.useBlueText || this.useBlueImage)) {
+				svg.style["display"] = "none";
 
 				if (targetElement === svg.parentElement) {
 
@@ -321,11 +334,7 @@ class CheckmarkManager {
 		}
 		else if (this.useLegacyImage) {
 
-			if (location === "bio") {
-
-				div.style["vertical-align"] = "middle";
-			}
-			else if (location === "heading") {
+			if (location === "heading") {
 
 				div.style["display"] = "inline-flex";
 			}
@@ -344,11 +353,7 @@ class CheckmarkManager {
 		}
 		else {
 
-			if (location === "bio") {
-
-				div.style["vertical-align"] = "middle";
-			}
-			else if (location === "heading") {
+			if (location === "heading") {
 
 				div.style["display"] = "inline-flex";
 			}
@@ -379,7 +384,7 @@ class CheckmarkManager {
 		}
 
 		const handle = handleElement.textContent?.substring(1).toLowerCase();
-		const parent = nth_element(handleElement, "parentElement", 7);
+		const parent = nth_element(handleElement, "parentElement", 5);
 		const handleStyle = getComputedStyle(handleElement);
 
 		// BEGIN SUPPORTER SECTION
@@ -387,7 +392,7 @@ class CheckmarkManager {
 		const color = this._getSupporterColor(handle);
 		if (color !== null) {
 
-			const nameElement = nth_element(parent, "firstElementChild", 7);
+			const nameElement = nth_element(parent, "firstElementChild", 5);
 			if (nameElement != null) {
 
 				nameElement.style["color"] = color;
@@ -400,7 +405,7 @@ class CheckmarkManager {
 
 		if (this.doBlueUpdate || verified) {
 
-			const targetElement = nth_element(parent, "firstElementChild", 6);
+			const targetElement = nth_element(parent, "firstElementChild", 4)?.lastElementChild?.lastElementChild?.lastElementChild;
 			// this should not happen unless html structure changed
 			// double equal checks for undefined as well
 			if (targetElement == null) {
