@@ -233,7 +233,7 @@ class CheckmarkManager {
 				svg.style["color"] = this.blueColor;
 			}
 
-			if (this.useBlueText || this.useBlueImage) {
+			if (this.showBlue && (this.useBlueText || this.useBlueImage)) {
 
 				if (targetElement === svg.parentElement) {
 
