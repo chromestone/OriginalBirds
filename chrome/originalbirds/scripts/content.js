@@ -240,10 +240,6 @@ class CheckmarkManager {
 					svg.style["display"] = "none";
 				}
 			}
-			else if (this.useBlueColor) {
-
-				svg.style["color"] = this.blueColor;
-			}
 			else if (this.useBlueText || this.useBlueImage) {
 
 				svg.style["display"] = "none";
@@ -308,6 +304,10 @@ class CheckmarkManager {
 				}
 
 				svg.after(div);
+			}
+			else if (this.useBlueColor) {
+
+				svg.style["color"] = this.blueColor;
 			}
 
 			break;
