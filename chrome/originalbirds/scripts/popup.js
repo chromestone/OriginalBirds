@@ -291,7 +291,7 @@ $('#savelegacybutton').on("click", function() {
 
 chrome.storage.onChanged.addListener((changes) => {
 
-	if (changes.hasOwnProperty("checkmark")) {
+	if (typeof changes.checkmark !== 'undefined') {
 
 		const checkHtml = changes.checkmark.newValue ?? "";
 		const checkBlob = new Blob([checkHtml], {type: "text/plain"});

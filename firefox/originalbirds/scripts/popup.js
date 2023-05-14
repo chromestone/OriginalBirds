@@ -30,36 +30,36 @@ function displayNormalSpan() {
 	$('#fieldsetblue > input[type="radio"]').checkboxradio().change(function() {
 
 		$('#fieldsetblue > div.radiocontent').prop("hidden", true);
-	
+
 		const id = $(this).attr("id");
 		if (id == "radiobluetext") {
-	
+
 			$('#divbluetext').prop("hidden", false);
 		}
 		else if (id == "radioblueimage") {
-	
+
 			$('#divblueimage').prop("hidden", false);
 		}
 		else {
-	
+
 			$('#divbluedefault').prop("hidden", false);
 		}
 	});
 	$('#fieldsetlegacy > input[type="radio"]').checkboxradio().change(function() {
-	
+
 		$('#fieldsetlegacy > div.radiocontent').prop("hidden", true);
-	
+
 		const id = $(this).attr("id");
 		if (id == "radiolegacytext") {
-	
+
 			$('#divlegacytext').prop("hidden", false);
 		}
 		else if (id == "radiolegacyimage") {
-	
+
 			$('#divlegacyimage').prop("hidden", false);
 		}
 		else {
-	
+
 			$('#divlegacydefault').prop("hidden", false);
 		}
 	});
@@ -228,10 +228,10 @@ function displayNormalSpan() {
 	$('#savelegacybutton').on("click", function() {
 
 		$(this).prop("disabled", true);
-	
+
 		const color = $('#legacycolor').val() ?? "";
 		if (color.length === 0 || color.match(/^#[0-9A-F]{6}$/i)) {
-	
+
 			const radioId = $('#fieldsetlegacy > input[type="radio"]:checked').attr("id");
 			let look;
 			if (radioId == "radiolegacytext") {
@@ -246,7 +246,7 @@ function displayNormalSpan() {
 
 				look = "default";
 			}
-	
+
 			const text = $('#legacytext').val()?.substring(0, 64) ?? "";
 			if (look != "text" || text.length > 0) {
 
@@ -266,7 +266,7 @@ function displayNormalSpan() {
 				}
 			}
 		}
-	
+
 		$('#legacyerror').prop("hidden", false);
 		$(this).prop("disabled", false);
 	});
@@ -275,13 +275,13 @@ function displayNormalSpan() {
 
 	chrome.storage.onChanged.addListener((changes) => {
 
-		if (changes.hasOwnProperty("checkmark")) {
-	
+		if (typeof changes.checkmark !== 'undefined') {
+
 			const checkHtml = changes.checkmark.newValue ?? "";
 			const checkBlob = new Blob([checkHtml], {type: "text/plain"});
 			const prevURL = $('#checkmarkdownload').attr("href");
 			if (prevURL != null) {
-	
+
 				URL.revokeObjectURL(prevURL);
 			}
 			$('#checkmarkdownload').attr("href", URL.createObjectURL(checkBlob));
@@ -292,7 +292,7 @@ function displayNormalSpan() {
 	});
 
 	$('#reloadcheckmark').on("click", function() {
-	
+
 		$(this).prop("disabled", true);
 		chrome.runtime.sendMessage({text: "cachecheckmark!"});
 	});

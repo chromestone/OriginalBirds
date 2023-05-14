@@ -85,7 +85,7 @@ function nth_element(elem, dir, n) {
 	while ( i < n && ( elem = elem[ dir ] ) && elem.nodeType !== 9 ) {
 
 		if ( elem.nodeType === 1 ) {
-			
+
 			i += 1;
 		}
 	}
@@ -161,17 +161,17 @@ class CheckmarkManager {
 			const supporters = JSON.parse(properties.supporters);
 
 			if (typeof supporters.donors === 'undefined') {
-		
+
 				console.log("Warning: Original Birds could not load donors :( .");
 				this.donors = new Set();
 			}
 			else {
 
-				this.donors = new Set(supporters.donors.map((obj) => obj.handle.toLowerCase()))
+				this.donors = new Set(supporters.donors.map((obj) => obj.handle.toLowerCase()));
 			}
 
 			if (typeof supporters.contributors === 'undefined') {
-		
+
 				console.log("Warning: Original Birds could not load contributors :( .");
 				this.contributors = new Set();
 			}
