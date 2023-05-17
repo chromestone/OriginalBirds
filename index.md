@@ -12,17 +12,20 @@ Tired of not knowing who was an Original Bird (**OB**)? Then this extension is f
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Twitter](https://img.shields.io/twitter/follow/RealOpenBirds?style=social)](https://twitter.com/RealOpenBirds)
 
+<h2 id="features" style="margin-top: 0;">Features</h2>
+
+<ul style="margin: 0 0 5px 0;">
+  <li>Customize checkmark color, or replace with your OWN text / emoji / image!</li>
+  <li>Shows checkmarks on embedded Tweets (e.g. on news websites).</li>
+  <li>Displays green checkmarks next to legacy verified users.</li>
+  <li>Toggle Twitter Blue checkmarks on/off.</li>
+</ul>
+
 <div>
-	<img src="https://chromestone.github.io/OriginalBirds/images/reynolds.png" alt="Reynolds Demo" style="width: 50%">
-	<img src="images/demo_v4.gif" alt="Wrexham Demo" loading="lazy" style="width: 26%">
+	<img src="https://chromestone.github.io/OriginalBirds/images/reynolds.png" alt="Reynolds Demo" style="width: 58%;">
+	<img src="images/demo_v4.gif" alt="Demo V4 Gif" loading="lazy" style="width: 30%;">
 </div>
 
-## Features
-
-- Customize checkmark color, or replace with your OWN text / emoji / image!
-- Shows checkmarks on embedded Tweets (e.g. on news websites).
-- Displays green checkmarks next to legacy verified users.
-- Toggle Twitter Blue checkmarks on/off.
 
 ## Donations
 

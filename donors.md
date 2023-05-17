@@ -28,6 +28,13 @@ title: Original Birds
 		padding: 3px;
 		margin-right: 0.1em;
 	}
+
+	ul[id^="donor"] > li:before {
+		content: "❤️";
+		background-color: #1d9bf0;
+		padding: 3px;
+		margin-right: 0.1em;
+	}
 </style>
 
 # Donors
@@ -39,6 +46,8 @@ title: Original Birds
 <ul id="silver-list" style="margin: 0;">
 </ul>
 <ul id="bronze-list" style="margin: 0;">
+</ul>
+<ul id="donor-list" style="margin: 0;">
 </ul>
 
 <script>
@@ -57,38 +66,48 @@ title: Original Birds
 		const gold = document.getElementById("gold-list");
 		const silver = document.getElementById("silver-list");
 		const bronze = document.getElementById("bronze-list");
+		const container = document.getElementById("donor-list");
 
 		// Extract the list of supporters from the JSON data
 		const supporters = data.supporters;
 		// Loop through the list of supporters and create a list item for each one
 		for (const handle of Object.keys(supporters)) {
 
-			// filter for contributors
-			if (supporters[handle].type !== "subscriber") {
+			const donor = supporters[handle];
+
+			let the_list;
+
+			const donorType = donor.type;
+			if (donorType === "subscriber") {
+
+				const tier = donor.tier;
+				if (tier === "gold") {
+
+					the_list = gold;
+				}
+				else if (tier === "silver") {
+
+					the_list = silver;
+				}
+				else if (tier === "bronze") {
+
+					the_list = bronze;
+				}
+				else {
+
+					console.error("Invalid tier [" + tier + "]");
+					continue;
+				}
+			}
+			else if (donorType === "donor") {
+
+				the_list = container;
+			}
+			else {
 
 				continue;
 			}
 
-			let the_list = null;
-			const tier = donor.tier;
-			if (tier === "gold") {
-
-				the_list = gold;
-			}
-			else if (tier === "silver") {
-
-				the_list = silver;
-			}
-			else if (tier === "bronze") {
-
-				the_list = bronze;
-			}
-
-			if (the_list === null) {
-
-				// something bad happened
-				continue;
-			}
 			const listItem = document.createElement("li");
 			const linkElement = document.createElement("a");
 			linkElement.href = "https://twitter.com/" + handle;
