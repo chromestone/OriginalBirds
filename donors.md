@@ -113,7 +113,7 @@ title: Original Birds
 			linkElement.href = "https://twitter.com/" + handle;
 			linkElement.textContent = "@" + handle;
 			listItem.appendChild(linkElement);
-			container.appendChild(listItem);
+			the_list.appendChild(listItem);
 		}
 	})
 	.catch(error => console.error(error));

@@ -1,18 +1,14 @@
 ---
 title: Original Birds
 ---
-
-Tired of not knowing who was an Original Bird (**OB**)? Then this extension is for you! A **green checkmark** is added on Twitter to indicate who was an **OB** before the great purge of April 20th, 2023. Don't believe your eyes? Go watch our [YouTube video](https://www.youtube.com/watch?v=dOV4717bG3Y) and read the [FAQ](#faq)!
-
-<a target="_blank" rel="noopener noreferrer" href="https://chrome.google.com/webstore/detail/original-birds/chhgbpmapfgibdoimakecicdlhhmkpjn"><img src="https://chromestone.github.io/OriginalBirds/images/chrome.png" alt="Get it for FREE on the Chrome Web Store."></a>
-<a target="_blank" rel="noopener noreferrer" href="https://addons.mozilla.org/en-US/firefox/addon/original-birds/"><img src="https://chromestone.github.io/OriginalBirds/images/firefox.webp" alt="Get it for FREE for Firefox."></a>
-
 [![CodeQL](https://github.com/chromestone/OriginalBirds/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/chromestone/OriginalBirds/actions/workflows/github-code-scanning/codeql)
 [![ESLint](https://github.com/chromestone/OriginalBirds/actions/workflows/eslint.yml/badge.svg)](https://github.com/chromestone/OriginalBirds/actions/workflows/eslint.yml)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![Twitter](https://img.shields.io/twitter/follow/RealOpenBirds?style=social)](https://twitter.com/RealOpenBirds)
-
-<h2 id="features" style="margin-top: 0;">Features</h2>
+[![Twitter](https://img.shields.io/twitter/follow/RealOpenBirds?style=social)](https://twitter.com/RealOpenBirds)<br />
+Tired of not knowing who was an Original Bird (**OB**)? Then this extension is for you! A **green checkmark** is added on Twitter to indicate who was an **OB** before the great purge of April 20th, 2023. Don't believe your eyes? Go watch our [YouTube video](https://www.youtube.com/watch?v=dOV4717bG3Y) and read the [FAQ](#faq)!<br />
+<a target="_blank" rel="noopener noreferrer" href="https://chrome.google.com/webstore/detail/original-birds/chhgbpmapfgibdoimakecicdlhhmkpjn" style><img src="https://chromestone.github.io/OriginalBirds/images/chrome.png" alt="Get it for FREE on the Chrome Web Store."></a>
+<a target="_blank" rel="noopener noreferrer" href="https://addons.mozilla.org/en-US/firefox/addon/original-birds/"><img src="https://chromestone.github.io/OriginalBirds/images/firefox.webp" alt="Get it for FREE for Firefox."></a>
+<h2 id="features" style="margin: 0;">Features</h2>
 
 <ul style="margin: 0 0 5px 0;">
   <li>Customize checkmark color, or replace with your OWN text / emoji / image!</li>
@@ -25,7 +21,6 @@ Tired of not knowing who was an Original Bird (**OB**)? Then this extension is f
 	<img src="https://chromestone.github.io/OriginalBirds/images/reynolds.png" alt="Reynolds Demo" style="width: 58%;">
 	<img src="images/demo_v4.gif" alt="Demo V4 Gif" loading="lazy" style="width: 30%;">
 </div>
-
 
 ## Donations
 
