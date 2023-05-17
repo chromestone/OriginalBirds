@@ -2,26 +2,35 @@
 title: Original Birds
 ---
 
-Tired of not knowing who was an Original Bird (**OB**)? Then this extension is for you! A **green checkmark** is added on Twitter to indicate who was an **OB** before the great purge of April 20th, 2023. Don't believe your eyes? Go watch our [YouTube video](https://www.youtube.com/watch?v=R3rb2JZEjxo) and read the [FAQ](#faq)!
+Tired of not knowing who was an Original Bird (**OB**)? Then this extension is for you! A **green checkmark** is added on Twitter to indicate who was an **OB** before the great purge of April 20th, 2023. Don't believe your eyes? Go watch our [YouTube video](https://www.youtube.com/watch?v=dOV4717bG3Y) and read the [FAQ](#faq)!
 
-<a target="_blank" rel="noopener noreferrer" href="https://chrome.google.com/webstore/detail/original-birds/chhgbpmapfgibdoimakecicdlhhmkpjn" style="display: inline"><img src="https://chromestone.github.io/OriginalBirds/images/chrome.png" alt="Get it for FREE on the Chrome Web Store."></a>
-<a target="_blank" rel="noopener noreferrer" href="https://addons.mozilla.org/en-US/firefox/addon/original-birds/" style="display: inline"><img src="https://chromestone.github.io/OriginalBirds/images/firefox.webp" alt="Get it for FREE for Firefox."></a>
+<a target="_blank" rel="noopener noreferrer" href="https://chrome.google.com/webstore/detail/original-birds/chhgbpmapfgibdoimakecicdlhhmkpjn"><img src="https://chromestone.github.io/OriginalBirds/images/chrome.png" alt="Get it for FREE on the Chrome Web Store."></a>
+<a target="_blank" rel="noopener noreferrer" href="https://addons.mozilla.org/en-US/firefox/addon/original-birds/"><img src="https://chromestone.github.io/OriginalBirds/images/firefox.webp" alt="Get it for FREE for Firefox."></a>
 
 [![CodeQL](https://github.com/chromestone/OriginalBirds/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/chromestone/OriginalBirds/actions/workflows/github-code-scanning/codeql)
+[![ESLint](https://github.com/chromestone/OriginalBirds/actions/workflows/eslint.yml/badge.svg)](https://github.com/chromestone/OriginalBirds/actions/workflows/eslint.yml)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Twitter](https://img.shields.io/twitter/follow/RealOpenBirds?style=social)](https://twitter.com/RealOpenBirds)
 
 <div>
 	<img src="https://chromestone.github.io/OriginalBirds/images/reynolds.png" alt="Reynolds Demo" style="width: 50%">
-	<img src="https://chromestone.github.io/OriginalBirds/images/wrexham.gif" alt="Wrexham Demo" loading="lazy" style="width: 39%">
+	<img src="images/demo_v4.gif" alt="Wrexham Demo" loading="lazy" style="width: 26%">
 </div>
+
+## Features
+
+- Customize checkmark color, or replace with your OWN text / emoji / image!
+- Shows checkmarks on embedded Tweets (e.g. on news websites).
+- Displays green checkmarks next to legacy verified users.
+- Toggle Twitter Blue checkmarks on/off.
 
 ## Donations
 
 Thank you to all of our generous [donors](donors.md) and [contributors](contributors.md)! Please go check them out and show them some love!!!
 
-If you like using this extension, then please consider donating to support this project!<br />
-[buymeacoffee.com/openbirds](https://www.buymeacoffee.com/openbirds)
+If you like using this extension, then please consider donating to support this project!
+
+<a target="_blank" rel="noopener noreferrer" href="https://www.buymeacoffee.com/openbirds"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
 
 **Extension users will see all donor names in light orange and all contributor names in light purple on Twitter.**
 

@@ -6,11 +6,11 @@ title: Original Birds
 
 **💜💜💜Thank you to all who have helped with the development of this extension.💜💜💜**
 
-<ul id="donor-list">
+<ul id="contributor-list">
 </ul>
 
 <script>
-	const url = 'https://chromestone.github.io/OriginalBirds/supporters.json';
+	const url = "https://original-birds.pages.dev/supporters.json";
 
 	// Fetch the JSON data from the URL
 	fetch(url).then(response => response.json()).then(data => {
@@ -21,7 +21,7 @@ title: Original Birds
 		}
 
 		// Get the container element to display the list
-		const container = document.getElementById('donor-list');
+		const container = document.getElementById("contributor-list");
 
 		// Extract the list of supporters from the JSON data
 		const supporters = data.supporters;
@@ -29,13 +29,13 @@ title: Original Birds
 		for (const handle of Object.keys(supporters)) {
 
 			// filter for contributors
-			if (supporters[handle].type != "contributor") {
+			if (supporters[handle].type !== "contributor") {
 
 				continue;
 			}
 
-			const listItem = document.createElement('li');
-			const linkElement = document.createElement('a');
+			const listItem = document.createElement("li");
+			const linkElement = document.createElement("a");
 			linkElement.href = "https://twitter.com/" + handle;
 			linkElement.textContent = "@" + handle;
 			listItem.appendChild(linkElement);

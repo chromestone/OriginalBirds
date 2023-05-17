@@ -1,17 +1,9 @@
 {
-    "supporters": {
-        "RealOpenBirds": {"type": "contributor"},
-        "No1mann": {"type": "contributor"},
-        "sixteencharacter": {"type": "donor"},
-        "seventeencharacte": {"type": "subscriber", "tier": "bronze"},
-        "eighteencharacters": {"type": "subscriber", "tier": "silver"},
-        "nineteencharacters_": {"type": "subscriber", "tier": "gold"}
-    },
-    "donors": [
-    ],
-    "contributors": [
+	"donors": [
+	],
+	"contributors": [
 
-        {"handle": "RealOpenBirds"},
-        {"handle": "No1mann"}
-    ]
+		{"handle": "RealOpenBirds"},
+		{"handle": "No1mann"}
+	]
 }
