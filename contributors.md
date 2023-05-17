@@ -2,6 +2,20 @@
 title: Original Birds
 ---
 
+<style>
+	ul {
+		list-style: none;
+		padding-left: 1em;
+	}
+
+	ul > li:before {
+		content: "💜";
+		background-color: #1d9bf0;
+		padding: 3px;
+		margin-right: 0.1em;
+	}
+</style>
+
 # Contributors
 
 **💜💜💜Thank you to all who have helped with the development of this extension.💜💜💜**
