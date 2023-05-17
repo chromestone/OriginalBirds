@@ -1,20 +1,21 @@
 ---
 title: Original Birds
 ---
-<p style="margin-bottom: 10px;">
-Tired of not knowing who was an Original Bird (<strong>OB</strong>)? Then this extension is for you! A <strong>green checkmark</strong> is added on Twitter to indicate who was an <strong>OB</strong> before the great purge of April 20th, 2023. Don’t believe your eyes? Go watch our <a target="_blank" rel="noopener noreferrer" href="https://www.youtube.com/watch?v=dOV4717bG3Y">YouTube video</a> and read the <a target="_blank" rel="noopener noreferrer" href="#faq">FAQ</a>!
-<p>
 
-<a target="_blank" rel="noopener noreferrer" href="https://chrome.google.com/webstore/detail/original-birds/chhgbpmapfgibdoimakecicdlhhmkpjn" style><img src="https://chromestone.github.io/OriginalBirds/images/chrome.png" alt="Get it for FREE on the Chrome Web Store."></a>
-<a target="_blank" rel="noopener noreferrer" href="https://addons.mozilla.org/en-US/firefox/addon/original-birds/"><img src="https://chromestone.github.io/OriginalBirds/images/firefox.webp" alt="Get it for FREE for Firefox."></a>
+Tired of not knowing who was an Original Bird (**OB**)? Then this extension is for you! A **green checkmark** is added on Twitter to indicate who was an **OB** before the great purge of April 20th, 2023. Don't believe your eyes? Go watch our [YouTube video](https://www.youtube.com/watch?v=dOV4717bG3Y) and read the [FAQ](#faq)!
+
+<p style="margin: 0;">
+	<a target="_blank" rel="noopener noreferrer" href="https://chrome.google.com/webstore/detail/original-birds/chhgbpmapfgibdoimakecicdlhhmkpjn" style><img src="https://chromestone.github.io/OriginalBirds/images/chrome.png" alt="Get it for FREE on the Chrome Web Store."></a>
+	<a target="_blank" rel="noopener noreferrer" href="https://addons.mozilla.org/en-US/firefox/addon/original-birds/"><img src="https://chromestone.github.io/OriginalBirds/images/firefox.webp" alt="Get it for FREE for Firefox."></a>
+</p>
 
 <h2 id="features" style="margin: 0;">Features</h2>
 
 <ul style="margin: 0 0 5px 0;">
-  <li>Customize checkmark color, or replace with your OWN text / emoji / image!</li>
-  <li>Shows checkmarks on embedded Tweets (e.g. on news websites).</li>
-  <li>Displays green checkmarks next to legacy verified users.</li>
-  <li>Toggle Twitter Blue checkmarks on/off.</li>
+	<li>Customize checkmark color, or replace with your OWN text / emoji / image!</li>
+	<li>Shows checkmarks on embedded Tweets (e.g. on news websites).</li>
+	<li>Displays green checkmarks next to legacy verified users.</li>
+	<li>Toggle Twitter Blue checkmarks on/off.</li>
 </ul>
 
 <div>
