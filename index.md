@@ -12,17 +12,19 @@ Tired of not knowing who was an Original Bird (**OB**)? Then this extension is f
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Twitter](https://img.shields.io/twitter/follow/RealOpenBirds?style=social)](https://twitter.com/RealOpenBirds)
 
-<div>
-	<img src="https://chromestone.github.io/OriginalBirds/images/reynolds.png" alt="Reynolds Demo" style="width: 48%;">
-	<img src="https://chromestone.github.io/OriginalBirds/images/wide_demo_v4.gif" alt="Demo V4 Gif" loading="lazy" style="width: 48%;">
-</div>
+<img src="https://chromestone.github.io/OriginalBirds/images/wide_demo_v4.gif" alt="Demo V4 Gif" loading="lazy" style="width: 75%;">
 
 ## Features
 
  - Customize checkmark color, or replace with your OWN text / emoji / image!
  - Shows checkmarks on embedded Tweets (e.g. on news websites).
- - Displays green checkmarks next to legacy verified users.
  - Toggle Twitter Blue checkmarks on/off.
+ - Displays green checkmarks next to legacy verified users.
+
+<figure>
+	<img src="https://chromestone.github.io/OriginalBirds/images/reynolds.png" alt="Reynolds Demo" style="width: 75%;">
+	<figcaption>Ryan Reynolds' Twitter seen on April 24th (4 days after the purge) without Twitter Blue (<i>top right</i>). This extension displays the green checkmark (<i>center</i>). As early as May 3rd, his Twitter is now verified again.</figcaption>
+</figure>
 
 ## Donations
 
@@ -76,7 +78,6 @@ If you like using this extension, then please consider donating to support this 
 	<p>Always consult the <a target="_blank" rel="noopener noreferrer" href="https://github.com/chromestone/OriginalBirds/blob/main/CONTRIBUTING.md">contributing guidelines</a> first and then make a GitHub issue. Remember to include your Twitter handle when you make your pull request. If it gets approved, then congrats, you're a contributor!</p>
 	<p>(Discord for donors and contributors coming soon.)</p>
 </details>
-
 
 ## Privacy
 
