@@ -13,8 +13,8 @@ Tired of not knowing who was an Original Bird (**OB**)? Then this extension is f
 [![Twitter](https://img.shields.io/twitter/follow/RealOpenBirds?style=social)](https://twitter.com/RealOpenBirds)
 
 <div>
-	<img src="https://chromestone.github.io/OriginalBirds/images/reynolds.png" alt="Reynolds Demo" style="width: 58%;">
-	<img src="images/demo_v4.gif" alt="Demo V4 Gif" loading="lazy" style="width: 30%;">
+	<img src="https://chromestone.github.io/OriginalBirds/images/reynolds.png" alt="Reynolds Demo" style="width: 48%;">
+	<img src="https://chromestone.github.io/OriginalBirds/images/wide_demo_v4.gif" alt="Demo V4 Gif" loading="lazy" style="width: 48%;">
 </div>
 
 ## Features
