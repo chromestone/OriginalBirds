@@ -21,8 +21,8 @@ Tired of not knowing who was an Original Bird (**OB**)? Then this extension is f
  - Toggle Twitter Blue checkmarks on/off.
  - Displays green checkmarks next to legacy verified users.
 
-<figure>
-	<img src="https://chromestone.github.io/OriginalBirds/images/reynolds.png" alt="Reynolds Demo" style="width: 75%;">
+<figure style="width: 75%;">
+	<img src="https://chromestone.github.io/OriginalBirds/images/reynolds.png" alt="Reynolds Demo">
 	<figcaption><i>Top Right:</i> Ryan Reynolds' Twitter seen on April 24th, 2023 without Twitter Blue. <i>Center: </i> This extension displays the green checkmark. <i>Remark: </i>As early as May 3rd, 2023, his Twitter is now verified again.</figcaption>
 </figure>
 
@@ -57,7 +57,7 @@ If you like using this extension, then please consider donating to support this 
 <details>
 	<summary>How do you keep your extension safe from security vulnerabilites?</summary>
 	<p>Firstly, we use Github's <a target="_blank" rel="noopener noreferrer" href="https://codeql.github.com/">CodeQL</a> to run automatic scans on our entire codebase (including dependencies we use) for each iteration and before official releases.</p>
-	<p>Secondly, we are working on adding another layer of defense using <a target="_blank" rel="noopener noreferrer" href="https://github.com/cure53/DOMPurify">DOMPurify</a> to guard our checkmark  <a target="_blank" rel="noopener noreferrer" href="https://en.wikipedia.org/wiki/HTML">HTML</a> from <a target="_blank" rel="noopener noreferrer" href="https://en.wikipedia.org/wiki/Cross-site_scripting">cross-site scripting attacks</a>. This is largely unecessary since we retrieve our checkmarks from twitter.com over <a target="_blank" rel="noopener noreferrer" href="https://en.wikipedia.org/wiki/HTTPS">HTTPS</a>. Still, we want to be extra paranoid in case Twitter does something unexpected.</p>
+	<p>Secondly, we are working on adding another layer of defense using <a target="_blank" rel="noopener noreferrer" href="https://github.com/cure53/DOMPurify">DOMPurify</a> to guard our checkmark  <a target="_blank" rel="noopener noreferrer" href="https://en.wikipedia.org/wiki/HTML">HTML</a> from <a target="_blank" rel="noopener noreferrer" href="https://en.wikipedia.org/wiki/Cross-site_scripting">cross-site scripting attacks</a>. This is largely unnecessary since we retrieve our checkmark from twitter.com over <a target="_blank" rel="noopener noreferrer" href="https://en.wikipedia.org/wiki/HTTPS">HTTPS</a>. Still, we want to be extra paranoid in case Twitter does something unexpected.</p>
 	<p>Lastly, we ask contributors on our GitHub repo to report security vulnerabilities in private so that we have a chance to create a patch. See our <a target="_blank" rel="noopener noreferrer" href="https://github.com/chromestone/OriginalBirds/blob/main/SECURITY.md">security policy</a>.</p>
 </details>
 
