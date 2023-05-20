@@ -17,7 +17,7 @@ const COMPOSE_REPLY_TWEET_SELECTOR = 'div[data-testid="User-Name"] > div:nth-chi
 const HOVER_CARD_SELECTOR = 'div[data-testid="HoverCard"] > ' + 'div > '.repeat(6) + 'a > div > :is(div, span) > span';
 
 // targets recommendation and people you might like
-const RECOMMENDATION_SELECTOR = 'div[data-testid="UserCell"] > ' + 'div > '.repeat(7) + 'a > div > div[dir] > span';
+const RECOMMENDATION_SELECTOR = 'div[data-testid="UserCell"] > :last-child > :last-child > ' + '* > '.repeat(7) + '[dir] > *';
 
 // targets messages
 const CONVERSATION_SELECTOR = 'div[data-testid="conversation"] > ' + 'div > '.repeat(12) + 'div[dir] > span';
