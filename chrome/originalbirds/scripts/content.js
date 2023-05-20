@@ -1,16 +1,14 @@
 // checkmark selector to get html with checkmark svg
-const CHECK_SELECTOR = 'div[data-testid="UserName"] > ' + 'div > '.repeat(4) + 'div[dir] > ' + 'span > '.repeat(4) + 'div:nth-child(1)';
+const CHECK_SELECTOR = 'div[data-testid="UserName"] > ' + '* > '.repeat(4) + '[dir] > ' + '* > '.repeat(4) + ':nth-child(1)';
 
 // targets user name on their profile/feed page
-const USER_SELECTOR = 'div[data-testid="UserName"] > ' + 'div > '.repeat(5) + 'div[dir] > span';
+const USER_SELECTOR = 'div[data-testid="UserName"] > ' + '* > '.repeat(5) + '[dir] > *';
 // targets top heading on user page
-const HEADING_SELECTOR = 'h2[role="heading"] > ' + 'div > '.repeat(4) + 'span:nth-child(2) > span';
+const HEADING_SELECTOR = 'h2[role="heading"] > ' + '* > '.repeat(4) + ':last-child > *';
 
 // targets feed topmost post
-const FEED_SELECTOR = 'div[data-testid="User-Name"] > div > div > div > a > div > span';
-
 // targets user feed or thread reply with (nested) post
-const THREAD_REPLY_POST_SELECTOR = 'div[data-testid="User-Name"] > div:nth-child(2) > ' + 'div > '.repeat(4) + 'span';
+const FEED_SELECTOR = 'div[data-testid="User-Name"] > :last-child > * > :nth-child(1) > * > [dir] > *';
 
 // targets user name when writing a popup reply
 const COMPOSE_REPLY_TWEET_SELECTOR = 'div[data-testid="User-Name"] > div:nth-child(2) > div > div > div[dir] > span';
@@ -634,11 +632,8 @@ function registerRecurringObserver(manager) {
 			manager.updateCheckmark(FEED_SELECTOR,
 				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 4),
 				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 7));
-			manager.updateCheckmark(THREAD_REPLY_POST_SELECTOR,
-				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 4),
-				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 7));
 			manager.updateCheckmark(COMPOSE_REPLY_TWEET_SELECTOR,
-				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 4),
+				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 3)?.lastElementChild?.lastElementChild,
 				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 6));
 			manager.updateCheckmark(HOVER_CARD_SELECTOR,
 				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.lastElementChild,
