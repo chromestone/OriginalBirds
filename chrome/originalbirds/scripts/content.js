@@ -8,24 +8,24 @@ const HEADING_SELECTOR = 'h2[role="heading"] > ' + '* > '.repeat(4) + ':last-chi
 
 // targets feed topmost post
 // targets user feed or thread reply with (nested) post
-const FEED_SELECTOR = 'div[data-testid="User-Name"] > :last-child > * > :nth-child(1) > * > [dir] > *';
+const FEED_SELECTOR = 'div[data-testid="User-Name"] > :last-child > * > * > * > [dir] > *';
 
 // targets user name when writing a popup reply
-const COMPOSE_REPLY_TWEET_SELECTOR = 'div[data-testid="User-Name"] > div:nth-child(2) > div > div > div[dir] > span';
+const COMPOSE_REPLY_TWEET_SELECTOR = 'div[data-testid="User-Name"] > :last-child > * > * > [dir] > span';
 
 // targets overlay upon hovering on user
-const HOVER_CARD_SELECTOR = 'div[data-testid="HoverCard"] > ' + 'div > '.repeat(6) + 'a > div > :is(div, span) > span';
+const HOVER_CARD_SELECTOR = 'div[data-testid="HoverCard"] > ' + '* > '.repeat(8) + '[dir] > span';
 
 // targets recommendation and people you might like
-const RECOMMENDATION_SELECTOR = 'div[data-testid="UserCell"] > :last-child > :last-child > ' + '* > '.repeat(7) + '[dir] > *';
+const RECOMMENDATION_SELECTOR = 'div[data-testid="UserCell"] > ' + '* > '.repeat(9) + '[dir] > *';
 
 // targets messages
-const CONVERSATION_SELECTOR = 'div[data-testid="conversation"] > ' + 'div > '.repeat(12) + 'div[dir] > span';
+const CONVERSATION_SELECTOR = 'div[data-testid="conversation"] > ' + '* > '.repeat(12) + '[dir] > *';
 const ACTIVE_MESSAGE_SELECTOR = 'div[data-testid="cellInnerDiv"] > ' + 'div > '.repeat(5) + 'a > div > div[dir] > span';
 
 // targets embed tweets
-const EMBED_ORIGINAL_SELECTOR = 'article[role] >' + 'div > '.repeat(5) + 'a[dir]:nth-child(1) > span:nth-child(2)';
-const EMBED_TWEET_SELECTOR = 'article[role] >' + 'div > '.repeat(6) + 'a > div > div[dir] > span';
+const EMBED_ORIGINAL_SELECTOR = 'article[role] > ' + '* > '.repeat(5) + 'a:nth-child(1) > span:last-child';
+const EMBED_TWEET_SELECTOR = 'article[role] > ' + '* > '.repeat(8) + '[dir] > span';
 
 const VERIFIED_ICON_SELECTOR = 'svg[data-testid="icon-verified"]';
 const TWITTER_BLUE_RGB = [29, 155, 240];
@@ -198,13 +198,8 @@ class CheckmarkManager {
 		const verifiedIcons = targetElement.querySelectorAll(VERIFIED_ICON_SELECTOR);
 		for (const svg of verifiedIcons) {
 
-			if (this.checkmarkIds.has(svg["data-testid"])) {
-
-				continue;
-			}
-
 			const svgColor = getComputedStyle(svg).getPropertyValue("color");
-			const colorValues = svgColor.replace(/^(rgb|rgba)\(/,'').replace(/\)$/,'').replace(/\s/g,'').split(',');
+			const colorValues = svgColor.replaceAll(/[^\d,]/g, "").split(",");
 
 			if (colorValues.length < 3) {
 
@@ -212,11 +207,10 @@ class CheckmarkManager {
 				continue;
 			}
 
-			let absDistance = 0;
-			for (let i = 0; i < 3; i++) {
-
-				absDistance += Math.abs(parseInt(colorValues[i]) - TWITTER_BLUE_RGB[i]);
-			}
+			const absDistance =
+				Math.abs(parseInt(colorValues[0]) - TWITTER_BLUE_RGB[0]) +
+				Math.abs(parseInt(colorValues[1]) - TWITTER_BLUE_RGB[1]) +
+				Math.abs(parseInt(colorValues[2]) - TWITTER_BLUE_RGB[2]);
 			if (absDistance > 30) {
 
 				continue;
@@ -367,8 +361,6 @@ class CheckmarkManager {
 			if (svg !== null) {
 
 				svg.style["color"] = this.legacyColor;//"#800080";
-				// lowers chance of deleting our own checkmark when not showing blue
-				svg.setAttribute("data-testid", div.id);
 			}
 		}
 	}
