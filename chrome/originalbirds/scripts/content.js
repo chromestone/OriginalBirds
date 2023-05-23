@@ -145,9 +145,12 @@ class CheckmarkManager {
 		this.invocations = Math.max(1, parseInt(properties.invocations ?? 10));
 		this.pollDelay = Math.max(0, parseInt(properties.polldelay ?? 200));
 
-		this.checkmarkIds = new Set();
-		this.bioId = null;
-		this.headingId = null;
+		this.blueIds = new Set();
+		this.legacyIds = new Set();
+		this.bioId = myRandomId();
+		while ((this.headingId = myRandomId()) === this.bioId);
+		this.legacyIds.add(this.bioId);
+		this.legacyIds.add(this.headingId);
 
 		// BEGIN SUPPORTER SECTION
 
@@ -239,17 +242,19 @@ class CheckmarkManager {
 
 				svg.style["display"] = "none";
 
+				/*
 				if (targetElement === svg.parentElement) {
 
 					const wrapper = document.createElement("span");
 					svg.parentElement.insertBefore(wrapper, svg);
 					wrapper.appendChild(svg);
 				}
+				*/
 
 				let checkmarkFound = false;
-				for (const child of svg.parentElement.children) {
+				for (const child of targetElement.children) {
 
-					if (this.checkmarkIds.has(child.id)) {
+					if (this.blueIds.has(child.id)) {
 
 						checkmarkFound = true;
 						break;
@@ -261,14 +266,15 @@ class CheckmarkManager {
 				}
 
 				let myId;
-				while (this.checkmarkIds.has(myId = myRandomId()));
-				this.checkmarkIds.add(myId);
+				while (this.blueIds.has(myId = myRandomId()));
+				this.blueIds.add(myId);
 
 				const div = document.createElement("span");
 				div.id = myId;
 
 				if (this.useBlueText) {
 
+					/*
 					if (location === "bio") {
 
 						let furthestParent = svg.parentElement;
@@ -278,13 +284,21 @@ class CheckmarkManager {
 						}
 						furthestParent.style["vertical-align"] = "baseline";
 					}
+					*/
 
-					div.style["color"] = handleStyle.getPropertyValue("color");
-					div.style["font-family"] = handleStyle.getPropertyValue("font-family");
-					div.style["font-size"] = handleStyle.getPropertyValue("font-size");
-					div.style["margin-left"] = "2px";
+					let span = div;
+					if (location === "heading") {
 
-					div.textContent = this.blueText;
+						span = document.createElement("span");
+						div.appendChild(span);
+					}
+
+					span.style["color"] = handleStyle.getPropertyValue("color");
+					span.style["font-family"] = handleStyle.getPropertyValue("font-family");
+					span.style["font-size"] = handleStyle.getPropertyValue("font-size");
+					span.style["margin-left"] = "2px";
+
+					span.textContent = this.blueText;
 				}
 				else if (this.useBlueImage) {
 
@@ -298,7 +312,7 @@ class CheckmarkManager {
 					div.appendChild(blueImg);
 				}
 
-				svg.after(div);
+				targetElement.append(div);
 			}
 			else if (this.useBlueColor) {
 
@@ -414,16 +428,16 @@ class CheckmarkManager {
 
 				if (verified) {
 
-					if (document.getElementById(this.bioId) === null) {
+					let div = document.getElementById(this.bioId);
+					if (div === null) {
 
-						let myId;
-						while ((myId = myRandomId()) === this.bioId);
-						this.checkmarkIds.add(myId);
-
-						const div = document.createElement("span");
-						div.id = this.bioId = myId;
+						div = document.createElement("span");
+						div.id = this.bioId;
 
 						this._updateLegacy(div, handleStyle, "bio");
+					}
+
+					if (div !== targetElement.lastElementChild) {
 
 						targetElement.appendChild(div);
 					}
@@ -472,21 +486,19 @@ class CheckmarkManager {
 			return;
 		}
 
-		if (document.getElementById(this.headingId) !== null) {
+		let div = document.getElementById(this.headingId);
+		if (div === null) {
 
-			return;
+			div = document.createElement("span");
+			div.id = this.headingId;
+	
+			this._updateLegacy(div, handleStyle, "heading");	
 		}
 
-		let myId;
-		while ((myId = myRandomId()) === this.headingId);
-		this.checkmarkIds.add(myId);
+		if (div !== headingElement.lastElementChild) {
 
-		const div = document.createElement("span");
-		div.id = this.headingId = myId;
-
-		this._updateLegacy(div, handleStyle, "heading");
-
-		headingElement.appendChild(div);
+			headingElement.appendChild(div);
+		}
 	}
 
 	updateCheckmark(selector, element2Target, element2Name, start=1) {
@@ -542,7 +554,7 @@ class CheckmarkManager {
 			let checkmarkFound = false;
 			for (const child of targetElement.children) {
 
-				if (this.checkmarkIds.has(child.id)) {
+				if (this.legacyIds.has(child.id)) {
 
 					checkmarkFound = true;
 					break;
@@ -554,8 +566,8 @@ class CheckmarkManager {
 			}
 
 			let myId;
-			while (this.checkmarkIds.has(myId = myRandomId()));
-			this.checkmarkIds.add(myId);
+			while (this.legacyIds.has(myId = myRandomId()));
+			this.legacyIds.add(myId);
 
 			const div = document.createElement("span");
 			div.id = myId;
