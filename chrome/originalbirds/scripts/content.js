@@ -140,11 +140,14 @@ class CheckmarkManager {
 			this.useLegacyImage = this.legacyURL.length > 0;
 		}
 
+		this.doBlueUpdate = !this.showBlue || this.useBlueColor || this.useBlueText || this.useBlueImage;
+
 		this.invocations = Math.max(1, parseInt(properties.invocations ?? 10));
 		this.pollDelay = Math.max(0, parseInt(properties.polldelay ?? 200));
 
-		this.doBlueUpdate = !this.showBlue || this.useBlueColor || this.useBlueText || this.useBlueImage;
 		this.checkmarkIds = new Set();
+		this.bioId = null;
+		this.headingId = null;
 
 		// BEGIN SUPPORTER SECTION
 
@@ -175,7 +178,7 @@ class CheckmarkManager {
 			}
 			else {
 
-				this.contributors =  new Set(supporters.contributors.map((obj) => obj.handle.toLowerCase()));
+				this.contributors = new Set(supporters.contributors.map((obj) => obj.handle.toLowerCase()));
 			}
 		}
 	}
@@ -411,23 +414,14 @@ class CheckmarkManager {
 
 				if (verified) {
 
-					let checkmarkFound = false;
-					for (const child of targetElement.children) {
-
-						if (this.checkmarkIds.has(child.id)) {
-
-							checkmarkFound = true;
-							break;
-						}
-					}
-					if (!checkmarkFound) {
+					if (document.getElementById(this.bioId) === null) {
 
 						let myId;
-						while (this.checkmarkIds.has(myId = myRandomId()));
+						while ((myId = myRandomId()) === this.bioId);
 						this.checkmarkIds.add(myId);
 
 						const div = document.createElement("span");
-						div.id = myId;
+						div.id = this.bioId = myId;
 
 						this._updateLegacy(div, handleStyle, "bio");
 
@@ -435,6 +429,11 @@ class CheckmarkManager {
 					}
 				}
 			}
+		}
+
+		if (!verified) {
+
+			document.getElementById(this.bioId)?.remove();
 		}
 
 		this._updateHeading(heading_selector, color, verified, handleStyle);
@@ -469,23 +468,21 @@ class CheckmarkManager {
 
 		if (!verified) {
 
+			document.getElementById(this.headingId)?.remove();
 			return;
 		}
 
-		for (const child of headingElement.children) {
+		if (document.getElementById(this.headingId) !== null) {
 
-			if (this.checkmarkIds.has(child.id)) {
-
-				return;
-			}
+			return;
 		}
 
 		let myId;
-		while (this.checkmarkIds.has(myId = myRandomId()));
+		while ((myId = myRandomId()) === this.headingId);
 		this.checkmarkIds.add(myId);
 
 		const div = document.createElement("span");
-		div.id = myId;
+		div.id = this.headingId = myId;
 
 		this._updateLegacy(div, handleStyle, "heading");
 

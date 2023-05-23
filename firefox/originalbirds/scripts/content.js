@@ -145,6 +145,8 @@ class CheckmarkManager {
 
 		this.doBlueUpdate = !this.showBlue || this.useBlueColor || this.useBlueText || this.useBlueImage;
 		this.checkmarkIds = new Set();
+		this.bioId = null;
+		this.headingId = null;
 
 		// BEGIN SUPPORTER SECTION
 
@@ -175,7 +177,7 @@ class CheckmarkManager {
 			}
 			else {
 
-				this.contributors =  new Set(supporters.contributors.map((obj) => obj.handle.toLowerCase()));
+				this.contributors = new Set(supporters.contributors.map((obj) => obj.handle.toLowerCase()));
 			}
 		}
 	}
