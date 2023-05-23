@@ -147,10 +147,16 @@ class CheckmarkManager {
 
 		this.blueIds = new Set();
 		this.legacyIds = new Set();
-		this.bioId = myRandomId();
-		while ((this.headingId = myRandomId()) === this.bioId);
-		this.legacyIds.add(this.bioId);
-		this.legacyIds.add(this.headingId);
+
+		this.blueBioId = myRandomId();
+		while ((this.blueHeadingId = myRandomId()) === this.blueBioId);
+		this.blueIds.add(this.blueBioId);
+		this.blueIds.add(this.blueHeadingId);
+
+		while (this.blueIds.has(this.legacyBioId = myRandomId()));
+		while (this.blueIds.has(this.legacyHeadingId = myRandomId()) || this.legacyHeadingId === this.legacyBioId);
+		this.legacyIds.add(this.legacyBioId);
+		this.legacyIds.add(this.legacyHeadingId);
 
 		// BEGIN SUPPORTER SECTION
 
@@ -242,49 +248,57 @@ class CheckmarkManager {
 
 				svg.style["display"] = "none";
 
-				/*
-				if (targetElement === svg.parentElement) {
+				let myId;
+				if (location === "heading" || location === "bio") {
 
-					const wrapper = document.createElement("span");
-					svg.parentElement.insertBefore(wrapper, svg);
-					wrapper.appendChild(svg);
-				}
-				*/
+					myId = location === "bio" ? this.blueBioId : this.blueHeadingId;
+					const div = document.getElementById(myId);
+					if (div !== null) {
 
-				let checkmarkFound = false;
-				for (const child of targetElement.children) {
+						if (div !== targetElement.firstElementChild) {
 
-					if (this.blueIds.has(child.id)) {
-
-						checkmarkFound = true;
+							//targetElement.prepend(div);
+						}
 						break;
 					}
 				}
-				if (checkmarkFound) {
+				else {
 
-					break;
+					let checkmarkFound = false;
+					for (const child of targetElement.children) {
+	
+						if (this.blueIds.has(child.id)) {
+	
+							checkmarkFound = true;
+							break;
+						}
+					}
+					if (checkmarkFound) {
+	
+						break;
+					}
+	
+					while (this.blueIds.has(myId = myRandomId()) || this.legacyIds.has(myId));
+					this.blueIds.add(myId);	
 				}
-
-				let myId;
-				while (this.blueIds.has(myId = myRandomId()));
-				this.blueIds.add(myId);
 
 				const div = document.createElement("span");
 				div.id = myId;
 
 				if (this.useBlueText) {
 
-					/*
 					if (location === "bio") {
 
-						let furthestParent = svg.parentElement;
-						while (furthestParent.parentElement != targetElement) {
+						const alignerElement = targetElement.parentElement?.parentElement;
+						if (alignerElement == null) {
 
-							furthestParent = furthestParent.parentElement;
+							console.log("Warning: Original Birds could not align blue text.");
 						}
-						furthestParent.style["vertical-align"] = "baseline";
+						else {
+
+							alignerElement.style["vertical-align"] = "bottom";
+						}
 					}
-					*/
 
 					let span = div;
 					if (location === "heading") {
@@ -312,7 +326,7 @@ class CheckmarkManager {
 					div.appendChild(blueImg);
 				}
 
-				targetElement.append(div);
+				targetElement.appendChild(div);
 			}
 			else if (this.useBlueColor) {
 
@@ -428,11 +442,11 @@ class CheckmarkManager {
 
 				if (verified) {
 
-					let div = document.getElementById(this.bioId);
+					let div = document.getElementById(this.legacyBioId);
 					if (div === null) {
 
 						div = document.createElement("span");
-						div.id = this.bioId;
+						div.id = this.legacyBioId;
 
 						this._updateLegacy(div, handleStyle, "bio");
 					}
@@ -447,7 +461,7 @@ class CheckmarkManager {
 
 		if (!verified) {
 
-			document.getElementById(this.bioId)?.remove();
+			document.getElementById(this.legacyBioId)?.remove();
 		}
 
 		this._updateHeading(heading_selector, color, verified, handleStyle);
@@ -482,15 +496,15 @@ class CheckmarkManager {
 
 		if (!verified) {
 
-			document.getElementById(this.headingId)?.remove();
+			document.getElementById(this.legacyHeadingId)?.remove();
 			return;
 		}
 
-		let div = document.getElementById(this.headingId);
+		let div = document.getElementById(this.legacyHeadingId);
 		if (div === null) {
 
 			div = document.createElement("span");
-			div.id = this.headingId;
+			div.id = this.legacyHeadingId;
 	
 			this._updateLegacy(div, handleStyle, "heading");	
 		}
@@ -566,7 +580,7 @@ class CheckmarkManager {
 			}
 
 			let myId;
-			while (this.legacyIds.has(myId = myRandomId()));
+			while (this.blueIds.has(myId = myRandomId()) || this.legacyIds.has(myId));
 			this.legacyIds.add(myId);
 
 			const div = document.createElement("span");
