@@ -285,7 +285,7 @@ class CheckmarkManager {
 				}
 
 				while (this.blueIds.has(myId = myRandomId()) || this.legacyIds.has(myId));
-				this.blueIds.add(myId);	
+				this.blueIds.add(myId);
 			}
 
 			const div = document.createElement("span");
@@ -513,8 +513,8 @@ class CheckmarkManager {
 
 			div = document.createElement("span");
 			div.id = this.legacyHeadingId;
-	
-			this._updateLegacy(div, handleStyle, "heading");	
+
+			this._updateLegacy(div, handleStyle, "heading");
 		}
 
 		if (div !== headingElement.lastElementChild) {
