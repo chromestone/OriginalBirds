@@ -1,8 +1,8 @@
 {
 	"manifest_version": 3,
 	"name": "Original Birds",
-	"version": "0.0.0.4",
-	"description": "A simple extension that shows green checkmarks next to legacy verified Twitter users.",
+	"version": "0.0.0.5",
+	"description": "An extension that shows green checkmarks next to legacy verified Twitter users.",
 	"homepage_url": "https://chromestone.github.io/OriginalBirds/",
 
 	"icons": {
@@ -15,7 +15,7 @@
 	"content_scripts": [
 		{
 			"matches": ["https://*.twitter.com/*"],
-			"js": ["scripts/content.js"],
+			"js": ["scripts/purify.js", "scripts/content.js"],
 			"all_frames": true
 		}
 	],

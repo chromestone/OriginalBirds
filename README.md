@@ -12,10 +12,16 @@ A browser extension that brings back the legacy Twitter verified checkmarks.
 
 ## For more information or FAQ visit our [website](https://chromestone.github.io/OriginalBirds/).
 
+**Huge thanks to thansen0 for publishing the data:** [github.com/thansen0/verified_twitters](https://github.com/thansen0/verified_twitters)
+
+For instructions on installing from source see [below](#install-from-source).
+
 ## Donations
 Thank you to all of our generous [donors](https://chromestone.github.io/OriginalBirds/donors.html) and [contributors](https://chromestone.github.io/OriginalBirds/contributors.html)! Please go check them out and show them some love!!!
 
-If you like using this extension, then please consider [donating](https://www.buymeacoffee.com/openbirds) to support this project!<br />
+If you like using this extension, then please consider donating to support this project!<br />
+
+<a target="_blank" rel="noopener noreferrer" href="https://www.buymeacoffee.com/openbirds"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
 
 **Extension users will see all donor names in light orange and all contributor names in light purple on Twitter.**
 
@@ -23,9 +29,11 @@ If you like using this extension, then please consider [donating](https://www.bu
 
 Contributions are welcome! See our [contributions guidelines](CONTRIBUTING.md) before making an issue.
 
-## Acknowledgements
+## Install From Source
 
-**Huge thanks to thansen0 for publishing the data:** [github.com/thansen0/verified_twitters](https://github.com/thansen0/verified_twitters)
+TODO
+
+## Acknowledgements
 
 [jQuery](https://github.com/jquery/jquery)
 
