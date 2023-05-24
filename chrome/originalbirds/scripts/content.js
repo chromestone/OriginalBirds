@@ -57,7 +57,7 @@ function waitForElement(selector) {
 function setCheckmark(targetElement) {
 
 	return new Promise((resolve) =>
-		chrome.storage.local.set({checkmark: targetElement.outerHTML}, () => resolve(null)));
+		chrome.storage.local.set({checkmark: DOMPurify.sanitize(targetElement.outerHTML)}, () => resolve(null)));
 }
 
 function getProperties(keys) {
@@ -621,7 +621,7 @@ async function checkmarkManagerFactory() {
 	}
 
 	const parser = new DOMParser();
-	const checkDoc = parser.parseFromString(properties.checkmark, "text/html");
+	const checkDoc = parser.parseFromString(DOMPurify.sanitize(properties.checkmark), "text/html");
 
 	const checkHtml = checkDoc?.body?.firstChild;
 	if (checkHtml == null || checkDoc.querySelector("parsererror") !== null) {
