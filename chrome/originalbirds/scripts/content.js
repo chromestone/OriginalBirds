@@ -57,9 +57,7 @@ function waitForElement(selector) {
 function setCheckmark(targetElement) {
 
 	return new Promise((resolve) =>
-		chrome.storage.local.set({checkmark: targetElement.outerHTML}, () =>
-			chrome.storage.local.remove("closeme", () =>
-				resolve(null))));
+		chrome.storage.local.set({checkmark: targetElement.outerHTML}, () => resolve(null)));
 }
 
 function getProperties(keys) {
@@ -207,8 +205,8 @@ class CheckmarkManager {
 
 	_updateBlue(targetElement, handleStyle, location = null) {
 
-		const verifiedIcons = targetElement.querySelectorAll(VERIFIED_ICON_SELECTOR);
-		for (const svg of verifiedIcons) {
+		let blueSvg = null;
+		for (const svg of targetElement.querySelectorAll(VERIFIED_ICON_SELECTOR)) {
 
 			const svgColor = getComputedStyle(svg).getPropertyValue("color");
 			const colorValues = svgColor.replaceAll(/[^\d,]/g, "").split(",");
@@ -228,112 +226,122 @@ class CheckmarkManager {
 				continue;
 			}
 
-			if (!this.showBlue) {
+			blueSvg = svg;
+			break;
+		}
+
+		if (blueSvg === null) {
+
+			if (location === "heading") {
+
+				document.getElementById(this.blueHeadingId)?.remove();
+			}
+			else if (location === "bio") {
+
+				document.getElementById(this.blueBioId)?.remove();
+			}
+
+			return;
+		}
+
+		if (!this.showBlue) {
+
+			if (location === "bio") {
+
+				let furthestParent = blueSvg;
+				while (furthestParent.parentElement != targetElement) {
+
+					furthestParent = furthestParent.parentElement;
+				}
+				furthestParent.style["display"] = "none";
+			}
+			else {
+
+				blueSvg.style["display"] = "none";
+			}
+		}
+		else if (this.useBlueText || this.useBlueImage) {
+
+			blueSvg.style["display"] = "none";
+
+			let myId;
+			if (location === "heading" || location === "bio") {
+
+				myId = location === "bio" ? this.blueBioId : this.blueHeadingId;
+				const div = document.getElementById(myId);
+				if (div !== null) {
+
+					return;
+				}
+			}
+			else {
+
+				for (const child of targetElement.children) {
+
+					if (this.blueIds.has(child.id)) {
+
+						return;
+					}
+				}
+
+				while (this.blueIds.has(myId = myRandomId()) || this.legacyIds.has(myId));
+				this.blueIds.add(myId);	
+			}
+
+			const div = document.createElement("span");
+			div.id = myId;
+
+			if (this.useBlueText) {
+
+				let span = div;
 
 				if (location === "bio") {
 
-					let furthestParent = svg;
-					while (furthestParent.parentElement != targetElement) {
+					const alignerElement = targetElement.parentElement?.parentElement;
+					if (alignerElement == null) {
 
-						furthestParent = furthestParent.parentElement;
+						console.log("Warning: Original Birds could not align blue text.");
 					}
-					furthestParent.style["display"] = "none";
-				}
-				else {
+					else {
 
-					svg.style["display"] = "none";
+						alignerElement.style["vertical-align"] = "bottom";
+					}
 				}
+				else if (location === "heading") {
+
+					span = document.createElement("span");
+					div.appendChild(span);
+				}
+
+				span.style["color"] = handleStyle.getPropertyValue("color");
+				span.style["font-family"] = handleStyle.getPropertyValue("font-family");
+				span.style["font-size"] = handleStyle.getPropertyValue("font-size");
+				span.style["margin-left"] = "2px";
+
+				span.textContent = this.blueText;
 			}
-			else if (this.useBlueText || this.useBlueImage) {
+			else if (this.useBlueImage) {
 
-				svg.style["display"] = "none";
+				div.style["display"] = "flex";
+				div.style["margin-left"] = "2px";
 
-				let myId;
-				if (location === "heading" || location === "bio") {
-
-					myId = location === "bio" ? this.blueBioId : this.blueHeadingId;
-					const div = document.getElementById(myId);
-					if (div !== null) {
-
-						if (div !== targetElement.firstElementChild) {
-
-							//targetElement.prepend(div);
-						}
-						break;
-					}
-				}
-				else {
-
-					let checkmarkFound = false;
-					for (const child of targetElement.children) {
-	
-						if (this.blueIds.has(child.id)) {
-	
-							checkmarkFound = true;
-							break;
-						}
-					}
-					if (checkmarkFound) {
-	
-						break;
-					}
-	
-					while (this.blueIds.has(myId = myRandomId()) || this.legacyIds.has(myId));
-					this.blueIds.add(myId);	
-				}
-
-				const div = document.createElement("span");
-				div.id = myId;
-
-				if (this.useBlueText) {
-
-					if (location === "bio") {
-
-						const alignerElement = targetElement.parentElement?.parentElement;
-						if (alignerElement == null) {
-
-							console.log("Warning: Original Birds could not align blue text.");
-						}
-						else {
-
-							alignerElement.style["vertical-align"] = "bottom";
-						}
-					}
-
-					let span = div;
-					if (location === "heading") {
-
-						span = document.createElement("span");
-						div.appendChild(span);
-					}
-
-					span.style["color"] = handleStyle.getPropertyValue("color");
-					span.style["font-family"] = handleStyle.getPropertyValue("font-family");
-					span.style["font-size"] = handleStyle.getPropertyValue("font-size");
-					span.style["margin-left"] = "2px";
-
-					span.textContent = this.blueText;
-				}
-				else if (this.useBlueImage) {
-
-					div.style["display"] = "flex";
-					div.style["margin-left"] = "2px";
-
-					const blueImg = document.createElement("img");
-					blueImg.width = 20;
-					blueImg.height = 20;
-					blueImg.src = this.blueURL;
-					div.appendChild(blueImg);
-				}
-
-				targetElement.appendChild(div);
-			}
-			else if (this.useBlueColor) {
-
-				svg.style["color"] = this.blueColor;
+				const blueImg = document.createElement("img");
+				blueImg.width = 20;
+				blueImg.height = 20;
+				blueImg.src = this.blueURL;
+				div.appendChild(blueImg);
 			}
 
-			break;
+			let furthestParent = blueSvg;
+			while (furthestParent.parentElement != targetElement) {
+
+				furthestParent = furthestParent.parentElement;
+			}
+			furthestParent.after(div);
+		}
+		else if (this.useBlueColor) {
+
+			blueSvg.style["color"] = this.blueColor;
 		}
 	}
 
@@ -391,7 +399,7 @@ class CheckmarkManager {
 			const svg = div.querySelector('svg');
 			if (svg !== null) {
 
-				svg.style["color"] = this.legacyColor;//"#800080";
+				svg.style["color"] = this.legacyColor;
 			}
 		}
 	}
@@ -645,22 +653,22 @@ function registerRecurringObserver(manager) {
 
 			manager.updateUserPage(USER_SELECTOR, HEADING_SELECTOR);
 			manager.updateCheckmark(FEED_SELECTOR,
-				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 4),
+				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 4)?.lastElementChild?.lastElementChild,
 				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 7));
 			manager.updateCheckmark(COMPOSE_REPLY_TWEET_SELECTOR,
 				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 3)?.lastElementChild?.lastElementChild,
 				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 6));
 			manager.updateCheckmark(HOVER_CARD_SELECTOR,
-				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.lastElementChild,
+				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.lastElementChild?.lastElementChild,
 				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.firstElementChild);
 			manager.updateCheckmark(RECOMMENDATION_SELECTOR,
-				(element) => nth_element(element, "parentElement", 6)?.firstElementChild?.firstElementChild?.lastElementChild,
+				(element) => nth_element(nth_element(element, "parentElement", 6)?.firstElementChild?.firstElementChild, "lastElementChild", 3),
 				(element) => nth_element(nth_element(element, "parentElement", 6), "firstElementChild", 6));
 			manager.updateCheckmark(CONVERSATION_SELECTOR,
-				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild,
+				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.lastElementChild?.lastElementChild,
 				(element) => nth_element(nth_element(element, "parentElement", 5), "firstElementChild", 5));
 			manager.updateCheckmark(ACTIVE_MESSAGE_SELECTOR,
-				(element) => nth_element(element, "parentElement", 6)?.firstElementChild?.firstElementChild?.firstElementChild,
+				(element) => nth_element(element, "parentElement", 6)?.firstElementChild?.firstElementChild?.firstElementChild?.lastElementChild?.lastElementChild,
 				(element) => nth_element(nth_element(element, "parentElement", 6), "firstElementChild", 6));
 			manager.updateCheckmark(EMBED_ORIGINAL_SELECTOR,
 				(element) => nth_element(nth_element(element, "parentElement", 3), "firstElementChild", 6)?.lastElementChild?.lastElementChild,

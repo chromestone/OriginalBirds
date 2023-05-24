@@ -2,12 +2,12 @@ let closemeListener = (_, sendResponse) => sendResponse({closeme: false});
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
-	if (msg.text == "closeme?") {
+	if (msg.text === "closeme?") {
 
 		closemeListener(sender, sendResponse);
 		return true;
 	}
-	else if (msg.text == "cachecheckmark!") {
+	else if (msg.text === "cachecheckmark!") {
 
 		cacheCheckmark();
 	}
@@ -20,7 +20,7 @@ function cacheCheckmark() {
 	closemeListener = (...theArgs) => callbacks.push(theArgs);
 	chrome.tabs.create({url: "https://twitter.com/elonmusk", active: false}, (tab) => {
 
-		closemeListener = (sender, sendResponse) => sendResponse({closeme: sender.tab.id == tab.id});
+		closemeListener = (sender, sendResponse) => sendResponse({closeme: sender.tab.id === tab.id});
 		// if the previous line does not outpace the content script's request
 		// then clearing the backlog handles it
 		callbacks.forEach((theArgs) => closemeListener(...theArgs));
