@@ -166,26 +166,26 @@ class CheckmarkManager {
 		}
 		else {
 
-			const supporters = JSON.parse(properties.supporters);
+			const supportersJSON = JSON.parse(properties.supporters);
 
-			if (typeof supporters.donors === 'undefined') {
+			if (typeof supportersJSON.supporters === 'undefined') {
 
-				console.log("Warning: Original Birds could not load donors :( .");
+				console.log("Warning: Original Birds could not load supporters :( .");
 				this.donors = new Set();
-			}
-			else {
-
-				this.donors = new Set(supporters.donors.map((obj) => obj.handle.toLowerCase()));
-			}
-
-			if (typeof supporters.contributors === 'undefined') {
-
-				console.log("Warning: Original Birds could not load contributors :( .");
 				this.contributors = new Set();
 			}
 			else {
 
-				this.contributors = new Set(supporters.contributors.map((obj) => obj.handle.toLowerCase()));
+				const supporters = supportersJSON.supporters;
+				const supportersKeys = Object.keys(supporters);
+				this.donors = new Set(supportersKeys.
+					filter((key) => supporters[key].type === "donor" || supporters[key].type === "subscriber").
+					map((key) => key.toLowerCase()));
+				this.contributors = new Set(supportersKeys.
+					filter((key) => supporters[key].type === "contributor").
+					map((key) => key.toLowerCase()));
+				console.log(this.donors);
+				console.log(this.contributors);
 			}
 		}
 	}

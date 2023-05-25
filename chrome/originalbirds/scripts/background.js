@@ -39,7 +39,7 @@ async function loadHandles() {
 
 async function getSupporters() {
 
-	const response = await fetch("https://chromestone.github.io/OriginalBirds/supporters.json");
+	const response = await fetch("https://original-birds.pages.dev/supporters.json");
 	const data = await response.text();
 
 	chrome.storage.local.set({supporters: data});
