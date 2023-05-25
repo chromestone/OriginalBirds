@@ -28,7 +28,12 @@ const EMBED_ORIGINAL_SELECTOR = 'article[role] > ' + '* > '.repeat(5) + 'a:nth-c
 const EMBED_TWEET_SELECTOR = 'article[role] > ' + '* > '.repeat(8) + '[dir] > span';
 
 const VERIFIED_ICON_SELECTOR = 'svg[data-testid="icon-verified"]';
-const TWITTER_BLUE_RGB = [29, 155, 240];
+const TWITTER_BLUE_RGB = Object.freeze([29, 155, 240]);
+
+const CHECKMARK_LOCATION = Object.freeze({
+	HEADING: 0,
+	BIO: 1
+});
 
 function waitForElement(selector) {
 
@@ -232,11 +237,11 @@ class CheckmarkManager {
 
 		if (blueSvg === null) {
 
-			if (location === "heading") {
+			if (location === CHECKMARK_LOCATION.HEADING) {
 
 				document.getElementById(this.blueHeadingId)?.remove();
 			}
-			else if (location === "bio") {
+			else if (location === CHECKMARK_LOCATION.BIO) {
 
 				document.getElementById(this.blueBioId)?.remove();
 			}
@@ -246,7 +251,7 @@ class CheckmarkManager {
 
 		if (!this.showBlue) {
 
-			if (location === "bio") {
+			if (location === CHECKMARK_LOCATION.BIO) {
 
 				let furthestParent = blueSvg;
 				while (furthestParent.parentElement != targetElement) {
@@ -265,9 +270,9 @@ class CheckmarkManager {
 			blueSvg.style["display"] = "none";
 
 			let myId;
-			if (location === "heading" || location === "bio") {
+			if (location === CHECKMARK_LOCATION.HEADING || location === CHECKMARK_LOCATION.BIO) {
 
-				myId = location === "bio" ? this.blueBioId : this.blueHeadingId;
+				myId = location === CHECKMARK_LOCATION.HEADING ? this.blueHeadingId : this.blueBioId;
 				const div = document.getElementById(myId);
 				if (div !== null) {
 
@@ -295,7 +300,12 @@ class CheckmarkManager {
 
 				let span = div;
 
-				if (location === "bio") {
+				if (location === CHECKMARK_LOCATION.HEADING) {
+
+					span = document.createElement("span");
+					div.appendChild(span);
+				}
+				else if (location === CHECKMARK_LOCATION.BIO) {
 
 					const alignerElement = targetElement.parentElement?.parentElement;
 					if (alignerElement == null) {
@@ -306,11 +316,6 @@ class CheckmarkManager {
 
 						alignerElement.style["vertical-align"] = "bottom";
 					}
-				}
-				else if (location === "heading") {
-
-					span = document.createElement("span");
-					div.appendChild(span);
 				}
 
 				span.style["color"] = handleStyle.getPropertyValue("color");
@@ -349,7 +354,7 @@ class CheckmarkManager {
 
 		if (this.useLegacyText) {
 
-			if (location === "heading") {
+			if (location === CHECKMARK_LOCATION.HEADING) {
 
 				const span = document.createElement("span");
 				div.appendChild(span);
@@ -365,7 +370,7 @@ class CheckmarkManager {
 		}
 		else if (this.useLegacyImage) {
 
-			if (location === "heading") {
+			if (location === CHECKMARK_LOCATION.HEADING) {
 
 				div.style["display"] = "inline-flex";
 			}
@@ -384,7 +389,7 @@ class CheckmarkManager {
 		}
 		else {
 
-			if (location === "heading") {
+			if (location === CHECKMARK_LOCATION.HEADING) {
 
 				div.style["display"] = "inline-flex";
 			}
@@ -414,7 +419,7 @@ class CheckmarkManager {
 
 		const handle = handleElement.textContent?.substring(1).toLowerCase();
 		const parent = nth_element(handleElement, "parentElement", 5);
-		const handleStyle = getComputedStyle(handleElement);
+		const handleStyle = getComputedStyle(handleElement.parentElement);
 
 		// BEGIN SUPPORTER SECTION
 
@@ -445,7 +450,7 @@ class CheckmarkManager {
 
 				if (this.doBlueUpdate) {
 
-					this._updateBlue(targetElement, handleStyle, "bio");
+					this._updateBlue(targetElement, handleStyle, CHECKMARK_LOCATION.BIO);
 				}
 
 				if (verified) {
@@ -456,7 +461,7 @@ class CheckmarkManager {
 						div = document.createElement("span");
 						div.id = this.legacyBioId;
 
-						this._updateLegacy(div, handleStyle, "bio");
+						this._updateLegacy(div, handleStyle, CHECKMARK_LOCATION.BIO);
 					}
 
 					if (div !== targetElement.lastElementChild) {
@@ -499,7 +504,7 @@ class CheckmarkManager {
 
 		if (this.doBlueUpdate) {
 
-			this._updateBlue(headingElement, handleStyle, "heading");
+			this._updateBlue(headingElement, handleStyle, CHECKMARK_LOCATION.HEADING);
 		}
 
 		if (!verified) {
@@ -514,7 +519,7 @@ class CheckmarkManager {
 			div = document.createElement("span");
 			div.id = this.legacyHeadingId;
 
-			this._updateLegacy(div, handleStyle, "heading");
+			this._updateLegacy(div, handleStyle, CHECKMARK_LOCATION.HEADING);
 		}
 
 		if (div !== headingElement.lastElementChild) {
@@ -561,7 +566,7 @@ class CheckmarkManager {
 				continue;
 			}
 
-			const handleStyle = getComputedStyle(element);
+			const handleStyle = getComputedStyle(element.parentElement);
 
 			if (this.doBlueUpdate) {
 
