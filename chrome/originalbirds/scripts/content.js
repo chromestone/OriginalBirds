@@ -34,6 +34,17 @@ const CHECKMARK_LOCATION = Object.freeze({
 	HEADING: 0,
 	BIO: 1
 });
+/*
+const SUPPORTER_TYPE = Object.freeze({
+	CONTRIBUTOR: 0,
+	DONOR: 1,
+	BRONZE: 2,
+	SILVER: 3,
+	GOLD: 4
+});
+*/
+const DONOR_STYLE = Object.freeze({"namecolor": "#FFDB98"});
+const CONTRIBUTOR_STYLE = Object.freeze({"namecolor": "#FFCDFF"});
 
 function waitForElement(selector) {
 
@@ -163,50 +174,79 @@ class CheckmarkManager {
 
 		// BEGIN SUPPORTER SECTION
 
-		if (typeof properties.supporters === 'undefined') {
+		const supportersJSON = JSON.parse(properties.supporters ?? "{}");
+		if (supportersJSON.supporters === undefined) {
 
 			console.log("Warning: Original Birds could not load supporters :( .");
-			this.donors = new Set();
-			this.contributors = new Set();
+			this.supporters = new Map();
 		}
 		else {
 
-			const supportersJSON = JSON.parse(properties.supporters);
+			this.supporters = new Map(Object.entries(supportersJSON.supporters).map(([k, v]) => {
 
-			if (typeof supportersJSON.supporters === 'undefined') {
+				k = k.toLowerCase();
 
-				console.log("Warning: Original Birds could not load supporters :( .");
-				this.donors = new Set();
-				this.contributors = new Set();
-			}
-			else {
+				if (v.style === undefined) {
 
-				const supporters = supportersJSON.supporters;
-				const supportersKeys = Object.keys(supporters);
-				this.donors = new Set(supportersKeys.
-					filter((key) => supporters[key].type === "donor" || supporters[key].type === "subscriber").
-					map((key) => key.toLowerCase()));
-				this.contributors = new Set(supportersKeys.
-					filter((key) => supporters[key].type === "contributor").
-					map((key) => key.toLowerCase()));
-				console.log(this.donors);
-				console.log(this.contributors);
-			}
+					if (v.type === "donor") {
+
+						return [k, DONOR_STYLE];
+					}
+					if (v.type === "contributor") {
+
+						return [k, CONTRIBUTOR_STYLE];
+					}
+					return null;
+				}
+				return [k, v.style];
+/*
+				if (v === "contributor") {
+
+					return [k, SUPPORTER_TYPE.CONTRIBUTOR];
+				}
+				if (v === "donor") {
+
+					return [k, SUPPORTER_TYPE.DONOR];
+				}
+				if (v === "bronze") {
+
+					return [k, SUPPORTER_TYPE.BRONZE];
+				}
+				if (v === "silver") {
+
+					return [k, SUPPORTER_TYPE.SILVER];
+				}
+				if (v === "gold") {
+
+					return [k, SUPPORTER_TYPE.GOLD];
+				}
+				return null;
+*/
+			}).filter((entry) => entry !== null));
 		}
+
+		// END SUPPORTER SECTION
 	}
 
-	_getSupporterColor(handle) {
+/*
+	_getSupporterStyle(handle) {
 
-		if (this.donors.has(handle)) {
+		const supporter = this.supporters.get(handle);
+		if (supporter === undefined) {
 
-			return "#FFDB98";
+			return null;
 		}
-		if (this.contributors.has(handle)) {
+		if (supporter.type === SUPPORTER_TYPE.CONTRIBUTOR) {
 
-			return "#FFCDFF";
+			return CONTRIBUTOR_STYLE;
 		}
-		return null;
+		if (supporter.type === SUPPORTER_TYPE.DONOR) {
+
+			return DONOR_STYLE;
+		}
+		return supporter;
 	}
+*/
 
 	_updateBlue(targetElement, handleStyle, location = null) {
 
@@ -423,13 +463,16 @@ class CheckmarkManager {
 
 		// BEGIN SUPPORTER SECTION
 
-		const color = this._getSupporterColor(handle);
-		if (color !== null) {
+		const supporterStyle = this.supporters.get(handle);
+		if (supporterStyle != null) {
 
-			const nameElement = nth_element(parent, "firstElementChild", 5);
-			if (nameElement != null) {
+			if (supporterStyle.namecolor !== undefined) {
 
-				nameElement.style["color"] = color;
+				const nameElement = nth_element(parent, "firstElementChild", 5);
+				if (nameElement != null) {
+	
+					nameElement.style["color"] = supporterStyle.namecolor;
+				}
 			}
 		}
 
@@ -477,10 +520,10 @@ class CheckmarkManager {
 			document.getElementById(this.legacyBioId)?.remove();
 		}
 
-		this._updateHeading(heading_selector, color, verified, handleStyle);
+		this._updateHeading(heading_selector, supporterStyle, verified, handleStyle);
 	}
 
-	_updateHeading(selector, color, verified, handleStyle) {
+	_updateHeading(selector, supporterStyle, verified, handleStyle) {
 
 		const headingElement = document.querySelector(selector);
 		if (headingElement === null) {
@@ -490,13 +533,16 @@ class CheckmarkManager {
 
 		// BEGIN SUPPORTER SECTION
 
-		if (color !== null) {
+		if (supporterStyle != null) {
 
-			const nameElement = headingElement.parentElement?.parentElement?.
-				firstElementChild?.firstElementChild?.firstElementChild;
-			if (nameElement != null) {
+			if (supporterStyle.namecolor !== undefined) {
 
-				nameElement.style["color"] = color;
+				const nameElement = headingElement.parentElement?.parentElement?.
+					firstElementChild?.firstElementChild?.firstElementChild;
+				if (nameElement != null) {
+
+					nameElement.style["color"] = supporterStyle.namecolor;
+				}
 			}
 		}
 
@@ -536,13 +582,16 @@ class CheckmarkManager {
 
 			// BEGIN SUPPORTER SECTION
 
-			const color = this._getSupporterColor(handle);
-			if (color !== null) {
+			const supporterStyle = this.supporters.get(handle);
+			if (supporterStyle != null) {
+	
+				if (supporterStyle.namecolor !== undefined) {
+		
+					const nameElement = element2Name(element);
+					if (nameElement != null) {
 
-				const nameElement = element2Name(element);
-				if (nameElement != null) {
-
-					nameElement.style["color"] = color;
+						nameElement.style["color"] = supporterStyle.namecolor;
+					}
 				}
 			}
 
@@ -614,12 +663,12 @@ async function checkmarkManagerFactory() {
 		"invocations", "polldelay", "supporters"
 	]);
 
-	if (typeof properties.checkmark === 'undefined') {
+	if (properties.checkmark === undefined) {
 
 		console.error("Original Birds could not load checkmark.");
 		return null;
 	}
-	if (typeof properties.handles === 'undefined') {
+	if (properties.handles === undefined) {
 
 		console.error("Original Birds could not load verified handles.");
 		return null;
