@@ -54,12 +54,16 @@ async function fetchHandles() {
 	try {
 
 		const response = await fetch("https://original-birds.pages.dev/verified_handles.txt");
+		if (!response.ok) {
+
+			throw new Error("Original Birds encountered status [" + response.status + "] retrieving the list.");
+		}
 		data = await response.text();
 	}
 	catch (error) {
 
-		console.log(error.message);
 		console.log("Warning: Original Birds could not retrieve the latest legacy users list.");
+		console.log(error.message);
 
 		try {
 
@@ -68,18 +72,23 @@ async function fetchHandles() {
 		}
 		catch (error) {
 
+			console.error("Original Birds could not find a local fallback list.");
 			console.error(error);
 			return;
 		}
 	}
 
 	const handles = data.split('\n').filter((str) => str !== "").map((str) => str.toLowerCase());
-	const handlesSet = new Set(handles);
+	//console.log(handles.constructor.prototype);
+	// const handlesSet = new Set(handles);
+	//console.log(typeof handlesSet.constructor.prototype);
 
 	const theDate = new Date();
 	theDate.setHours(0,0,0,0);
 
-	chrome.storage.local.set({handles: Array.from(handlesSet), lasthandlesupdate: theDate.toJSON});
+	//const x = Array.from(handlesSet);
+	//console.log(x.constructor.prototype);
+	chrome.storage.local.set({handles: handles, lasthandlesupdate: theDate.toJSON});
 }
 
 async function fetchSupporters() {
