@@ -14,6 +14,27 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 	return false;
 });
 
+function getFrequency(freq) {
+
+	if (freq === "daily") {
+
+		return 24 * 60 * 60 * 1000;
+	}
+	if (freq === "weekly") {
+
+		return 7 * 24 * 60 * 60 * 1000;
+	}
+	if (freq === "monthly") {
+
+		return 28 * 24 * 60 * 60 * 1000;
+	}
+	if (freq === "yearly") {
+
+		return 365 * 24 * 60 * 60 * 1000;
+	}
+	return 0;
+}
+
 function cacheCheckmark() {
 
 	const callbacks = [];
@@ -27,47 +48,77 @@ function cacheCheckmark() {
 	});
 }
 
-async function loadHandles() {
+async function fetchHandles() {
 
-	const response = await fetch("../data/verified_handles.txt");
-	const data = await response.text();
+	let data;
+	try {
+
+		const response = await fetch("https://original-birds.pages.dev/verified_handles.txt");
+		data = await response.text();
+	}
+	catch (error) {
+
+		console.log(error.message);
+		console.log("Warning: Original Birds could not retrieve the latest legacy users list.");
+
+		try {
+
+			const response = await fetch("../data/verified_handles.txt");
+			data = await response.text();
+		}
+		catch (error) {
+
+			console.error(error);
+			return;
+		}
+	}
+
 	const handles = data.split('\n').filter((str) => str !== "").map((str) => str.toLowerCase());
-
 	const handlesSet = new Set(handles);
-	chrome.storage.local.set({handles: Array.from(handlesSet)});
+
+	const theDate = new Date();
+	theDate.setHours(0,0,0,0);
+
+	chrome.storage.local.set({handles: Array.from(handlesSet), lasthandlesupdate: theDate.toJSON});
 }
 
-async function getSupporters() {
+async function fetchSupporters() {
 
 	const response = await fetch("https://original-birds.pages.dev/supporters.json");
 	const data = await response.text();
 
-	chrome.storage.local.set({supporters: data});
 	const theDate = new Date();
 	theDate.setHours(0,0,0,0);
-	chrome.storage.local.set({lastlaunch: theDate.toJSON()});
+
+	chrome.storage.local.set({supporters: data, lastlaunch: theDate.toJSON()});
 }
 
-chrome.storage.local.get(["checkmark", "handles", "supporters", "lastlaunch"], (result) => {
+chrome.storage.local.get([
+	"checkmark", "handles", "selectors", "supporters",
+	"lasthandlesupdate", "lastselectorsupdate", "lastlaunch",
+	"checkmarkfrequency", "handlesfrequency", "selectorsfrequency"], (result) => {
 
-	if (typeof result.checkmark === 'undefined') {
+	const theDate = new Date();
+	theDate.setHours(0,0,0,0);
+
+	// TODO: checkmark freq
+	if (result.checkmark === undefined) {
 
 		cacheCheckmark();
 	}
 
-	const oneWeekInMilliseconds = 5 * 24 * 60 * 60 * 1000; // 5 days in milliseconds
-	const theDate = new Date();
-	theDate.setHours(0,0,0,0);
-	const overdue = typeof result.lastlaunch === 'undefined' ||
-		Math.abs(theDate - new Date(result.lastlaunch)) >= oneWeekInMilliseconds;
+	if (result.supporters === undefined ||
+		result.lastlaunch === undefined ||
+		Math.abs(theDate - new Date(result.lasthandlesupdate)) >=
+		getFrequency(result.handlesfrequency ?? "weekly")) {
 
-	if (typeof result.handles === 'undefined' || overdue) {
-
-		loadHandles();
+		fetchHandles();
 	}
 
-	if (typeof result.supporters === 'undefined' || overdue) {
+	if (result.supporters === undefined ||
+		result.lastlaunch === undefined ||
+		Math.abs(theDate - new Date(result.lastlaunch)) >= 24 * 60 * 60 * 1000) {
 
-		getSupporters();
+		fetchSupporters();
 	}
 });

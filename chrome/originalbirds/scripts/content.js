@@ -34,15 +34,7 @@ const CHECKMARK_LOCATION = Object.freeze({
 	HEADING: 0,
 	BIO: 1
 });
-/*
-const SUPPORTER_TYPE = Object.freeze({
-	CONTRIBUTOR: 0,
-	DONOR: 1,
-	BRONZE: 2,
-	SILVER: 3,
-	GOLD: 4
-});
-*/
+
 const DONOR_STYLE = Object.freeze({"namecolor": "#FFDB98"});
 const CONTRIBUTOR_STYLE = Object.freeze({"namecolor": "#FFCDFF"});
 
@@ -199,54 +191,11 @@ class CheckmarkManager {
 					return null;
 				}
 				return [k, v.style];
-/*
-				if (v === "contributor") {
-
-					return [k, SUPPORTER_TYPE.CONTRIBUTOR];
-				}
-				if (v === "donor") {
-
-					return [k, SUPPORTER_TYPE.DONOR];
-				}
-				if (v === "bronze") {
-
-					return [k, SUPPORTER_TYPE.BRONZE];
-				}
-				if (v === "silver") {
-
-					return [k, SUPPORTER_TYPE.SILVER];
-				}
-				if (v === "gold") {
-
-					return [k, SUPPORTER_TYPE.GOLD];
-				}
-				return null;
-*/
 			}).filter((entry) => entry !== null));
 		}
 
 		// END SUPPORTER SECTION
 	}
-
-/*
-	_getSupporterStyle(handle) {
-
-		const supporter = this.supporters.get(handle);
-		if (supporter === undefined) {
-
-			return null;
-		}
-		if (supporter.type === SUPPORTER_TYPE.CONTRIBUTOR) {
-
-			return CONTRIBUTOR_STYLE;
-		}
-		if (supporter.type === SUPPORTER_TYPE.DONOR) {
-
-			return DONOR_STYLE;
-		}
-		return supporter;
-	}
-*/
 
 	_updateBlue(targetElement, handleStyle, location = null) {
 
