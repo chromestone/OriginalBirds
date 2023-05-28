@@ -14,114 +14,6 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 	return false;
 });
 
-const LAST_TWITTER_UPDATE = new Date("2023-04-22T16:00:00.000Z");
-
-const DEFAULT_SELECTORS = {
-	// checkmark selector to get html with checkmark svg
-	checkselector: {
-		selector: 'div[data-testid="UserName"] > ' + '* > '.repeat(4) + '[dir] > ' + '* > '.repeat(4) + ':nth-child(1)',
-		element2target: [],
-		element2name: [],
-		element2border: []
-	},
-
-	// targets user name on their profile/feed page
-	userselector: {
-		selector: 'div[data-testid="UserName"] > ' + '* > '.repeat(5) + '[dir] > *',
-		element2target: [],
-		element2name: [],
-		element2border: []
-	},
-	// targets top heading on user page
-	headingselector: {
-		selector: 'h2[role="heading"] > ' + '* > '.repeat(4) + ':last-child > *',
-		element2target: [],
-		element2name: [],
-		element2border: []
-	},
-
-	selectors: [
-		// targets feed topmost post
-		// targets user feed or thread reply with (nested) post
-		{
-			selector: 'div[data-testid="User-Name"] > :last-child > * > * > * > [dir] > *',
-			element2target: [],
-			element2name: [],
-			element2border: []
-		},
-		// targets user name when writing a popup reply
-		{
-			selector: 'div[data-testid="User-Name"] > :last-child > * > * > [dir] > span',
-			element2target: [],
-			element2name: [],
-			element2border: []
-		},
-		// targets overlay upon hovering on user
-		{
-			selector: 'div[data-testid="HoverCard"] > ' + '* > '.repeat(8) + '[dir] > span',
-			element2target: [],
-			element2name: [],
-			element2border: []
-		},
-		// targets recommendation and people you might like
-		{
-			selector: 'div[data-testid="UserCell"] > ' + '* > '.repeat(9) + '[dir] > *',
-			element2target: [],
-			element2name: [],
-			element2border: []
-		},
-		// targets messages column
-		{
-			selector: 'div[data-testid="conversation"] > ' + '* > '.repeat(12) + '[dir] > *',
-			element2target: [],
-			element2name: [],
-			element2border: []
-		},
-		// targets active message header
-		{
-			selector: 'div[data-testid="cellInnerDiv"] > ' + 'div > '.repeat(5) + 'a > div > div[dir] > span',
-			element2target: [],
-			element2name: [],
-			element2border: []
-		},
-		// targets original embed tweets
-		{
-			selector: 'article[role] > ' + '* > '.repeat(5) + 'a:nth-child(1) > span:last-child',
-			element2target: [],
-			element2name: [],
-			element2border: []
-		},
-		// targets embed tweets
-		{
-			selector: 'article[role] > ' + '* > '.repeat(8) + '[dir] > span',
-			element2target: [],
-			element2name: [],
-			element2border: []
-		},
-	]
-};
-
-function freq2millis(freq) {
-
-	if (freq === "daily") {
-
-		return 24 * 60 * 60 * 1000;
-	}
-	if (freq === "weekly") {
-
-		return 7 * 24 * 60 * 60 * 1000;
-	}
-	if (freq === "monthly") {
-
-		return 28 * 24 * 60 * 60 * 1000;
-	}
-	if (freq === "yearly") {
-
-		return 365 * 24 * 60 * 60 * 1000;
-	}
-	return 0;
-}
-
 function cacheCheckmark() {
 
 	const callbacks = [];
@@ -173,6 +65,159 @@ async function fetchHandles() {
 	chrome.storage.local.set({handles: handles, lasthandlesupdate: theDate.toJSON()});
 }
 
+function defaultSelectors() {
+
+	function flist(...theArgs) {
+
+		return theArgs.flat();
+	}
+
+	function repeat(value, arrLen) {
+
+		return Array(arrLen).fill(value);
+	}
+
+	return {
+		// checkmark selector to get html with checkmark svg
+		checkselector: {
+			selector: 'div[data-testid="UserName"] > ' + '* > '.repeat(4) + '[dir] > ' + '* > '.repeat(4) + ':nth-child(1)'
+		},
+
+		// targets user name on their profile/feed page
+		userselector: {
+			selector: 'div[data-testid="UserName"] > ' + '* > '.repeat(5) + '[dir] > *',
+			element2target: flist(
+				repeat("parentElement", 5),
+				repeat("firstElementChild", 4),
+				repeat("lastElementChild", 3)
+			),
+			element2name: flist(
+				repeat("parentElement", 5),
+				repeat("firstElementChild", 5)
+			)
+		},
+		// targets top heading on user page
+		headingselector: {
+			selector: 'h2[role="heading"] > ' + '* > '.repeat(4) + ':last-child > *',
+			element2name: flist(
+				repeat("parentElement", 2),
+				repeat("firstElementChild", 3)
+			)
+		},
+
+		selectors: [
+			// targets feed topmost post
+			// targets user feed or thread reply with (nested) post
+			{
+				selector: 'div[data-testid="User-Name"] > :last-child > * > * > * > [dir] > *',
+				element2target: flist(
+					repeat("parentElement", 6),
+					repeat("firstElementChild", 4),
+					repeat("lastElementChild", 2)
+				),
+				element2name: flist(
+					repeat("parentElement", 7)
+				),
+				element2border: flist()
+			},
+			// targets user name when writing a popup reply
+			{
+				selector: 'div[data-testid="User-Name"] > :last-child > * > * > [dir] > span',
+				element2target: flist(
+					repeat("parentElement", 5),
+					repeat("firstElementChild", 3),
+					repeat("lastElementChild", 2)
+				),
+				element2name: flist(
+					repeat("parentElement", 6)
+				)
+			},
+			// targets overlay upon hovering on user
+			{
+				selector: 'div[data-testid="HoverCard"] > ' + '* > '.repeat(8) + '[dir] > span',
+				element2target: flist(
+					repeat("parentElement", 5),
+					repeat("firstElementChild", 2),
+					repeat("lastElementChild", 2)
+				),
+				element2name: flist(
+					repeat("parentElement", 5),
+					repeat("firstElementChild", 3)
+				),
+				element2border: flist()
+			},
+			// targets recommendation and people you might like
+			{
+				selector: 'div[data-testid="UserCell"] > ' + '* > '.repeat(9) + '[dir] > *',
+				element2target: flist(
+					repeat("parentElement", 6),
+					repeat("firstElementChild", 2),
+					repeat("lastElementChild", 3)
+				),
+				element2name: flist(
+					repeat("parentElement", 6),
+					repeat("firstElementChild", 6)
+				),
+				element2border: flist()
+			},
+			// targets messages column
+			{
+				selector: 'div[data-testid="conversation"] > ' + '* > '.repeat(12) + '[dir] > *',
+				element2target: flist(
+					repeat("parentElement", 5),
+					repeat("firstElementChild", 2),
+					repeat("lastElementChild", 2)
+				),
+				element2name: flist(
+					repeat("parentElement", 5),
+					repeat("firstElementChild", 5)
+				)
+			},
+			// targets active message header
+			{
+				selector: 'div[data-testid="cellInnerDiv"] > ' + 'div > '.repeat(5) + 'a > div > div[dir] > span',
+				element2target: flist(
+					repeat("parentElement", 6),
+					repeat("firstElementChild", 3),
+					repeat("lastElementChild", 2)
+				),
+				element2name: flist(
+					repeat("parentElement", 6),
+					repeat("firstElementChild", 6)
+				)
+			},
+			// targets original embed tweets
+			{
+				selector: 'article[role] > ' + '* > '.repeat(5) + 'a:nth-child(1) > span:last-child',
+				element2target: flist(
+					repeat("parentElement", 3),
+					repeat("firstElementChild", 6),
+					repeat("lastElementChild", 2)
+				),
+				element2name: flist(
+					repeat("parentElement", 3),
+					repeat("firstElementChild", 9)
+				),
+				element2border: flist()
+			},
+			// targets embed tweets
+			{
+				selector: 'article[role] > ' + '* > '.repeat(8) + '[dir] > span',
+				element2target: flist(
+					repeat("parentElement", 5),
+					repeat("firstElementChild", 2),
+					repeat("lastElementChild", 2)
+				),
+				element2name: flist(
+					repeat("parentElement", 5),
+					repeat("firstElementChild", 5)
+				),
+				element2border: flist()
+			},
+		]
+	};
+}
+
 async function fetchSelectors() {
 
 	let data;
@@ -193,7 +238,7 @@ async function fetchSelectors() {
 		console.log("Warning: Original Birds could not retrieve the latest selectors.");
 		console.log(error.message);
 
-		data = JSON.stringify(DEFAULT_SELECTORS);
+		data = JSON.stringify(defaultSelectors());
 	}
 
 	const theDate = new Date();
@@ -224,10 +269,34 @@ async function fetchSupporters() {
 	}
 }
 
+function freq2millis(freq) {
+
+	if (freq === "daily") {
+
+		return 24 * 60 * 60 * 1000;
+	}
+	if (freq === "weekly") {
+
+		return 7 * 24 * 60 * 60 * 1000;
+	}
+	if (freq === "monthly") {
+
+		return 28 * 24 * 60 * 60 * 1000;
+	}
+	if (freq === "yearly") {
+
+		return 365 * 24 * 60 * 60 * 1000;
+	}
+	return 0;
+}
+
 chrome.storage.local.get([
 	"checkmark", "handles", "selectors", "supporters", "lastlaunch",
 	"lastcheckmarkupdate", "lasthandlesupdate",
-	"checkmarkfrequency", "handlesfrequency"], (result) => {
+	"checkmarkfrequency", "handlesfrequency"
+], (result) => {
+
+	const LAST_TWITTER_UPDATE = new Date("2023-04-22T16:00:00.000Z");
 
 	const theDate = new Date();
 	theDate.setHours(0,0,0,0);
