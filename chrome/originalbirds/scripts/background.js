@@ -79,21 +79,118 @@ async function fetchHandles() {
 	}
 
 	const handles = data.split('\n').filter((str) => str !== "").map((str) => str.toLowerCase());
-	//console.log(handles.constructor.prototype);
-	// const handlesSet = new Set(handles);
-	//console.log(typeof handlesSet.constructor.prototype);
 
 	const theDate = new Date();
 	theDate.setHours(0,0,0,0);
 
-	//const x = Array.from(handlesSet);
-	//console.log(x.constructor.prototype);
 	chrome.storage.local.set({handles: handles, lasthandlesupdate: theDate.toJSON});
 }
 
 async function fetchSelectors() {
 
-	// TODO
+	let data;
+	try {
+
+		/* TODO
+		const response = await fetch("https://original-birds.pages.dev/selectors.json");
+		if (!response.ok) {
+
+			throw new Error("Original Birds encountered status [" + response.status + "] retrieving the list.");
+		}
+		data = await response.text();
+		*/
+		throw new Error("This is a test.");
+	}
+	catch (error) {
+
+		console.log("Warning: Original Birds could not retrieve the latest selectors.");
+		console.log(error.message);
+
+		data = {
+			// checkmark selector to get html with checkmark svg
+			checkselector: {
+				selector: 'div[data-testid="UserName"] > ' + '* > '.repeat(4) + '[dir] > ' + '* > '.repeat(4) + ':nth-child(1)',
+				element2target: [],
+				element2name: [],
+				element2border: []
+			},
+
+			// targets user name on their profile/feed page
+			userselector: {
+				selector: 'div[data-testid="UserName"] > ' + '* > '.repeat(5) + '[dir] > *',
+				element2target: [],
+				element2name: [],
+				element2border: []
+			},
+			// targets top heading on user page
+			headingselector: {
+				selector: 'h2[role="heading"] > ' + '* > '.repeat(4) + ':last-child > *',
+				element2target: [],
+				element2name: [],
+				element2border: []
+			},
+
+			selectors: [
+				// targets feed topmost post
+				// targets user feed or thread reply with (nested) post
+				{
+					selector: 'div[data-testid="User-Name"] > :last-child > * > * > * > [dir] > *',
+					element2target: [],
+					element2name: [],
+					element2border: []
+				},
+				// targets user name when writing a popup reply
+				{
+					selector: 'div[data-testid="User-Name"] > :last-child > * > * > [dir] > span',
+					element2target: [],
+					element2name: [],
+					element2border: []
+				},
+				// targets overlay upon hovering on user
+				{
+					selector: 'div[data-testid="HoverCard"] > ' + '* > '.repeat(8) + '[dir] > span',
+					element2target: [],
+					element2name: [],
+					element2border: []
+				},
+				// targets recommendation and people you might like
+				{
+					selector: 'div[data-testid="UserCell"] > ' + '* > '.repeat(9) + '[dir] > *',
+					element2target: [],
+					element2name: [],
+					element2border: []
+				},
+				// targets messages column
+				{
+					selector: 'div[data-testid="conversation"] > ' + '* > '.repeat(12) + '[dir] > *',
+					element2target: [],
+					element2name: [],
+					element2border: []
+				},
+				// targets active message header
+				{
+					selector: 'div[data-testid="cellInnerDiv"] > ' + 'div > '.repeat(5) + 'a > div > div[dir] > span',
+					element2target: [],
+					element2name: [],
+					element2border: []
+				},
+				// targets original embed tweets
+				{
+					selector: 'article[role] > ' + '* > '.repeat(5) + 'a:nth-child(1) > span:last-child',
+					element2target: [],
+					element2name: [],
+					element2border: []
+				},
+				// targets embed tweets
+				{
+					selector: 'article[role] > ' + '* > '.repeat(8) + '[dir] > span',
+					element2target: [],
+					element2name: [],
+					element2border: []
+				},
+			]
+		};
+	}
 }
 
 async function fetchSupporters() {
@@ -122,18 +219,17 @@ chrome.storage.local.get([
 
 	if (result.handles === undefined ||
 		result.lasthandlesupdate === undefined ||
-		Math.abs(theDate - new Date(result.lasthandlesupdate)) >=
-		getFrequency(result.handlesfrequency ?? "weekly")) {
+		Math.abs(theDate - new Date(result.lasthandlesupdate)) >= getFrequency(result.handlesfrequency ?? "weekly")) {
 
 		fetchHandles();
 	}
 
 	const overdue = result.lastselectorsupdate === undefined ||
-		Math.abs(theDate - new Date(result.lasthandlesupdate)) >= getFrequency(result.handlesfrequency ?? "weekly");
+		Math.abs(theDate - new Date(result.lastselectorsupdate)) >= getFrequency(result.selectorsfrequency ?? "daily");
 
 	if (result.selectors === undefined || overdue) {
 
-		fetchHandles();
+		fetchSelectors();
 	}
 
 	// BEGIN SUPPORTER SECTION
