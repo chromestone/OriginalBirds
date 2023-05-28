@@ -64,8 +64,13 @@ function waitForElement(selector) {
 
 function setCheckmark(targetElement) {
 
-	return new Promise((resolve) =>
-		chrome.storage.local.set({checkmark: DOMPurify.sanitize(targetElement.outerHTML)}, () => resolve(null)));
+	const theDate = new Date();
+	theDate.setHours(0,0,0,0);
+
+	return new Promise((resolve) => chrome.storage.local.set({
+		checkmark: DOMPurify.sanitize(targetElement.outerHTML),
+		lastcheckmarkupdate: theDate
+	}, () => resolve(null)));
 }
 
 function getProperties(keys) {
