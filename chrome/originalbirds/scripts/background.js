@@ -91,6 +91,11 @@ async function fetchHandles() {
 	chrome.storage.local.set({handles: handles, lasthandlesupdate: theDate.toJSON});
 }
 
+async function fetchSelectors() {
+
+	// TODO
+}
+
 async function fetchSupporters() {
 
 	const response = await fetch("https://original-birds.pages.dev/supporters.json");
@@ -103,8 +108,7 @@ async function fetchSupporters() {
 }
 
 chrome.storage.local.get([
-	"checkmark", "handles", "selectors", "supporters",
-	"lasthandlesupdate", "lastselectorsupdate", "lastlaunch",
+	"checkmark", "handles", "selectors", "supporters", "lasthandlesupdate", "lastlaunch",
 	"checkmarkfrequency", "handlesfrequency", "selectorsfrequency"], (result) => {
 
 	const theDate = new Date();
@@ -116,18 +120,28 @@ chrome.storage.local.get([
 		cacheCheckmark();
 	}
 
-	if (result.supporters === undefined ||
-		result.lastlaunch === undefined ||
+	if (result.handles === undefined ||
+		result.lasthandlesupdate === undefined ||
 		Math.abs(theDate - new Date(result.lasthandlesupdate)) >=
 		getFrequency(result.handlesfrequency ?? "weekly")) {
 
 		fetchHandles();
 	}
 
-	if (result.supporters === undefined ||
-		result.lastlaunch === undefined ||
-		Math.abs(theDate - new Date(result.lastlaunch)) >= 24 * 60 * 60 * 1000) {
+	const overdue = result.lastselectorsupdate === undefined ||
+		Math.abs(theDate - new Date(result.lasthandlesupdate)) >= getFrequency(result.handlesfrequency ?? "weekly");
+
+	if (result.selectors === undefined || overdue) {
+
+		fetchHandles();
+	}
+
+	// BEGIN SUPPORTER SECTION
+
+	if (result.supporters === undefined || overdue) {
 
 		fetchSupporters();
 	}
+
+	// END SUPPORTER SECTION
 });
