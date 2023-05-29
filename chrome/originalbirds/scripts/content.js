@@ -103,10 +103,11 @@ function nth_element(elem, dir, n) {
 
 class CheckmarkManager {
 
-	constructor(verifiedHandles, checkHtml, properties) {
+	constructor(verifiedHandles, checkHtml, selectors, properties) {
 
 		this.verifiedHandles = verifiedHandles;
 		this.checkHtml = checkHtml;
+		this.selectors = selectors;
 
 		// do not use new here
 		this.showBlue = Boolean(properties.showblue ?? true);
@@ -528,20 +529,29 @@ class CheckmarkManager {
 		}
 	}
 
-	updateCheckmark(selector, element2Target, element2Name, start=1) {
+	updateCheckmark() {
 
-		for (const element of document.querySelectorAll(selector)) {
+		for (const checkmarkArgs of this.selectors.selectors) {
 
-			const handle = element.textContent?.substring(start).toLowerCase();
+			this._updateCheckmark(checkmarkArgs);
+		}
+	}
+
+	_updateCheckmark({selector, nthparent, parent2target, parent2name = null, indexstart = 1}) {
+
+		for (const handleElement of document.querySelectorAll(selector)) {
+
+			const handle = handleElement.textContent?.substring(indexstart).toLowerCase();
+			const parent = nth_element(handleElement, "parentElement", nthparent);
 
 			// BEGIN SUPPORTER SECTION
 
 			const supporterStyle = this.supporters.get(handle);
 			if (supporterStyle != null) {
 	
-				if (supporterStyle.namecolor !== undefined) {
-		
-					const nameElement = element2Name(element);
+				if (parent2name != null && supporterStyle.namecolor != null) {
+
+					const nameElement = parent.querySelector(parent2name);
 					if (nameElement != null) {
 
 						nameElement.style["color"] = supporterStyle.namecolor;
@@ -560,7 +570,7 @@ class CheckmarkManager {
 				continue;
 			}
 
-			const targetElement = element2Target(element);
+			const targetElement = parent.querySelector(parent2target);
 			// this should not happen unless html structure changed
 			// double equal checks for undefined as well
 			if (targetElement == null) {
@@ -569,7 +579,7 @@ class CheckmarkManager {
 				continue;
 			}
 
-			const handleStyle = getComputedStyle(element.parentElement);
+			const handleStyle = getComputedStyle(handleElement.parentElement);
 
 			if (this.doBlueUpdate) {
 
@@ -612,7 +622,7 @@ class CheckmarkManager {
 async function checkmarkManagerFactory() {
 
 	const properties = await getProperties([
-		"handles", "checkmark", "showblue", "showlegacy", "bluelook", "legacylook",
+		"checkmark", "handles", "selectors", "showblue", "showlegacy", "bluelook", "legacylook",
 		"bluecolor", "legacycolor", "bluetext", "legacytext", "blueimage", "legacyimage",
 		"invocations", "polldelay", "supporters"
 	]);
@@ -627,6 +637,11 @@ async function checkmarkManagerFactory() {
 		console.error("Original Birds could not load verified handles.");
 		return null;
 	}
+	if (properties.selectors === undefined) {
+
+		console.error("Original Birds could not load selectors.");
+		return null;
+	}
 
 	const parser = new DOMParser();
 	const checkDoc = parser.parseFromString(DOMPurify.sanitize(properties.checkmark), "text/html");
@@ -637,9 +652,13 @@ async function checkmarkManagerFactory() {
 		console.error("Original Birds could not load checkmark.");
 		return;
 	}
+
+	// TODO validate selectors
+	const selectors = JSON.parse(properties.selectors);
+
 	const verifiedHandles = new Set(properties.handles);
 
-	return new CheckmarkManager(verifiedHandles, checkHtml, properties);
+	return new CheckmarkManager(verifiedHandles, checkHtml, selectors, properties);
 }
 
 function registerRecurringObserver(manager) {
@@ -660,6 +679,8 @@ function registerRecurringObserver(manager) {
 			stopped = false;
 
 			manager.updateUserPage(USER_SELECTOR, HEADING_SELECTOR);
+			manager.updateCheckmark();
+			/*
 			manager.updateCheckmark(FEED_SELECTOR,
 				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 4)?.lastElementChild?.lastElementChild,
 				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 7));
@@ -685,6 +706,7 @@ function registerRecurringObserver(manager) {
 			manager.updateCheckmark(EMBED_TWEET_SELECTOR,
 				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.lastElementChild?.lastElementChild,
 				(element) => nth_element(nth_element(element, "parentElement", 5), "firstElementChild", 5));
+			*/
 
 			window.setTimeout(addCheckmark, manager.pollDelay);
 		}
