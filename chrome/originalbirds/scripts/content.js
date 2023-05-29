@@ -69,7 +69,7 @@ function setCheckmark(targetElement) {
 
 	return new Promise((resolve) => chrome.storage.local.set({
 		checkmark: DOMPurify.sanitize(targetElement.outerHTML),
-		lastcheckmarkupdate: theDate
+		lastcheckmarkupdate: theDate.toJSON()
 	}, () => resolve(null)));
 }
 

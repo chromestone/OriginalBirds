@@ -86,23 +86,15 @@ function defaultSelectors() {
 		// targets user name on their profile/feed page
 		userselector: {
 			selector: 'div[data-testid="UserName"] > ' + '* > '.repeat(5) + '[dir] > *',
-			element2target: flist(
-				repeat("parentElement", 5),
-				repeat("firstElementChild", 4),
-				repeat("lastElementChild", 3)
-			),
-			element2name: flist(
-				repeat("parentElement", 5),
-				repeat("firstElementChild", 5)
-			)
+			nthparent: 5,
+			parent2target: ':nth-child(1) > '.repeat(4) + ':last-child > :last-child > :last-child',
+			parent2name: ':nth-child(1) > '.repeat(4) + 'nth-child(1)'
 		},
 		// targets top heading on user page
 		headingselector: {
 			selector: 'h2[role="heading"] > ' + '* > '.repeat(4) + ':last-child > *',
-			element2name: flist(
-				repeat("parentElement", 2),
-				repeat("firstElementChild", 3)
-			)
+			nthparent: 2,
+			parent2name: 'nth-child(1) > nth-child(1) > nth-child(1)'
 		},
 
 		selectors: [
@@ -110,109 +102,64 @@ function defaultSelectors() {
 			// targets user feed or thread reply with (nested) post
 			{
 				selector: 'div[data-testid="User-Name"] > :last-child > * > * > * > [dir] > *',
-				element2target: flist(
-					repeat("parentElement", 6),
-					repeat("firstElementChild", 4),
-					repeat("lastElementChild", 2)
-				),
-				element2name: flist(
-					repeat("parentElement", 7)
-				),
-				element2border: flist()
+				nthparent: 6,
+				parent2target: ':nth-child(1) > '.repeat(4) + ':last-child > :last-child',
+				parent2name: ':nth-child(1) > '.repeat(6) + ':nth-child(1)',
+				parent2border: ''
 			},
 			// targets user name when writing a popup reply
 			{
 				selector: 'div[data-testid="User-Name"] > :last-child > * > * > [dir] > span',
-				element2target: flist(
-					repeat("parentElement", 5),
-					repeat("firstElementChild", 3),
-					repeat("lastElementChild", 2)
-				),
-				element2name: flist(
-					repeat("parentElement", 6)
-				)
+				nthparent: 5,
+				parent2target: ':nth-child(1) > '.repeat(3) + ':last-child > :last-child',
+				parent2name: ':nth-child(1) > '.repeat(5) + ':nth-child(1)'
 			},
 			// targets overlay upon hovering on user
 			{
 				selector: 'div[data-testid="HoverCard"] > ' + '* > '.repeat(8) + '[dir] > span',
-				element2target: flist(
-					repeat("parentElement", 5),
-					repeat("firstElementChild", 2),
-					repeat("lastElementChild", 2)
-				),
-				element2name: flist(
-					repeat("parentElement", 5),
-					repeat("firstElementChild", 3)
-				),
-				element2border: flist()
+				nthparent: 5,
+				parent2target: ':nth-child(1) > :nth-child(1) > :last-child > :last-child',
+				parent2name: ':nth-child(1) > :nth-child(1) > :nth-child(1)',
+				parent2border: ''
 			},
 			// targets recommendation and people you might like
 			{
 				selector: 'div[data-testid="UserCell"] > ' + '* > '.repeat(9) + '[dir] > *',
-				element2target: flist(
-					repeat("parentElement", 6),
-					repeat("firstElementChild", 2),
-					repeat("lastElementChild", 3)
-				),
-				element2name: flist(
-					repeat("parentElement", 6),
-					repeat("firstElementChild", 6)
-				),
-				element2border: flist()
+				nthparent: 6,
+				parent2target: ':nth-child(1) > :nth-child(1) > :last-child > :last-child > :last-child',
+				parent2name: ':nth-child(1) > '.repeat(5) + ':nth-child(1)',
+				parent2border: ''
 			},
 			// targets messages column
 			{
 				selector: 'div[data-testid="conversation"] > ' + '* > '.repeat(12) + '[dir] > *',
-				element2target: flist(
-					repeat("parentElement", 5),
-					repeat("firstElementChild", 2),
-					repeat("lastElementChild", 2)
-				),
-				element2name: flist(
-					repeat("parentElement", 5),
-					repeat("firstElementChild", 5)
-				)
+				nthparent: 5,
+				parent2target: ':nth-child(1) > :nth-child(1) > :last-child > :last-child',
+				parent2name: ':nth-child(1) > '.repeat(4) + ':nth-child(1)'
 			},
 			// targets active message header
 			{
 				selector: 'div[data-testid="cellInnerDiv"] > ' + 'div > '.repeat(5) + 'a > div > div[dir] > span',
-				element2target: flist(
-					repeat("parentElement", 6),
-					repeat("firstElementChild", 3),
-					repeat("lastElementChild", 2)
-				),
-				element2name: flist(
-					repeat("parentElement", 6),
-					repeat("firstElementChild", 6)
-				)
+				nthparent: 6,
+				parent2target: ':nth-child(1) > '.repeat(3) + ':last-child > :last-child',
+				parent2name: ':nth-child(1) > '.repeat(5) + ':nth-child(1)'
 			},
 			// targets original embed tweets
 			{
 				selector: 'article[role] > ' + '* > '.repeat(5) + 'a:nth-child(1) > span:last-child',
-				element2target: flist(
-					repeat("parentElement", 3),
-					repeat("firstElementChild", 6),
-					repeat("lastElementChild", 2)
-				),
-				element2name: flist(
-					repeat("parentElement", 3),
-					repeat("firstElementChild", 9)
-				),
-				element2border: flist()
+				nthparent: 3,
+				parent2target: ':nth-child(1) > '.repeat(6) + ':last-child > :last-child',
+				parent2name: ':nth-child(1) > '.repeat(8) + ':nth-child(1)',
+				parent2border: '',
+				indexstart: 0
 			},
 			// targets embed tweets
 			{
 				selector: 'article[role] > ' + '* > '.repeat(8) + '[dir] > span',
-				element2target: flist(
-					repeat("parentElement", 5),
-					repeat("firstElementChild", 2),
-					repeat("lastElementChild", 2)
-				),
-				element2name: flist(
-					repeat("parentElement", 5),
-					repeat("firstElementChild", 5)
-				),
-				element2border: flist()
+				nthparent: 5,
+				parent2target: ':nth-child(1) > :nth-child(1) > :last-child > :last-child',
+				parent2name: ':nth-child(1) > '.repeat(4) + ':nth-child(1)',
+				parent2border: ''
 			},
 		]
 	};
@@ -296,6 +243,8 @@ chrome.storage.local.get([
 	"checkmarkfrequency", "handlesfrequency"
 ], (result) => {
 
+	console.log(result);
+
 	const LAST_TWITTER_UPDATE = new Date("2023-04-22T16:00:00.000Z");
 
 	const theDate = new Date();
@@ -315,6 +264,7 @@ chrome.storage.local.get([
 		Math.abs(theDate - new Date(result.lastcheckmarkupdate)) >=
 		freq2millis(result.checkmarkfrequency)))) {
 
+		console.log("checkmark");
 		cacheCheckmark();
 	}
 
@@ -324,6 +274,7 @@ chrome.storage.local.get([
 		Math.abs(theDate - new Date(result.lasthandlesupdate)) >=
 		freq2millis(result.handlesfrequency))) {
 
+		console.log("handles");
 		fetchHandles();
 	}
 
@@ -332,6 +283,7 @@ chrome.storage.local.get([
 
 	if (result.selectors === undefined || overdue) {
 
+		console.log("selectors");
 		fetchSelectors();
 	}
 
@@ -339,6 +291,7 @@ chrome.storage.local.get([
 
 	if (result.supporters === undefined || overdue) {
 
+		console.log("supporters");
 		fetchSupporters();
 	}
 
