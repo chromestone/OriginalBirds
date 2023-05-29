@@ -67,16 +67,6 @@ async function fetchHandles() {
 
 function defaultSelectors() {
 
-	function flist(...theArgs) {
-
-		return theArgs.flat();
-	}
-
-	function repeat(value, arrLen) {
-
-		return Array(arrLen).fill(value);
-	}
-
 	return {
 		// checkmark selector to get html with checkmark svg
 		checkselector: {
@@ -87,14 +77,14 @@ function defaultSelectors() {
 		userselector: {
 			selector: 'div[data-testid="UserName"] > ' + '* > '.repeat(5) + '[dir] > *',
 			nthparent: 5,
-			parent2target: ':nth-child(1) > '.repeat(4) + ':last-child > :last-child > :last-child',
-			parent2name: ':nth-child(1) > '.repeat(4) + 'nth-child(1)'
+			parent2target: ':scope' + ' > :nth-child(1)'.repeat(4) + ' > :last-child'.repeat(3),
+			parent2name: ':scope' + ' > :nth-child(1)'.repeat(5)
 		},
 		// targets top heading on user page
 		headingselector: {
 			selector: 'h2[role="heading"] > ' + '* > '.repeat(4) + ':last-child > *',
 			nthparent: 2,
-			parent2name: 'nth-child(1) > nth-child(1) > nth-child(1)'
+			parent2name: ':scope' + ' > nth-child(1)'.repeat(3)
 		},
 
 		selectors: [
@@ -103,53 +93,53 @@ function defaultSelectors() {
 			{
 				selector: 'div[data-testid="User-Name"] > :last-child > * > * > * > [dir] > *',
 				nthparent: 6,
-				parent2target: ':nth-child(1) > '.repeat(4) + ':last-child > :last-child',
-				parent2name: ':nth-child(1) > '.repeat(6) + ':nth-child(1)',
+				parent2target: ':scope' + ' > :nth-child(1)'.repeat(4) + ' > :last-child'.repeat(2),
+				parent2name: ':scope' + ' > :nth-child(1)'.repeat(7),
 				parent2border: ''
 			},
 			// targets user name when writing a popup reply
 			{
 				selector: 'div[data-testid="User-Name"] > :last-child > * > * > [dir] > span',
 				nthparent: 5,
-				parent2target: ':nth-child(1) > '.repeat(3) + ':last-child > :last-child',
-				parent2name: ':nth-child(1) > '.repeat(5) + ':nth-child(1)'
+				parent2target: ':scope' + ' > :nth-child(1)'.repeat(3) + ' > :last-child'.repeat(2),
+				parent2name: ':scope' + ' > :nth-child(1)'.repeat(6)
 			},
 			// targets overlay upon hovering on user
 			{
 				selector: 'div[data-testid="HoverCard"] > ' + '* > '.repeat(8) + '[dir] > span',
 				nthparent: 5,
-				parent2target: ':nth-child(1) > :nth-child(1) > :last-child > :last-child',
-				parent2name: ':nth-child(1) > :nth-child(1) > :nth-child(1)',
+				parent2target: ':scope' + ' > :nth-child(1)'.repeat(2) + ' > :last-child'.repeat(2),
+				parent2name: ':scope' + ' > :nth-child(1)'.repeat(3),
 				parent2border: ''
 			},
 			// targets recommendation and people you might like
 			{
 				selector: 'div[data-testid="UserCell"] > ' + '* > '.repeat(9) + '[dir] > *',
 				nthparent: 6,
-				parent2target: ':nth-child(1) > :nth-child(1) > :last-child > :last-child > :last-child',
-				parent2name: ':nth-child(1) > '.repeat(5) + ':nth-child(1)',
+				parent2target: ':scope' + ' > :nth-child(1)'.repeat(2) + '> :last-child'.repeat(3),
+				parent2name: ':scope' + ' > :nth-child(1)'.repeat(6),
 				parent2border: ''
 			},
 			// targets messages column
 			{
 				selector: 'div[data-testid="conversation"] > ' + '* > '.repeat(12) + '[dir] > *',
 				nthparent: 5,
-				parent2target: ':nth-child(1) > :nth-child(1) > :last-child > :last-child',
-				parent2name: ':nth-child(1) > '.repeat(4) + ':nth-child(1)'
+				parent2target: ':scope' + ' > :nth-child(1)'.repeat(2) + ' > :last-child'.repeat(2),
+				parent2name: ':scope' + ' > :nth-child(1)'.repeat(5)
 			},
 			// targets active message header
 			{
 				selector: 'div[data-testid="cellInnerDiv"] > ' + 'div > '.repeat(5) + 'a > div > div[dir] > span',
 				nthparent: 6,
-				parent2target: ':nth-child(1) > '.repeat(3) + ':last-child > :last-child',
-				parent2name: ':nth-child(1) > '.repeat(5) + ':nth-child(1)'
+				parent2target: ':scope' + ' > :nth-child(1)'.repeat(3) + ' > :last-child'.repeat(2),
+				parent2name: ':scope' + ' > :nth-child(1)'.repeat(6)
 			},
 			// targets original embed tweets
 			{
 				selector: 'article[role] > ' + '* > '.repeat(5) + 'a:nth-child(1) > span:last-child',
 				nthparent: 3,
-				parent2target: ':nth-child(1) > '.repeat(6) + ':last-child > :last-child',
-				parent2name: ':nth-child(1) > '.repeat(8) + ':nth-child(1)',
+				parent2target: ':scope' + ' > :nth-child(1)'.repeat(6) + ' > :last-child'.repeat(2),
+				parent2name: ':scope' + ' > :nth-child(1)'.repeat(9),
 				parent2border: '',
 				indexstart: 0
 			},
@@ -157,8 +147,8 @@ function defaultSelectors() {
 			{
 				selector: 'article[role] > ' + '* > '.repeat(8) + '[dir] > span',
 				nthparent: 5,
-				parent2target: ':nth-child(1) > :nth-child(1) > :last-child > :last-child',
-				parent2name: ':nth-child(1) > '.repeat(4) + ':nth-child(1)',
+				parent2target: ':scope' + ' > :nth-child(1)'.repeat(2) + ' > :last-child'.repeat(2),
+				parent2name: ':scope' + ' > :nth-child(1)'.repeat(5),
 				parent2border: ''
 			},
 		]
