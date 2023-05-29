@@ -68,11 +68,6 @@ async function fetchHandles() {
 function defaultSelectors() {
 
 	return {
-		// checkmark selector to get html with checkmark svg
-		checkselector: {
-			selector: 'div[data-testid="UserName"] > ' + '* > '.repeat(4) + '[dir] > ' + '* > '.repeat(4) + ':nth-child(1)'
-		},
-
 		// targets user name on their profile/feed page
 		userselector: {
 			selector: 'div[data-testid="UserName"] > ' + '* > '.repeat(5) + '[dir] > *',
@@ -202,6 +197,7 @@ async function fetchSupporters() {
 	}
 	catch (error) {
 
+		console.error("Original Birds encountered an error retrieving supporters.");
 		console.error(error);
 	}
 }
@@ -229,34 +225,28 @@ function freq2millis(freq) {
 
 chrome.storage.local.get([
 	"checkmark", "handles", "selectors", "supporters", "lastlaunch",
-	"lastcheckmarkupdate", "lasthandlesupdate",
-	"checkmarkfrequency", "handlesfrequency"
+	"lastcheckmarkupdate", "lasthandlesupdate", "handlesfrequency"
 ], (result) => {
 
 	console.log(result);
 
-	const LAST_TWITTER_UPDATE = new Date("2023-04-22T16:00:00.000Z");
-
 	const theDate = new Date();
 	theDate.setHours(0,0,0,0);
 
-	result.checkmarkfrequency ??= "automatic";
-	result.handlesfrequency ??= "monthly";
-
+	// this is not a true value,
+	// rather it is used to force a checkmark cache if an update deems it necessary.
+	const LAST_TWITTER_UPDATE = new Date("2023-04-22T16:00:00.000Z");
 	result.lastcheckmarkupdate ??= new Date("2023-04-26T16:00:00.000Z");
 
 	if (result.checkmark === undefined ||
-		(result.checkmarkfrequency === "automatic" ?
 		// check if last Twitter update is newer than when checkmark was last retrieved
-		result.lastcheckmarkupdate <= LAST_TWITTER_UPDATE :
-		// only update on user set frequency
-		(result.checkmarkfrequency !== "never" &&
-		Math.abs(theDate - new Date(result.lastcheckmarkupdate)) >=
-		freq2millis(result.checkmarkfrequency)))) {
+		LAST_TWITTER_UPDATE >= result.lastcheckmarkupdate) {
 
 		console.log("checkmark");
 		cacheCheckmark();
 	}
+
+	result.handlesfrequency ??= "monthly";
 
 	if (result.handles === undefined ||
 		result.lasthandlesupdate === undefined ||

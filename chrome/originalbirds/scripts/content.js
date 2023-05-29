@@ -103,11 +103,11 @@ function nth_element(elem, dir, n) {
 
 class CheckmarkManager {
 
-	constructor(verifiedHandles, checkHtml, selectors, properties) {
+	constructor(selectors, verifiedHandles, checkHtml, properties) {
 
+		this.selectors = selectors;
 		this.verifiedHandles = verifiedHandles;
 		this.checkHtml = checkHtml;
-		this.selectors = selectors;
 
 		// do not use new here
 		this.showBlue = Boolean(properties.showblue ?? true);
@@ -404,7 +404,7 @@ class CheckmarkManager {
 		}
 	}
 
-	updateUserPage(user_selector, heading_selector) {
+	_updateUserPage(user_selector, heading_selector) {
 
 		const handleElement = document.querySelector(user_selector);
 		if (handleElement === null) {
@@ -529,14 +529,6 @@ class CheckmarkManager {
 		}
 	}
 
-	updateCheckmark() {
-
-		for (const checkmarkArgs of this.selectors.selectors) {
-
-			this._updateCheckmark(checkmarkArgs);
-		}
-	}
-
 	_updateCheckmark({selector, nthparent, parent2target, parent2name = null, indexstart = 1}) {
 
 		for (const handleElement of document.querySelectorAll(selector)) {
@@ -617,6 +609,14 @@ class CheckmarkManager {
 			targetElement.appendChild(div);
 		}
 	}
+
+	updateCheckmark() {
+
+		for (const checkmarkArgs of this.selectors.selectors) {
+
+			this._updateCheckmark(checkmarkArgs);
+		}
+	}
 }
 
 async function checkmarkManagerFactory() {
@@ -627,9 +627,9 @@ async function checkmarkManagerFactory() {
 		"invocations", "polldelay", "supporters"
 	]);
 
-	if (properties.checkmark === undefined) {
+	if (properties.selectors === undefined) {
 
-		console.error("Original Birds could not load checkmark.");
+		console.error("Original Birds could not load selectors.");
 		return null;
 	}
 	if (properties.handles === undefined) {
@@ -637,11 +637,14 @@ async function checkmarkManagerFactory() {
 		console.error("Original Birds could not load verified handles.");
 		return null;
 	}
-	if (properties.selectors === undefined) {
+	if (properties.checkmark === undefined) {
 
-		console.error("Original Birds could not load selectors.");
+		console.error("Original Birds could not load checkmark.");
 		return null;
 	}
+
+	// TODO validate selectors
+	const selectors = JSON.parse(properties.selectors);
 
 	const parser = new DOMParser();
 	const checkDoc = parser.parseFromString(DOMPurify.sanitize(properties.checkmark), "text/html");
@@ -653,12 +656,30 @@ async function checkmarkManagerFactory() {
 		return;
 	}
 
-	// TODO validate selectors
-	const selectors = JSON.parse(properties.selectors);
-
 	const verifiedHandles = new Set(properties.handles);
 
-	return new CheckmarkManager(verifiedHandles, checkHtml, selectors, properties);
+	// BEGIN SUPPORTER SECTION
+/*
+	if (typeof properties.supporters === 'string') {
+
+		let supportersJSON;
+		try {
+
+			supportersJSON = JSON.parse(properties.supporters)?.supporters;
+			console.log("parsed");
+		}
+		catch (error) {
+
+			console.log("Warning: Original Birds could not load supporters :( .");
+			console.log(error.message);
+		}
+		// will be undefined if not valid JSON
+		properties.supporters = supportersJSON;
+	}
+*/
+	// END SUPPORTER SECTION
+
+	return new CheckmarkManager(selectors, verifiedHandles, checkHtml, properties);
 }
 
 function registerRecurringObserver(manager) {
@@ -671,14 +692,14 @@ function registerRecurringObserver(manager) {
 	var invocations = manager.invocations;
 	var stopped = false;
 
-	function addCheckmark() {
+	function invokeManager() {
 
 		if (invocations > 0) {
 
 			invocations -= 1;
 			stopped = false;
 
-			manager.updateUserPage(USER_SELECTOR, HEADING_SELECTOR);
+			manager._updateUserPage(USER_SELECTOR, HEADING_SELECTOR);
 			manager.updateCheckmark();
 			/*
 			manager.updateCheckmark(FEED_SELECTOR,
@@ -708,21 +729,21 @@ function registerRecurringObserver(manager) {
 				(element) => nth_element(nth_element(element, "parentElement", 5), "firstElementChild", 5));
 			*/
 
-			window.setTimeout(addCheckmark, manager.pollDelay);
+			window.setTimeout(invokeManager, manager.pollDelay);
 		}
 		else {
 
 			stopped = true;
 		}
 	}
-	addCheckmark();
+	invokeManager();
 
 	const observer = new MutationObserver((_) => {
 
 		if (stopped) {
 
 			invocations = 1;
-			addCheckmark();
+			invokeManager();
 		}
 		else {
 
