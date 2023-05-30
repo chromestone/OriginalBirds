@@ -1,31 +1,7 @@
 // checkmark selector to get html with checkmark svg
 const CHECK_SELECTOR = 'div[data-testid="UserName"] > ' + '* > '.repeat(4) + '[dir] > ' + '* > '.repeat(4) + ':nth-child(1)';
 
-// targets user name on their profile/feed page
-const USER_SELECTOR = 'div[data-testid="UserName"] > ' + '* > '.repeat(5) + '[dir] > *';
-// targets top heading on user page
-const HEADING_SELECTOR = 'h2[role="heading"] > ' + '* > '.repeat(4) + ':last-child > *';
-
-// targets feed topmost post
-// targets user feed or thread reply with (nested) post
-const FEED_SELECTOR = 'div[data-testid="User-Name"] > :last-child > * > * > * > [dir] > *';
-
-// targets user name when writing a popup reply
-const COMPOSE_REPLY_TWEET_SELECTOR = 'div[data-testid="User-Name"] > :last-child > * > * > [dir] > span';
-
-// targets overlay upon hovering on user
-const HOVER_CARD_SELECTOR = 'div[data-testid="HoverCard"] > ' + '* > '.repeat(8) + '[dir] > span';
-
-// targets recommendation and people you might like
-const RECOMMENDATION_SELECTOR = 'div[data-testid="UserCell"] > ' + '* > '.repeat(9) + '[dir] > *';
-
-// targets messages
-const CONVERSATION_SELECTOR = 'div[data-testid="conversation"] > ' + '* > '.repeat(12) + '[dir] > *';
 const ACTIVE_MESSAGE_SELECTOR = 'div[data-testid="cellInnerDiv"] > ' + 'div > '.repeat(5) + 'a > div > div[dir] > span';
-
-// targets embed tweets
-const EMBED_ORIGINAL_SELECTOR = 'article[role] > ' + '* > '.repeat(5) + 'a:nth-child(1) > span:last-child';
-const EMBED_TWEET_SELECTOR = 'article[role] > ' + '* > '.repeat(8) + '[dir] > span';
 
 const VERIFIED_ICON_SELECTOR = 'svg[data-testid="icon-verified"]';
 const TWITTER_BLUE_RGB = Object.freeze([29, 155, 240]);

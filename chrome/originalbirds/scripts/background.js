@@ -70,14 +70,14 @@ function defaultSelectors() {
 	return {
 		// targets user name on their profile/feed page
 		userselector: {
-			selector: 'div[data-testid="UserName"] > ' + '* > '.repeat(5) + '[dir] > *',
+			selector: 'div[data-testid="UserName"]' + ' > *'.repeat(5) + ' > [dir] > *',
 			nthparent: 5,
 			parent2target: ':scope' + ' > :nth-child(1)'.repeat(4) + ' > :last-child'.repeat(3),
 			parent2name: ':scope' + ' > :nth-child(1)'.repeat(5)
 		},
 		// targets top heading on user page
 		headingselector: {
-			selector: 'h2[role="heading"] > ' + '* > '.repeat(4) + ':last-child > *',
+			selector: 'h2[role="heading"]' + ' > *'.repeat(4) + ' > :last-child > *',
 			nthparent: 2,
 			parent2name: ':scope' + ' > :nth-child(1)'.repeat(3)
 		},
@@ -102,23 +102,23 @@ function defaultSelectors() {
 			},
 			// targets overlay upon hovering on user
 			{
-				selector: 'div[data-testid="HoverCard"] > ' + '* > '.repeat(8) + '[dir] > span',
+				selector: 'div[data-testid="HoverCard"]' + ' > *'.repeat(8) + ' > [dir] > span',
 				nthparent: 5,
 				parent2target: ':scope' + ' > :nth-child(1)'.repeat(2) + ' > :last-child'.repeat(2),
 				parent2name: ':scope' + ' > :nth-child(1)'.repeat(3),
-				//parent2border: ''
+				closestborder: 'div[data-testid="HoverCard"]'
 			},
 			// targets recommendation and people you might like
 			{
-				selector: 'div[data-testid="UserCell"] > ' + '* > '.repeat(9) + '[dir] > *',
+				selector: 'div[data-testid="UserCell"]' + ' > *'.repeat(9) + ' > [dir] > *',
 				nthparent: 6,
 				parent2target: ':scope' + ' > :nth-child(1)'.repeat(2) + '> :last-child'.repeat(3),
 				parent2name: ':scope' + ' > :nth-child(1)'.repeat(6),
-				//parent2border: ''
+				closestborder: 'div[data-testid="UserCell"]'
 			},
 			// targets messages column
 			{
-				selector: 'div[data-testid="conversation"] > ' + '* > '.repeat(12) + '[dir] > *',
+				selector: 'div[data-testid="conversation"]' + ' > *'.repeat(12) + ' > [dir] > *',
 				nthparent: 5,
 				parent2target: ':scope' + ' > :nth-child(1)'.repeat(2) + ' > :last-child'.repeat(2),
 				parent2name: ':scope' + ' > :nth-child(1)'.repeat(5)
@@ -132,19 +132,18 @@ function defaultSelectors() {
 			},
 			// targets original embed tweets
 			{
-				selector: 'article[role] > ' + '* > '.repeat(5) + 'a:nth-child(1):has(> span)',
+				selector: 'article[role]' + ' > *'.repeat(5) + ' > a:nth-child(1):has(> span)',
 				nthparent: 2,
 				parent2target: ':scope' + ' > :nth-child(1)'.repeat(6) + ' > :last-child'.repeat(2),
-				parent2name: ':scope' + ' > :nth-child(1)'.repeat(9),
-				//parent2border: '',
+				parent2name: ':scope' + ' > :nth-child(1)'.repeat(9)
 			},
 			// targets embed tweets
 			{
-				selector: 'article[role] > ' + '* > '.repeat(8) + '[dir] > span',
+				selector: 'article[role]' + ' > *'.repeat(8) + ' > [dir] > span',
 				nthparent: 5,
 				parent2target: ':scope' + ' > :nth-child(1)'.repeat(2) + ' > :last-child'.repeat(2),
 				parent2name: ':scope' + ' > :nth-child(1)'.repeat(5),
-				//parent2border: ''
+				closestborder: '#app > * > * > *'
 			},
 		]
 	};
