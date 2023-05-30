@@ -154,8 +154,9 @@ class CheckmarkManager {
 
 		this.doBlueUpdate = !this.showBlue || this.useBlueColor || this.useBlueText || this.useBlueImage;
 
-		this.invocations = Math.max(1, parseInt(properties.invocations ?? 10));
-		this.pollDelay = Math.max(0, parseInt(properties.polldelay ?? 200));
+		// do not use new here
+		this.invocations = Math.max(1, Number(properties.invocations ?? 10));
+		this.pollDelay = Math.max(0, Number(properties.polldelay ?? 200));
 
 		this.blueIds = new Set();
 		this.legacyIds = new Set();
@@ -172,15 +173,24 @@ class CheckmarkManager {
 
 		// BEGIN SUPPORTER SECTION
 
-		const supportersJSON = JSON.parse(properties.supporters ?? "{}");
-		if (supportersJSON.supporters === undefined) {
+		let supportersObj;
+		try {
+
+			supportersObj = JSON.parse(properties.supporters ?? "{}")?.supporters;
+		}
+		catch (error) {
+
+			console.log(error.message);
+		}
+
+		if (supportersObj == null) {
 
 			console.log("Warning: Original Birds could not load supporters :( .");
 			this.supporters = new Map();
 		}
 		else {
 
-			this.supporters = new Map(Object.entries(supportersJSON.supporters).map(([k, v]) => {
+			this.supporters = new Map(Object.entries(supportersObj).map(([k, v]) => {
 
 				k = k.toLowerCase();
 
@@ -196,6 +206,7 @@ class CheckmarkManager {
 					}
 					return null;
 				}
+				// mapped value can be null but not undefined
 				return [k, v.style];
 			}).filter((entry) => entry !== null));
 		}
@@ -529,7 +540,9 @@ class CheckmarkManager {
 		}
 	}
 
-	_updateCheckmark({selector, nthparent, parent2target, parent2name = null, indexstart = 1}) {
+	_updateCheckmark({
+		selector, nthparent, parent2target, parent2name = null, parent2border = null, indexstart = 1
+	}) {
 
 		for (const handleElement of document.querySelectorAll(selector)) {
 
@@ -547,6 +560,16 @@ class CheckmarkManager {
 					if (nameElement != null) {
 
 						nameElement.style["color"] = supporterStyle.namecolor;
+					}
+				}
+
+				if (parent2border != null && supporterStyle.bordercolor != null) {
+
+					const borderElement = nth_element(parent, "parentElement", parent2border);
+					if (borderElement != null) {
+
+						borderElement.style["border-color"] = supporterStyle.bordercolor;
+						borderElement.style["border-width"] = "medium";
 					}
 				}
 			}
@@ -643,8 +666,92 @@ async function checkmarkManagerFactory() {
 		return null;
 	}
 
-	// TODO validate selectors
-	const selectors = JSON.parse(properties.selectors);
+	const selectorObjValid = ((dummyElement) => (selectorObj) => {
+
+		// required properties
+		if (selectorObj.selector == null || selectorObj.parent2target == null ||
+			selectorObj.nthparent == null) {
+
+			return false;
+		}
+
+		try {
+
+			// do not use new here
+			dummyElement.querySelector(selectorObj.selector = String(selectorObj.selector));
+			dummyElement.querySelector(selectorObj.parent2target = String(selectorObj.parent2target));
+
+			if (selectorObj.parent2name != null) {
+
+				// do not use new here
+				dummyElement.querySelector(selectorObj.parent2name = String(selectorObj.parent2name));
+			}
+
+			console.log(Number(selectorObj.nthparent));
+			console.log(Number.isInteger(Number(selectorObj.nthparent)));
+			if (!Number.isInteger(selectorObj.nthparent = Number(selectorObj.nthparent)) ||
+				selectorObj.nthparent < 0) {
+
+				return false;
+			}
+
+			if (selectorObj.parent2border != null &&
+				(!Number.isInteger(selectorObj.parent2border = Number(selectorObj.parent2border)) ||
+				selectorObj.parent2border < 0)) {
+
+				return false;
+			}
+		}
+		catch {
+
+			return false;
+		}
+		return true;
+	})(document.createDocumentFragment());
+
+	let selectors;
+	try {
+
+		selectors = JSON.parse(properties.selectors);
+
+		if (selectors.userselector != null && !selectorObjValid(selectors.userselector)) {
+
+			console.log("Warning: Original Birds skipped userselector.");
+			selectors.userselector = null;
+		}
+
+		if (selectors.headingselector != null) {
+
+			// dummy value so we don't have to change the validation function
+			selectors.headingselector.parent2target = ':scope';
+			if (!selectorObjValid(selectors.headingselector)) {
+
+				console.log("Warning: Original Birds skipped headingselector.");
+				selectors.headingselector = null;
+			}
+		}
+
+		if (selectors.selectors instanceof Array) {
+
+			const l = selectors.selectors.length;
+			selectors.selectors = selectors.selectors.filter(selectorObjValid);
+			if (selectors.selectors.length !== l) {
+
+				console.log("Warning: Original Birds skipped " + (l - selectors.selectors.length) + " elements in selectors.");
+			}
+		}
+		else {
+
+			console.log("Warning: Original Birds encounted unexpected selectors type.");
+			selectors.selectors = [];
+		}
+	}
+	catch (error) {
+
+		console.error("Original Birds could not load selectors.");
+		console.error(error);
+		return null;
+	}
 
 	const parser = new DOMParser();
 	const checkDoc = parser.parseFromString(DOMPurify.sanitize(properties.checkmark), "text/html");
@@ -657,27 +764,6 @@ async function checkmarkManagerFactory() {
 	}
 
 	const verifiedHandles = new Set(properties.handles);
-
-	// BEGIN SUPPORTER SECTION
-/*
-	if (typeof properties.supporters === 'string') {
-
-		let supportersJSON;
-		try {
-
-			supportersJSON = JSON.parse(properties.supporters)?.supporters;
-			console.log("parsed");
-		}
-		catch (error) {
-
-			console.log("Warning: Original Birds could not load supporters :( .");
-			console.log(error.message);
-		}
-		// will be undefined if not valid JSON
-		properties.supporters = supportersJSON;
-	}
-*/
-	// END SUPPORTER SECTION
 
 	return new CheckmarkManager(selectors, verifiedHandles, checkHtml, properties);
 }
@@ -701,33 +787,6 @@ function registerRecurringObserver(manager) {
 
 			manager._updateUserPage(USER_SELECTOR, HEADING_SELECTOR);
 			manager.updateCheckmark();
-			/*
-			manager.updateCheckmark(FEED_SELECTOR,
-				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 4)?.lastElementChild?.lastElementChild,
-				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 7));
-			manager.updateCheckmark(COMPOSE_REPLY_TWEET_SELECTOR,
-				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 3)?.lastElementChild?.lastElementChild,
-				(element) => nth_element(element.closest('div[data-testid="User-Name"]'), "firstElementChild", 6));
-			manager.updateCheckmark(HOVER_CARD_SELECTOR,
-				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.lastElementChild?.lastElementChild,
-				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.firstElementChild);
-			manager.updateCheckmark(RECOMMENDATION_SELECTOR,
-				(element) => nth_element(nth_element(element, "parentElement", 6)?.firstElementChild?.firstElementChild, "lastElementChild", 3),
-				(element) => nth_element(nth_element(element, "parentElement", 6), "firstElementChild", 6));
-			manager.updateCheckmark(CONVERSATION_SELECTOR,
-				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.lastElementChild?.lastElementChild,
-				(element) => nth_element(nth_element(element, "parentElement", 5), "firstElementChild", 5));
-			manager.updateCheckmark(ACTIVE_MESSAGE_SELECTOR,
-				(element) => nth_element(element, "parentElement", 6)?.firstElementChild?.firstElementChild?.firstElementChild?.lastElementChild?.lastElementChild,
-				(element) => nth_element(nth_element(element, "parentElement", 6), "firstElementChild", 6));
-			manager.updateCheckmark(EMBED_ORIGINAL_SELECTOR,
-				(element) => nth_element(nth_element(element, "parentElement", 3), "firstElementChild", 6)?.lastElementChild?.lastElementChild,
-				(element) => nth_element(nth_element(element, "parentElement", 3), "firstElementChild", 9),
-				0);
-			manager.updateCheckmark(EMBED_TWEET_SELECTOR,
-				(element) => nth_element(element, "parentElement", 5)?.firstElementChild?.firstElementChild?.lastElementChild?.lastElementChild,
-				(element) => nth_element(nth_element(element, "parentElement", 5), "firstElementChild", 5));
-			*/
 
 			window.setTimeout(invokeManager, manager.pollDelay);
 		}

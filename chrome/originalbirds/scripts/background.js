@@ -90,7 +90,7 @@ function defaultSelectors() {
 				nthparent: 6,
 				parent2target: ':scope' + ' > :nth-child(1)'.repeat(4) + ' > :last-child'.repeat(2),
 				parent2name: ':scope' + ' > :nth-child(1)'.repeat(7),
-				parent2border: ''
+				parent2border: 9
 			},
 			// targets user name when writing a popup reply
 			{
@@ -105,7 +105,7 @@ function defaultSelectors() {
 				nthparent: 5,
 				parent2target: ':scope' + ' > :nth-child(1)'.repeat(2) + ' > :last-child'.repeat(2),
 				parent2name: ':scope' + ' > :nth-child(1)'.repeat(3),
-				parent2border: ''
+				//parent2border: ''
 			},
 			// targets recommendation and people you might like
 			{
@@ -113,7 +113,7 @@ function defaultSelectors() {
 				nthparent: 6,
 				parent2target: ':scope' + ' > :nth-child(1)'.repeat(2) + '> :last-child'.repeat(3),
 				parent2name: ':scope' + ' > :nth-child(1)'.repeat(6),
-				parent2border: ''
+				//parent2border: ''
 			},
 			// targets messages column
 			{
@@ -135,7 +135,7 @@ function defaultSelectors() {
 				nthparent: 3,
 				parent2target: ':scope' + ' > :nth-child(1)'.repeat(6) + ' > :last-child'.repeat(2),
 				parent2name: ':scope' + ' > :nth-child(1)'.repeat(9),
-				parent2border: '',
+				//parent2border: '',
 				indexstart: 0
 			},
 			// targets embed tweets
@@ -144,7 +144,7 @@ function defaultSelectors() {
 				nthparent: 5,
 				parent2target: ':scope' + ' > :nth-child(1)'.repeat(2) + ' > :last-child'.repeat(2),
 				parent2name: ':scope' + ' > :nth-child(1)'.repeat(5),
-				parent2border: ''
+				//parent2border: ''
 			},
 		]
 	};
@@ -155,15 +155,12 @@ async function fetchSelectors() {
 	let data;
 	try {
 
-		/* TODO
 		const response = await fetch("https://original-birds.pages.dev/selectors.json");
 		if (!response.ok) {
 
-			throw new Error("Original Birds encountered status [" + response.status + "] retrieving the list.");
+			throw new Error("Original Birds encountered status [" + response.status + "] retrieving the selectors.");
 		}
 		data = await response.text();
-		*/
-		throw new Error("This is a test.");
 	}
 	catch (error) {
 
@@ -220,7 +217,7 @@ function freq2millis(freq) {
 
 		return 365 * 24 * 60 * 60 * 1000;
 	}
-	return 0;
+	return Infinity;
 }
 
 chrome.storage.local.get([
@@ -250,9 +247,8 @@ chrome.storage.local.get([
 
 	if (result.handles === undefined ||
 		result.lasthandlesupdate === undefined ||
-		(result.handlesfrequency !== "never" &&
 		Math.abs(theDate - new Date(result.lasthandlesupdate)) >=
-		freq2millis(result.handlesfrequency))) {
+		freq2millis(result.handlesfrequency)) {
 
 		console.log("handles");
 		fetchHandles();
