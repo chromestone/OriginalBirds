@@ -79,7 +79,7 @@ function defaultSelectors() {
 		headingselector: {
 			selector: 'h2[role="heading"] > ' + '* > '.repeat(4) + ':last-child > *',
 			nthparent: 2,
-			parent2name: ':scope' + ' > nth-child(1)'.repeat(3)
+			parent2name: ':scope' + ' > :nth-child(1)'.repeat(3)
 		},
 
 		selectors: [
@@ -90,7 +90,8 @@ function defaultSelectors() {
 				nthparent: 6,
 				parent2target: ':scope' + ' > :nth-child(1)'.repeat(4) + ' > :last-child'.repeat(2),
 				parent2name: ':scope' + ' > :nth-child(1)'.repeat(7),
-				parent2border: 9
+				closestborder: 'div[data-testid="cellInnerDiv"] > *,' +
+					'div[role="link"]:has(' + ' > *'.repeat(6) + ' > div[data-testid="User-Name"])'
 			},
 			// targets user name when writing a popup reply
 			{
@@ -131,12 +132,11 @@ function defaultSelectors() {
 			},
 			// targets original embed tweets
 			{
-				selector: 'article[role] > ' + '* > '.repeat(5) + 'a:nth-child(1) > span:last-child',
-				nthparent: 3,
+				selector: 'article[role] > ' + '* > '.repeat(5) + 'a:nth-child(1):has(> span)',
+				nthparent: 2,
 				parent2target: ':scope' + ' > :nth-child(1)'.repeat(6) + ' > :last-child'.repeat(2),
 				parent2name: ':scope' + ' > :nth-child(1)'.repeat(9),
 				//parent2border: '',
-				indexstart: 0
 			},
 			// targets embed tweets
 			{
@@ -247,8 +247,7 @@ chrome.storage.local.get([
 
 	if (result.handles === undefined ||
 		result.lasthandlesupdate === undefined ||
-		Math.abs(theDate - new Date(result.lasthandlesupdate)) >=
-		freq2millis(result.handlesfrequency)) {
+		Math.abs(theDate - new Date(result.lasthandlesupdate)) >= freq2millis(result.handlesfrequency)) {
 
 		console.log("handles");
 		fetchHandles();

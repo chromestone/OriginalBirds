@@ -155,8 +155,17 @@ class CheckmarkManager {
 		this.doBlueUpdate = !this.showBlue || this.useBlueColor || this.useBlueText || this.useBlueImage;
 
 		// do not use new here
-		this.invocations = Math.max(1, Number(properties.invocations ?? 10));
-		this.pollDelay = Math.max(0, Number(properties.polldelay ?? 200));
+		if (!Number.isInteger(this.invocations = Number(properties.invocations ?? 10))) {
+
+			this.invocations = 10;
+		}
+		if (!Number.isInteger(this.pollDelay = Number(properties.polldelay ?? 200))) {
+
+			this.pollDelay = 200;
+		}
+
+		this.invocations = Math.max(1, this.invocations);
+		this.pollDelay = Math.max(0, this.invocations);
 
 		this.blueIds = new Set();
 		this.legacyIds = new Set();
@@ -415,16 +424,16 @@ class CheckmarkManager {
 		}
 	}
 
-	_updateUserPage(user_selector, heading_selector) {
+	_updateUserPage({selector, nthparent, parent2target, parent2name = null}, heading_selector) {
 
-		const handleElement = document.querySelector(user_selector);
+		const handleElement = document.querySelector(selector);
 		if (handleElement === null) {
 
 			return;
 		}
 
 		const handle = handleElement.textContent?.substring(1).toLowerCase();
-		const parent = nth_element(handleElement, "parentElement", 5);
+		const parent = nth_element(handleElement, "parentElement", nthparent);
 		const handleStyle = getComputedStyle(handleElement.parentElement);
 
 		// BEGIN SUPPORTER SECTION
@@ -432,11 +441,16 @@ class CheckmarkManager {
 		const supporterStyle = this.supporters.get(handle);
 		if (supporterStyle != null) {
 
-			if (supporterStyle.namecolor !== undefined) {
+			if (supporterStyle.handlecolor != null) {
 
-				const nameElement = nth_element(parent, "firstElementChild", 5);
+				handleElement.style["color"] = supporterStyle.handlecolor;
+			}
+
+			if (parent2name != null && supporterStyle.namecolor != null) {
+
+				const nameElement = parent.querySelector(parent2name);
 				if (nameElement != null) {
-	
+
 					nameElement.style["color"] = supporterStyle.namecolor;
 				}
 			}
@@ -448,7 +462,7 @@ class CheckmarkManager {
 
 		if (this.doBlueUpdate || verified) {
 
-			const targetElement = nth_element(parent, "firstElementChild", 4)?.lastElementChild?.lastElementChild?.lastElementChild;
+			const targetElement = parent.querySelector(parent2target);
 			// this should not happen unless html structure changed
 			// double equal checks for undefined as well
 			if (targetElement == null) {
@@ -489,7 +503,7 @@ class CheckmarkManager {
 		this._updateHeading(heading_selector, supporterStyle, verified, handleStyle);
 	}
 
-	_updateHeading(selector, supporterStyle, verified, handleStyle) {
+	_updateHeading({selector, nthparent, parent2name = null}, supporterStyle, verified, handleStyle) {
 
 		const headingElement = document.querySelector(selector);
 		if (headingElement === null) {
@@ -501,10 +515,9 @@ class CheckmarkManager {
 
 		if (supporterStyle != null) {
 
-			if (supporterStyle.namecolor !== undefined) {
+			if (parent2name != null && supporterStyle.namecolor != null) {
 
-				const nameElement = headingElement.parentElement?.parentElement?.
-					firstElementChild?.firstElementChild?.firstElementChild;
+				const nameElement = nth_element(headingElement, "parentElement", nthparent)?.querySelector(parent2name);
 				if (nameElement != null) {
 
 					nameElement.style["color"] = supporterStyle.namecolor;
@@ -541,7 +554,8 @@ class CheckmarkManager {
 	}
 
 	_updateCheckmark({
-		selector, nthparent, parent2target, parent2name = null, parent2border = null, indexstart = 1
+		selector, nthparent, parent2target, parent2name = null,
+		parent2border = null, closestborder = null, indexstart = 1
 	}) {
 
 		for (const handleElement of document.querySelectorAll(selector)) {
@@ -553,6 +567,11 @@ class CheckmarkManager {
 
 			const supporterStyle = this.supporters.get(handle);
 			if (supporterStyle != null) {
+
+				if (supporterStyle.handlecolor != null) {
+
+					handleElement.style["color"] = supporterStyle.handlecolor;
+				}
 	
 				if (parent2name != null && supporterStyle.namecolor != null) {
 
@@ -563,13 +582,17 @@ class CheckmarkManager {
 					}
 				}
 
-				if (parent2border != null && supporterStyle.bordercolor != null) {
+				if ((parent2border != null || closestborder != null) &&
+					supporterStyle.bordercolor != null) {
 
-					const borderElement = nth_element(parent, "parentElement", parent2border);
+					const borderElement = parent2border != null ?
+						nth_element(parent, "parentElement", parent2border) :
+						parent.closest(closestborder);
 					if (borderElement != null) {
 
 						borderElement.style["border-color"] = supporterStyle.bordercolor;
-						borderElement.style["border-width"] = "medium";
+						borderElement.style["border-width"] = "3px";
+						borderElement.style["margin-bottom"] = "-3px";
 					}
 				}
 			}
@@ -635,6 +658,8 @@ class CheckmarkManager {
 
 	updateCheckmark() {
 
+		this._updateUserPage(this.selectors.userselector, this.selectors.headingselector);
+
 		for (const checkmarkArgs of this.selectors.selectors) {
 
 			this._updateCheckmark(checkmarkArgs);
@@ -686,9 +711,13 @@ async function checkmarkManagerFactory() {
 				// do not use new here
 				dummyElement.querySelector(selectorObj.parent2name = String(selectorObj.parent2name));
 			}
+			if (selectorObj.closestborder != null) {
 
-			console.log(Number(selectorObj.nthparent));
-			console.log(Number.isInteger(Number(selectorObj.nthparent)));
+				// do not use new here
+				dummyElement.querySelector(selectorObj.closestborder = String(selectorObj.closestborder));
+			}
+
+			// do not use new here
 			if (!Number.isInteger(selectorObj.nthparent = Number(selectorObj.nthparent)) ||
 				selectorObj.nthparent < 0) {
 
@@ -702,8 +731,9 @@ async function checkmarkManagerFactory() {
 				return false;
 			}
 		}
-		catch {
+		catch(error) {
 
+			console.log(error.message);
 			return false;
 		}
 		return true;
