@@ -1,9 +1,6 @@
 // checkmark selector to get html with checkmark svg
 const CHECK_SELECTOR = 'div[data-testid="UserName"] > ' + '* > '.repeat(4) + '[dir] > ' + '* > '.repeat(4) + ':nth-child(1)';
 
-const ACTIVE_MESSAGE_SELECTOR = 'div[data-testid="cellInnerDiv"] > ' + 'div > '.repeat(5) + 'a > div > div[dir] > span';
-
-const VERIFIED_ICON_SELECTOR = 'svg[data-testid="icon-verified"]';
 const TWITTER_BLUE_RGB = Object.freeze([29, 155, 240]);
 
 const CHECKMARK_LOCATION = Object.freeze({
@@ -201,8 +198,13 @@ class CheckmarkManager {
 
 	_updateBlue(targetElement, handleStyle, location = null) {
 
+		if (this.selectors.verifiediconselector == null) {
+
+			return;
+		}
+
 		let blueSvg = null;
-		for (const svg of targetElement.querySelectorAll(VERIFIED_ICON_SELECTOR)) {
+		for (const svg of targetElement.querySelectorAll(this.selectors.verifiediconselector)) {
 
 			const svgColor = getComputedStyle(svg).getPropertyValue("color");
 			const colorValues = svgColor.replaceAll(/[^\d,]/g, "").split(",");
@@ -400,7 +402,14 @@ class CheckmarkManager {
 		}
 	}
 
-	_updateUserPage({selector, nthparent, parent2target, parent2name = null}, heading_selector) {
+	_updateUserPage() {
+
+		if (this.selectors.userselector == null) {
+
+			return;
+		}
+
+		const {selector, nthparent, parent2target, parent2name = null} = this.selectors.userselector;
 
 		const handleElement = document.querySelector(selector);
 		if (handleElement === null) {
@@ -476,10 +485,17 @@ class CheckmarkManager {
 			document.getElementById(this.legacyBioId)?.remove();
 		}
 
-		this._updateHeading(heading_selector, supporterStyle, verified, handleStyle);
+		this._updateHeading(supporterStyle, verified, handleStyle);
 	}
 
-	_updateHeading({selector, nthparent, parent2name = null}, supporterStyle, verified, handleStyle) {
+	_updateHeading(supporterStyle, verified, handleStyle) {
+
+		if (this.selectors.headingselector == null) {
+
+			return;
+		}
+
+		const {selector, nthparent, parent2name = null} = this.selectors.headingselector;
 
 		const headingElement = document.querySelector(selector);
 		if (headingElement === null) {
@@ -634,7 +650,7 @@ class CheckmarkManager {
 
 	updateCheckmark() {
 
-		this._updateUserPage(this.selectors.userselector, this.selectors.headingselector);
+		this._updateUserPage();
 
 		for (const checkmarkArgs of this.selectors.selectors) {
 
@@ -667,7 +683,22 @@ async function checkmarkManagerFactory() {
 		return null;
 	}
 
-	const selectorObjValid = ((dummyElement) => (selectorObj) => {
+	const selectorValid = ((dummyElement) => (selector) => {
+
+		try {
+
+			dummyElement.querySelector(selector);
+		}
+		catch(error) {
+
+			console.log(error.message);
+			return false;
+		}
+
+		return true;
+	})(document.createDocumentFragment());
+
+	function selectorObjValid(selectorObj) {
 
 		// required properties
 		if (selectorObj.selector == null || selectorObj.parent2target == null ||
@@ -676,49 +707,52 @@ async function checkmarkManagerFactory() {
 			return false;
 		}
 
-		try {
+		// do not use new here
+		if (!selectorValid(selectorObj.selector = String(selectorObj.selector))) {
 
-			// do not use new here
-			dummyElement.querySelector(selectorObj.selector = String(selectorObj.selector));
-			dummyElement.querySelector(selectorObj.parent2target = String(selectorObj.parent2target));
-
-			if (selectorObj.parent2name != null) {
-
-				// do not use new here
-				dummyElement.querySelector(selectorObj.parent2name = String(selectorObj.parent2name));
-			}
-			if (selectorObj.closestborder != null) {
-
-				// do not use new here
-				dummyElement.querySelector(selectorObj.closestborder = String(selectorObj.closestborder));
-			}
-
-			// do not use new here
-			if (!Number.isInteger(selectorObj.nthparent = Number(selectorObj.nthparent)) ||
-				selectorObj.nthparent < 0) {
-
-				return false;
-			}
-
-			if (selectorObj.parent2border != null &&
-				(!Number.isInteger(selectorObj.parent2border = Number(selectorObj.parent2border)) ||
-				selectorObj.parent2border < 0)) {
-
-				return false;
-			}
-		}
-		catch(error) {
-
-			console.log(error.message);
 			return false;
 		}
+		if (!selectorValid(selectorObj.parent2target = String(selectorObj.parent2target))) {
+
+			return false;
+		}
+		if (selectorObj.parent2name != null &&
+			!selectorValid(selectorObj.parent2name = String(selectorObj.parent2name))) {
+
+			return false;
+		}
+		if (selectorObj.closestborder != null &&
+			!selectorValid(selectorObj.closestborder = String(selectorObj.closestborder))) {
+
+			return false;
+		}
+
+		// do not use new here
+		if (!Number.isInteger(selectorObj.nthparent = Number(selectorObj.nthparent)) ||
+			selectorObj.nthparent < 0) {
+
+			return false;
+		}
+		if (selectorObj.parent2border != null &&
+			(!Number.isInteger(selectorObj.parent2border = Number(selectorObj.parent2border)) ||
+			selectorObj.parent2border < 0)) {
+
+			return false;
+		}
+
 		return true;
-	})(document.createDocumentFragment());
+	}
 
 	let selectors;
 	try {
 
 		selectors = JSON.parse(properties.selectors);
+
+		if (selectors.verifiediconselector != null && !selectorValid(selectors.verifiediconselector)) {
+
+			console.log("Warning: Original Birds skipped verifiediconselector.")
+			selectors.verifiediconselector = null;
+		}
 
 		if (selectors.userselector != null && !selectorObjValid(selectors.userselector)) {
 
@@ -791,7 +825,6 @@ function registerRecurringObserver(manager) {
 			invocations -= 1;
 			stopped = false;
 
-			manager._updateUserPage(USER_SELECTOR, HEADING_SELECTOR);
 			manager.updateCheckmark();
 
 			window.setTimeout(invokeManager, manager.pollDelay);

@@ -68,16 +68,18 @@ async function fetchHandles() {
 function defaultSelectors() {
 
 	return {
+		verifiediconselector: 'svg[data-testid="icon-verified"]',
+
 		// targets user name on their profile/feed page
 		userselector: {
-			selector: 'div[data-testid="UserName"]' + ' > *'.repeat(5) + ' > [dir] > *',
+			selector: 'div[data-testid="UserName"]' + ' > *'.repeat(5) + ' > [dir] > span',
 			nthparent: 5,
 			parent2target: ':scope' + ' > :nth-child(1)'.repeat(4) + ' > :last-child'.repeat(3),
 			parent2name: ':scope' + ' > :nth-child(1)'.repeat(5)
 		},
 		// targets top heading on user page
 		headingselector: {
-			selector: 'h2[role="heading"]' + ' > *'.repeat(4) + ' > :last-child > *',
+			selector: 'div[data-testid="primaryColumn"] h2' + ' > *'.repeat(4) + ' > :last-child > span',
 			nthparent: 2,
 			parent2name: ':scope' + ' > :nth-child(1)'.repeat(3)
 		},
@@ -86,7 +88,7 @@ function defaultSelectors() {
 			// targets feed topmost post
 			// targets user feed or thread reply with (nested) post
 			{
-				selector: 'div[data-testid="User-Name"] > :last-child > * > * > * > [dir] > *',
+				selector: 'div[data-testid="User-Name"] > :last-child > * > * > * > [dir] > span',
 				nthparent: 6,
 				parent2target: ':scope' + ' > :nth-child(1)'.repeat(4) + ' > :last-child'.repeat(2),
 				parent2name: ':scope' + ' > :nth-child(1)'.repeat(7),
@@ -108,9 +110,9 @@ function defaultSelectors() {
 				parent2name: ':scope' + ' > :nth-child(1)'.repeat(3),
 				closestborder: 'div[data-testid="HoverCard"]'
 			},
-			// targets recommendation and people you might like
+			// targets recommendation or "(people) you might like" or "who to follow"
 			{
-				selector: 'div[data-testid="UserCell"]' + ' > *'.repeat(9) + ' > [dir] > *',
+				selector: 'div[data-testid="UserCell"]' + ' > *'.repeat(9) + ' > [dir] > span',
 				nthparent: 6,
 				parent2target: ':scope' + ' > :nth-child(1)'.repeat(2) + '> :last-child'.repeat(3),
 				parent2name: ':scope' + ' > :nth-child(1)'.repeat(6),
@@ -118,28 +120,28 @@ function defaultSelectors() {
 			},
 			// targets messages column
 			{
-				selector: 'div[data-testid="conversation"]' + ' > *'.repeat(12) + ' > [dir] > *',
+				selector: 'div[data-testid="conversation"]' + ' > *'.repeat(12) + ' > [dir] > span',
 				nthparent: 5,
 				parent2target: ':scope' + ' > :nth-child(1)'.repeat(2) + ' > :last-child'.repeat(2),
 				parent2name: ':scope' + ' > :nth-child(1)'.repeat(5)
 			},
 			// targets active message header
 			{
-				selector: 'div[data-testid="cellInnerDiv"] > ' + 'div > '.repeat(5) + 'a > div > div[dir] > span',
+				selector: 'div[data-testid="DmActivityContainer"] div[data-testid="cellInnerDiv"]' + ' > *'.repeat(7) + ' > [dir] > span',
 				nthparent: 6,
 				parent2target: ':scope' + ' > :nth-child(1)'.repeat(3) + ' > :last-child'.repeat(2),
 				parent2name: ':scope' + ' > :nth-child(1)'.repeat(6)
 			},
 			// targets original embed tweets
 			{
-				selector: 'article[role]' + ' > *'.repeat(5) + ' > a:nth-child(1):has(> span)',
+				selector: '#app article[role]' + ' > *'.repeat(5) + ' > a:nth-child(1):has(> span)',
 				nthparent: 2,
 				parent2target: ':scope' + ' > :nth-child(1)'.repeat(6) + ' > :last-child'.repeat(2),
 				parent2name: ':scope' + ' > :nth-child(1)'.repeat(9)
 			},
 			// targets embed tweets
 			{
-				selector: 'article[role]' + ' > *'.repeat(8) + ' > [dir] > span',
+				selector: '#app article[role]' + ' > *'.repeat(8) + ' > [dir] > span',
 				nthparent: 5,
 				parent2target: ':scope' + ' > :nth-child(1)'.repeat(2) + ' > :last-child'.repeat(2),
 				parent2name: ':scope' + ' > :nth-child(1)'.repeat(5),
