@@ -74,12 +74,12 @@ chrome.storage.local.get([
 
 	$('#blue').on("toggle", (_, active) => {
 
-		chrome.storage.local.set({"showblue": active});
+		chrome.storage.local.set({showblue: active});
 	});
 
 	$('#legacy').on("toggle", (_, active) => {
 
-		chrome.storage.local.set({"showlegacy": active});
+		chrome.storage.local.set({showlegacy: active});
 	});
 
 	$('.toggle').toggleClass("disabled", false);
@@ -227,10 +227,10 @@ $('#savebluebutton').on("click", function() {
 				$('#blueerror').prop("hidden", true);
 
 				chrome.storage.local.set({
-					"bluelook": look,
-					"bluecolor": color,
-					"bluetext": text,
-					"blueimage": imageURL
+					bluelook: look,
+					bluecolor: color,
+					bluetext: text,
+					blueimage: imageURL
 				}, () => $(this).prop("disabled", false));
 				return;
 			}
@@ -273,10 +273,10 @@ $('#savelegacybutton').on("click", function() {
 				$('#legacyerror').prop("hidden", true);
 
 				chrome.storage.local.set({
-					"legacylook": look,
-					"legacycolor": color,
-					"legacytext": text,
-					"legacyimage": imageURL
+					legacylook: look,
+					legacycolor: color,
+					legacytext: text,
+					legacyimage: imageURL
 				}, () => $(this).prop("disabled", false));
 				return;
 			}
@@ -319,7 +319,7 @@ $('#invocationsbutton').on("click", function() {
 	const value = $('#invocations').val() ?? "";
 	if (value.match(/^[1-9]\d{0,6}$/)) {
 
-		chrome.storage.local.set({"invocations": parseInt(value)}, () => $(this).prop("disabled", false));
+		chrome.storage.local.set({invocations: parseInt(value)}, () => $(this).prop("disabled", false));
 	}
 	else {
 
@@ -336,7 +336,7 @@ $('#polldelaybutton').on("click", function() {
 	const value = $('#polldelay').val() ?? "";
 	if (value.match(/^[1-9]\d{0,6}$/)) {
 
-		chrome.storage.local.set({"polldelay": parseInt(value)}, () => $(this).prop("disabled", false));
+		chrome.storage.local.set({polldelay: parseInt(value)}, () => $(this).prop("disabled", false));
 	}
 	else {
 

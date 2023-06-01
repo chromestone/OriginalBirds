@@ -27,7 +27,7 @@ function cacheCheckmark() {
 	});
 }
 
-async function fetchHandles() {
+async function fetchHandles(setDefault) {
 
 	let data;
 	try {
@@ -43,6 +43,11 @@ async function fetchHandles() {
 
 		console.log("Warning: Original Birds could not retrieve the latest legacy users list.");
 		console.log(error.message);
+
+		if (!setDefault) {
+
+			return;
+		}
 
 		try {
 
@@ -151,7 +156,7 @@ function defaultSelectors() {
 	};
 }
 
-async function fetchSelectors() {
+async function fetchSelectors(setDefault) {
 
 	let data;
 	try {
@@ -167,6 +172,11 @@ async function fetchSelectors() {
 
 		console.log("Warning: Original Birds could not retrieve the latest selectors.");
 		console.log(error.message);
+
+		if (!setDefault) {
+
+			return;
+		}
 
 		data = JSON.stringify(defaultSelectors());
 	}
@@ -251,7 +261,7 @@ chrome.storage.local.get([
 		Math.abs(theDate - new Date(result.lasthandlesupdate)) >= freq2millis(result.handlesfrequency)) {
 
 		console.log("handles");
-		fetchHandles();
+		fetchHandles(result.handles === undefined);
 	}
 
 	const overdue = result.lastlaunch === undefined ||
@@ -260,7 +270,7 @@ chrome.storage.local.get([
 	if (result.selectors === undefined || overdue) {
 
 		console.log("selectors");
-		fetchSelectors();
+		fetchSelectors(result.selectors === undefined);
 	}
 
 	// BEGIN SUPPORTER SECTION

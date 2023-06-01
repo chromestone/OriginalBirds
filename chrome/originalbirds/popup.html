@@ -26,6 +26,9 @@
 		details > ul {
 			margin: 0;
 		}
+		input:invalid {
+			outline: 2px solid red;
+		}
 	</style>
 	<link rel="stylesheet" href="css/toggles.css">
 	<link rel="stylesheet" href="css/toggles-dark.css">
@@ -45,7 +48,6 @@
 			<div id="blue" class="toggle toggle-dark disabled" style="display: inline-block;"></div>
 			<p class="text-color"><b>Legacy&nbsp;Checkmark</b></p>
 			<div id="legacy" class="toggle toggle-dark disabled" style="display: inline-block;"></div>
-			<p class="text-color">&#9989;Trouble with the legacy checkmark appearance? Try clicking "Reload Checkmark" under <i>Advanced</i>.</p>
 			<p class="text-color">&#128030;Found a bug? Tweet us <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/intent/tweet?screen_name=RealOpenBirds">@RealOpenBirds</a> or see how to <a target="_blank" rel="noopener noreferrer" href="https://github.com/chromestone/OriginalBirds/blob/main/CONTRIBUTING.md">contribute</a>.</p>
 			<p class="text-color">&#10067;Have a question? Read the <a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/#faq">FAQ</a>.</p>
 			<p class="text-color">&#11088;&#11088;&#11088;&#11088;&#11088;Enjoying the extension? Please leave a <a target="_blank" rel="noopener noreferrer" href="https://chrome.google.com/webstore/detail/original-birds/chhgbpmapfgibdoimakecicdlhhmkpjn">review</a>.</p>
@@ -66,7 +68,7 @@
 					<label for="bluecolor">
 						<p class="text-color"><b>Color</b></p>
 					</label>
-					<input id="bluecolor" placeholder="#1D9BF0">
+					<input id="bluecolor" type="text" pattern="#[0-9A-Fa-f]{6}" placeholder="#1D9BF0">
 				</div>
 				<div id="divbluetext" class="radiocontent" hidden>
 					<label for="bluetext">
@@ -114,7 +116,7 @@
 					<label for="legacycolor">
 						<p class="text-color"><b>Color</b></p>
 					</label>
-					<input id="legacycolor" placeholder="#2DB32D">
+					<input id="legacycolor" type="text" pattern="#[0-9A-Fa-f]{6}" placeholder="#2DB32D">
 				</div>
 				<div id="divlegacytext" class="radiocontent" hidden>
 					<label for="legacytext">
@@ -152,6 +154,16 @@
 			</fieldset>
 		</div>
 		<div id="advanced">
+			<label for="handlesfrequency">
+				<p class="text-color"><b>Legacy Verified List Updates</b></p>
+			</label>
+			<select id="handlesfrequency">
+				<option value="never">Never</option>
+				<option value="daily">Daily</option>
+				<option value="weekly" selected>Weekly</option>
+				<option value="monthly">Monthly</option>
+				<option value="yearly">Yearly</option>
+			</select>
 			<p class="text-color"><b>Checkmark&nbsp;HTML</b></p>
 			<details style="margin-bottom: 1rem;">
 				<summary class="text-color">Inspect</summary>
@@ -159,6 +171,13 @@
 				<a id="checkmarkdownload" download="checkmark.txt"><button style="font-size: 1.5rem; font-weight: bold;">&#10515;</button></a>
 			</details>
 			<button id="reloadcheckmark">Reload Checkmark</button>
+			<p class="text-color"><b>Selectors&nbsp;JSON</b></p>
+			<details style="margin-bottom: 1rem;">
+				<summary class="text-color">Inspect</summary>
+				<textarea id="selectorsjson" rows="4" cols="32" readonly style="vertical-align: middle;"></textarea>
+				<a id="selectorsdownload" download="selectors.json"><button style="font-size: 1.5rem; font-weight: bold;">&#10515;</button></a>
+			</details>
+			<button id="reloadselectors">Reload Selectors</button>
 			<label for="invocations">
 				<p class="text-color">
 					<b>Number&nbsp;of&nbsp;Polls</b><br>
@@ -175,6 +194,19 @@
 			</label>
 			<input id="polldelay" title="Number must be between 1 to 9999999." style="vertical-align: middle;">
 			<button id="polldelaybutton">&#8617;</button>
+			<div class="ui-widget ui-state-error ui-corner-all" style="margin-top: 0.5rem; padding: 0.2rem;">
+				<strong>Warning:</strong> Improper settings below may cause Original Birds to malfunction.
+			</div>
+			<label for="handlesurl">
+				<p class="text-color"><b>Legacy Verified List URL</b></p>
+			</label>
+			<input id="handlesurl" type="url" style="vertical-align: middle;">
+			<button id="handlesurlbutton">&#8617;</button>
+			<label for="selectorsurl">
+				<p class="text-color"><b>Selectors URL</b></p>
+			</label>
+			<input id="selectorsurl" type="url" style="vertical-align: middle;">
+			<button id="selectorsurlbutton">&#8617;</button>
 		</div>
 	</div>
 	<script src="scripts/popup.js"></script>
