@@ -78,7 +78,7 @@
 						<label for="bluetext">
 							<p class="text-color"><b>Text</b></p>
 						</label>
-						<input id="bluetext" maxlength="64">
+						<input id="bluetext" type="text" maxlength="64">
 					</div>
 					<div id="divblueimage" class="radiocontent" hidden>
 						<label for="blueimage">
@@ -120,7 +120,7 @@
 						<label for="legacytext">
 							<p class="text-color"><b>Text</b></p>
 						</label>
-						<input id="legacytext" maxlength="64">
+						<input id="legacytext" type="text" maxlength="64">
 					</div>
 					<div id="divlegacyimage" class="radiocontent" hidden>
 						<label for="legacyimage">
@@ -176,7 +176,7 @@
 						Number of times to poll after the latest change in page.
 					</p>
 				</label>
-				<input id="invocations" title="Number must be between 1 to 9999999." style="vertical-align: middle;">
+				<input id="invocations" type="text" title="Number must be between 1 to 9999999." style="vertical-align: middle;">
 				<button id="invocationsbutton">&#8617;</button>
 				<label for="polldelay">
 					<p class="text-color">
@@ -184,20 +184,26 @@
 						How long to wait between checkmark polls in milliseconds.
 					</p>
 				</label>
-				<input id="polldelay" title="Number must be between 1 to 9999999." style="vertical-align: middle;">
+				<input id="polldelay" type="text" title="Number must be between 1 to 9999999." style="vertical-align: middle;">
 				<button id="polldelaybutton">&#8617;</button>
 				<div class="ui-widget ui-state-error ui-corner-all" style="margin-top: 0.5rem; padding: 0.2rem;">
 					<strong>Warning:</strong> Improper settings below may cause Original Birds to malfunction.
 				</div>
-				<label for="handlesurl">
-					<p class="text-color"><b>Legacy Verified List URL</b></p>
+				<p class="text-color"><b>Legacy Verified List URLs</b></p>
+				<label for="handlesversionurl">
+					<p class="text-color">Version URL</p>
 				</label>
-				<input id="handlesurl" type="url" style="vertical-align: middle;">
+				<input id="handlesversionurl" type="text" style="vertical-align: middle;">
+				<button id="handlesversionbutton">&#8617;</button>
+				<label for="handlesurl">
+					<p class="text-color">List URL</p>
+				</label>
+				<input id="handlesurl" type="text" style="vertical-align: middle;">
 				<button id="handlesurlbutton">&#8617;</button>
 				<label for="selectorsurl">
 					<p class="text-color"><b>Selectors URL</b></p>
 				</label>
-				<input id="selectorsurl" type="url" style="vertical-align: middle;">
+				<input id="selectorsurl" type="text" style="vertical-align: middle;">
 				<button id="selectorsurlbutton">&#8617;</button>
 			</div>
 		</div>

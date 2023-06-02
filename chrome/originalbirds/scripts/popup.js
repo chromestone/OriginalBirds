@@ -19,6 +19,21 @@ else {
 
 // INITIALIZATION
 
+function validHttpsUrl(str) {
+
+	let url;
+	try {
+
+		url = new URL(str);
+	}
+	catch {
+
+		return false;  
+	}
+
+	return url.protocol === "https:";
+}
+
 $('.toggle').toggles({type: "select"});
 
 $('#tabs').tabs();
@@ -341,6 +356,66 @@ $('#polldelaybutton').on("click", function() {
 	else {
 
 		$('#polldelay').effect({
+			effect: "shake",
+			complete: () => $(this).prop("disabled", false)
+		});
+	}
+});
+
+$('#handlesversionbutton').on("click", function() {
+
+	$(this).prop("disabled", true);
+	const value = $('#handlesversionurl').val() ?? "";
+	if (validHttpsUrl(value)) {
+
+		const url = new URL(value);
+		url.search = "";
+		$('#handlesversionurl').val(url.toString());
+		chrome.storage.local.set({handlesversionurl: url.toString()}, () => $(this).prop("disabled", false));
+	}
+	else {
+
+		$('#handlesversionurl').effect({
+			effect: "shake",
+			complete: () => $(this).prop("disabled", false)
+		});
+	}
+});
+
+$('#handlesurlbutton').on("click", function() {
+
+	$(this).prop("disabled", true);
+	const value = $('#handlesurlbutton').val() ?? "";
+	if (validHttpsUrl(value)) {
+
+		const url = new URL(value);
+		url.search = "";
+		$('#handlesurl').val(url.toString());
+		chrome.storage.local.set({handlesversionurl: url.toString()}, () => $(this).prop("disabled", false));
+	}
+	else {
+
+		$('#handlesurl').effect({
+			effect: "shake",
+			complete: () => $(this).prop("disabled", false)
+		});
+	}
+});
+
+$('#selectorsurlbutton').on("click", function() {
+
+	$(this).prop("disabled", true);
+	const value = $('#selectorsurlbutton').val() ?? "";
+	if (validHttpsUrl(value)) {
+
+		const url = new URL(value);
+		url.search = "";
+		$('#selectorsurl').val(url.toString());
+		chrome.storage.local.set({handlesversionurl: url.toString()}, () => $(this).prop("disabled", false));
+	}
+	else {
+
+		$('#selectorsurl').effect({
 			effect: "shake",
 			complete: () => $(this).prop("disabled", false)
 		});
