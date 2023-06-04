@@ -365,59 +365,90 @@ $('#polldelaybutton').on("click", function() {
 $('#handlesversionbutton').on("click", function() {
 
 	$(this).prop("disabled", true);
-	const value = $('#handlesversionurl').val() ?? "";
-	if (validHttpsUrl(value)) {
+	const value = ($('#handlesversionurl').val() ?? "").trim();
+	
+	try {
 
-		const url = new URL(value);
-		url.search = "";
-		$('#handlesversionurl').val(url.toString());
-		chrome.storage.local.set({handlesversionurl: url.toString()}, () => $(this).prop("disabled", false));
-	}
-	else {
+		const inputURL = new URL(value);
 
-		$('#handlesversionurl').effect({
-			effect: "shake",
-			complete: () => $(this).prop("disabled", false)
-		});
+		if (inputURL.protocol === "https" && inputURL.search === "" &&
+			inputURL.username === "" && inputURL.password === "") {
+
+			chrome.storage.local.set({handlesversionurl: inputURL.toString()}, () => $(this).prop("disabled", false));
+			return;
+		}
 	}
+	catch(error) {
+
+		console.log(error.message);
+	}
+
+	$('#handlesversionurl').effect({
+		effect: "shake",
+		complete: () => $(this).prop("disabled", false)
+	});
 });
 
 $('#handlesurlbutton').on("click", function() {
 
 	$(this).prop("disabled", true);
-	const value = $('#handlesurlbutton').val() ?? "";
-	if (validHttpsUrl(value)) {
+	const value = $('#handlesurl').val() ?? "";
+	
+	try {
 
-		const url = new URL(value);
-		url.search = "";
-		$('#handlesurl').val(url.toString());
-		chrome.storage.local.set({handlesversionurl: url.toString()}, () => $(this).prop("disabled", false));
-	}
-	else {
+		const inputURL = new URL(value);
 
-		$('#handlesurl').effect({
-			effect: "shake",
-			complete: () => $(this).prop("disabled", false)
-		});
+		if (inputURL.protocol === "https" && inputURL.search === "" &&
+			inputURL.username === "" && inputURL.password === "") {
+
+			chrome.storage.local.set({handlesurl: inputURL.toString()}, () => $(this).prop("disabled", false));
+			return;
+		}
 	}
+	catch(error) {
+
+		console.log(error.message);
+	}
+
+	$('#handlesurl').effect({
+		effect: "shake",
+		complete: () => $(this).prop("disabled", false)
+	});
 });
 
 $('#selectorsurlbutton').on("click", function() {
 
 	$(this).prop("disabled", true);
-	const value = $('#selectorsurlbutton').val() ?? "";
-	if (validHttpsUrl(value)) {
+	const value = ($('#selectorsurl').val() ?? "").trim();
 
-		const url = new URL(value);
-		url.search = "";
-		$('#selectorsurl').val(url.toString());
-		chrome.storage.local.set({handlesversionurl: url.toString()}, () => $(this).prop("disabled", false));
-	}
-	else {
+	try {
 
-		$('#selectorsurl').effect({
-			effect: "shake",
-			complete: () => $(this).prop("disabled", false)
-		});
+		const base64Prefix = 'data:application/json;base64,';
+		if (value.startsWith(base64Prefix)) {
+
+			const decodedData = atob(value.substring(base64Prefix.length));
+			const validJSON = JSON.stringify(JSON.parse(decodedData));
+
+			chrome.storage.local.set({selectorsurl: validJSON}, () => $(this).prop("disabled", false));
+			return;
+		}
+
+		const inputURL = new URL(value);
+
+		if (inputURL.protocol === "https" && inputURL.search === "" &&
+			inputURL.username === "" && inputURL.password === "") {
+
+			chrome.storage.local.set({selectorsurl: inputURL.toString()}, () => $(this).prop("disabled", false));
+			return;
+		}
 	}
+	catch(error) {
+
+		console.log(error.message);
+	}
+
+	$('#selectorsurl').effect({
+		effect: "shake",
+		complete: () => $(this).prop("disabled", false)
+	});
 });
