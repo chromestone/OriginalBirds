@@ -76,7 +76,7 @@ function displayNormalSpan() {
 		"bluetext", "legacytext", "blueimage", "legacyimage", "invocations", "polldelay"
 	], (result) => {
 
-		if (typeof result.checkmark === 'undefined') {
+		if (result.checkmark === undefined) {
 
 			chrome.runtime.sendMessage({text: "cachecheckmark!"});
 		}
@@ -275,7 +275,7 @@ function displayNormalSpan() {
 
 	chrome.storage.onChanged.addListener((changes) => {
 
-		if (typeof changes.checkmark !== 'undefined') {
+		if (changes.checkmark !== undefined) {
 
 			const checkHtml = changes.checkmark.newValue ?? "";
 			const checkBlob = new Blob([checkHtml], {type: "text/plain"});
@@ -330,6 +330,97 @@ function displayNormalSpan() {
 			});
 		}
 	});
+
+	$('#handlesbutton').on("click", function() {
+
+		$(this).prop("disabled", true);
+		const versionValue = $('#handlesversionurl').val() ?? "";
+		const handlesValue = $('#handlesurl').val() ?? "";
+
+		let versionURL;
+		let success = false;
+		try {
+
+			versionURL = new URL(versionValue);
+			success = versionURL.protocol === "https:" && versionURL.search === "" &&
+				versionURL.username === "" && versionURL.password === "";
+		}
+		catch(error) {
+
+			console.log(error.message);
+		}
+
+		if (!success) {
+
+			$('label[for="handlesversionurl"] > p').effect({
+				effect: "shake",
+				complete: () => $(this).prop("disabled", false)
+			});
+			return;
+		}
+		
+		try {
+
+			const inputURL = new URL(handlesValue);
+
+			if (inputURL.protocol === "https:" && inputURL.search === "" &&
+				inputURL.username === "" && inputURL.password === "") {
+
+				chrome.storage.local.set({
+					handlesversionurl: versionURL.toString(),
+					handlesurl: inputURL.toString()
+				}, () => $(this).prop("disabled", false));
+				return;
+			}
+		}
+		catch(error) {
+
+			console.log(error.message);
+		}
+
+		$('label[for="handlesurl"] > p').effect({
+			effect: "shake",
+			complete: () => $(this).prop("disabled", false)
+		});
+	});
+
+	$('#selectorsbutton').on("click", function() {
+
+		$(this).prop("disabled", true);
+		const value = ($('#selectorsurl').val() ?? "").trim();
+
+		try {
+
+			const base64Prefix = 'data:application/json;base64,';
+			if (value.startsWith(base64Prefix)) {
+
+				const decodedData = atob(value.substring(base64Prefix.length));
+				const validJSON = JSON.stringify(JSON.parse(decodedData));
+
+				chrome.storage.local.set({selectorsurl: validJSON}, () => $(this).prop("disabled", false));
+				return;
+			}
+
+			const inputURL = new URL(value);
+
+			if (inputURL.protocol === "https:" && inputURL.search === "" &&
+				inputURL.username === "" && inputURL.password === "") {
+
+				chrome.storage.local.set({selectorsurl: inputURL.toString()}, () => $(this).prop("disabled", false));
+				return;
+			}
+		}
+		catch(error) {
+
+			console.log(error.message);
+		}
+
+		$('#fieldsetselectors > legend').effect({
+			effect: "shake",
+			complete: () => $(this).prop("disabled", false)
+		});
+	});
+
 }
 
 function actionListener(_, __) {
