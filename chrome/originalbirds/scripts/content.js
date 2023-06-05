@@ -3,6 +3,8 @@ const CHECK_SELECTOR = 'div[data-testid="UserName"] > ' + '* > '.repeat(4) + '[d
 
 const TWITTER_BLUE_RGB = Object.freeze([29, 155, 240]);
 
+const DEFAULT_LEGACY_COLOR = "#2DB32D";
+
 const CHECKMARK_LOCATION = Object.freeze({
 	HEADING: 0,
 	BIO: 1
@@ -88,12 +90,8 @@ class CheckmarkManager {
 		this.blueColor = String(properties.bluecolor ?? "");
 		this.legacyColor = String(properties.legacycolor ?? "");
 
-		this.useBlueColor = this.blueColor.length > 0;
-
-		if (this.legacyColor.length === 0) {
-
-			this.legacyColor = "#2DB32D";
-		}
+		this.blueColorSet = this.blueColor.length > 0;
+		this.legacyColorSet = this.legacyColor.length > 0;
 
 		this.useBlueText = false;
 		this.useBlueImage = false;
@@ -125,7 +123,7 @@ class CheckmarkManager {
 			this.useLegacyImage = this.legacyURL.length > 0;
 		}
 
-		this.doBlueUpdate = !this.showBlue || this.useBlueColor || this.useBlueText || this.useBlueImage;
+		this.doBlueUpdate = !this.showBlue || this.blueColorSet || this.useBlueText || this.useBlueImage;
 
 		// do not use new here
 		if (!Number.isInteger(this.invocations = Number(properties.invocations ?? 10))) {
@@ -311,9 +309,11 @@ class CheckmarkManager {
 					}
 				}
 
-				span.style["color"] = handleStyle.getPropertyValue("color");
+				span.style["color"] = this.blueColorSet ?
+					this.blueColor : handleStyle.getPropertyValue("color");
 				span.style["font-family"] = handleStyle.getPropertyValue("font-family");
 				span.style["font-size"] = handleStyle.getPropertyValue("font-size");
+				div.style["font-weight"] = handleStyle.getPropertyValue("font-weight");
 				span.style["margin-left"] = "2px";
 
 				span.textContent = this.blueText;
@@ -337,7 +337,7 @@ class CheckmarkManager {
 			}
 			furthestParent.after(div);
 		}
-		else if (this.useBlueColor) {
+		else if (this.blueColorSet) {
 
 			blueSvg.style["color"] = this.blueColor;
 		}
@@ -354,9 +354,11 @@ class CheckmarkManager {
 				div = span;
 			}
 
-			div.style["color"] = handleStyle.getPropertyValue("color");
+			div.style["color"] = this.legacyColorSet ? 
+				this.legacyColor : handleStyle.getPropertyValue("color");
 			div.style["font-family"] = handleStyle.getPropertyValue("font-family");
 			div.style["font-size"] = handleStyle.getPropertyValue("font-size");
+			div.style["font-weight"] = handleStyle.getPropertyValue("font-weight");
 			div.style["margin-left"] = "2px";
 
 			div.textContent = this.legacyText;
@@ -397,7 +399,7 @@ class CheckmarkManager {
 			const svg = div.querySelector('svg');
 			if (svg !== null) {
 
-				svg.style["color"] = this.legacyColor;
+				svg.style["color"] = this.legacyColorSet ? this.legacyColor : DEFAULT_LEGACY_COLOR;
 			}
 		}
 	}

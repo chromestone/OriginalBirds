@@ -411,9 +411,10 @@ $('#selectorsbutton').on("click", function() {
 		if (value.startsWith(base64Prefix)) {
 
 			const decodedData = atob(value.substring(base64Prefix.length));
-			const validJSON = JSON.stringify(JSON.parse(decodedData));
+			// validate JSON
+			JSON.parse(decodedData);
 
-			chrome.storage.local.set({selectorsurl: validJSON}, () => $(this).prop("disabled", false));
+			chrome.storage.local.set({selectorsurl: value}, () => $(this).prop("disabled", false));
 			return;
 		}
 

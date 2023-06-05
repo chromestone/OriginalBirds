@@ -27,39 +27,52 @@ function cacheCheckmark() {
 	});
 }
 
-async function fetchHandles(setDefault) {
+async function setDefaultHandles() {
 
 	let data;
 	try {
 
-		const response = await fetch("https://original-birds.pages.dev/verified_handles.txt");
+		const response = await fetch("../data/verified_handles.txt");
+		data = await response.text();
+	}
+	catch (error) {
+
+		console.log("Warning: Original Birds could not find a local fallback list.");
+		console.error(error);
+		return Promise.resolve(null);
+	}
+
+	const handles = data.split('\n').filter((str) => str !== "").map((str) => str.toLowerCase());
+
+	const theDate = new Date();
+	theDate.setHours(0,0,0,0);
+
+	return new Promise((resolve) => chrome.storage.local.set({
+		handles: handles,
+		lasthandlesupdate: theDate.toJSON()
+	}, () => resolve(null)));
+}
+
+async function fetchHandles() {
+
+	let data;
+	try {
+
+		const response = await fetch("https://original-birds.pages.dev/verified_handles.txt",
+			{cache: "no-store", redirect: "error"});
+
 		if (!response.ok) {
 
 			throw new Error("Original Birds encountered status [" + response.status + "] retrieving the list.");
 		}
+
 		data = await response.text();
 	}
 	catch (error) {
 
 		console.log("Warning: Original Birds could not retrieve the latest legacy users list.");
-		console.log(error.message);
-
-		if (!setDefault) {
-
-			return;
-		}
-
-		try {
-
-			const response = await fetch("../data/verified_handles.txt");
-			data = await response.text();
-		}
-		catch (error) {
-
-			console.error("Original Birds could not find a local fallback list.");
-			console.error(error);
-			return;
-		}
+		console.error(error);
+		return;
 	}
 
 	const handles = data.split('\n').filter((str) => str !== "").map((str) => str.toLowerCase());
@@ -70,9 +83,9 @@ async function fetchHandles(setDefault) {
 	chrome.storage.local.set({handles: handles, lasthandlesupdate: theDate.toJSON()});
 }
 
-function defaultSelectors() {
+function setDefaultSelectors() {
 
-	return {
+	const data = JSON.stringify({
 		verifiediconselector: 'svg[data-testid="icon-verified"]',
 
 		// targets user name on their profile/feed page
@@ -153,32 +166,37 @@ function defaultSelectors() {
 				closestborder: '#app > * > * > *'
 			},
 		]
-	};
+	});
+
+	const theDate = new Date();
+	theDate.setHours(0,0,0,0);
+
+	return new Promise((resolve) => chrome.storage.local.set({
+		selectors: data,
+		lastlaunch: theDate.toJSON()
+	}, () => resolve(null)));
 }
 
-async function fetchSelectors(setDefault) {
+async function fetchSelectors() {
 
 	let data;
 	try {
 
-		const response = await fetch("https://original-birds.pages.dev/selectors.json");
+		const response = await fetch("https://original-birds.pages.dev/selectors.json",
+			{cache: "no-store", redirect: "error"});
+
 		if (!response.ok) {
 
 			throw new Error("Original Birds encountered status [" + response.status + "] retrieving the selectors.");
 		}
+
 		data = await response.text();
 	}
 	catch (error) {
 
 		console.log("Warning: Original Birds could not retrieve the latest selectors.");
-		console.log(error.message);
-
-		if (!setDefault) {
-
-			return;
-		}
-
-		data = JSON.stringify(defaultSelectors());
+		console.error(error);
+		return;
 	}
 
 	const theDate = new Date();
@@ -191,11 +209,14 @@ async function fetchSupporters() {
 
 	try {
 
-		const response = await fetch("https://original-birds.pages.dev/supporters.json");
+		const response = await fetch("https://original-birds.pages.dev/supporters.json",
+			{cache: "no-store", redirect: "error"});
+
 		if (!response.ok) {
 
 			throw new Error("Original Birds encountered status [" + response.status + "] retrieving supporters.");
 		}
+
 		const data = await response.text();
 
 		const theDate = new Date();
@@ -205,8 +226,8 @@ async function fetchSupporters() {
 	}
 	catch (error) {
 
-		console.error("Original Birds encountered an error retrieving supporters.");
-		console.error(error);
+		console.log("Warning: Original Birds encountered an error retrieving supporters.");
+		console.log(error.message);
 	}
 }
 
@@ -236,8 +257,6 @@ chrome.storage.local.get([
 	"lastcheckmarkupdate", "lasthandlesupdate", "handlesfrequency"
 ], (result) => {
 
-	console.log(result);
-
 	const theDate = new Date();
 	theDate.setHours(0,0,0,0);
 
@@ -256,28 +275,32 @@ chrome.storage.local.get([
 
 	result.handlesfrequency ??= "monthly";
 
-	if (result.handles === undefined ||
-		result.lasthandlesupdate === undefined ||
+	if (result.handles === undefined) {
+
+		setDefaultHandles().then(fetchHandles);
+	}
+	else if (result.lasthandlesupdate === undefined ||
 		Math.abs(theDate - new Date(result.lasthandlesupdate)) >= freq2millis(result.handlesfrequency)) {
 
-		console.log("handles");
-		fetchHandles(result.handles === undefined);
+		fetchHandles();
 	}
 
 	const overdue = result.lastlaunch === undefined ||
 		Math.abs(theDate - new Date(result.lastlaunch)) >= freq2millis("daily");
 
-	if (result.selectors === undefined || overdue) {
+	if (result.selectors === undefined) {
 
-		console.log("selectors");
-		fetchSelectors(result.selectors === undefined);
+		setDefaultSelectors().then(fetchSelectors);
+	}
+	else if (overdue) {
+
+		fetchSelectors();
 	}
 
 	// BEGIN SUPPORTER SECTION
 
 	if (result.supporters === undefined || overdue) {
 
-		console.log("supporters");
 		fetchSupporters();
 	}
 
