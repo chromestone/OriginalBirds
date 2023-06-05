@@ -28,11 +28,11 @@ $('#fieldsetblue > input[type="radio"]').checkboxradio().change(function() {
 	$('#fieldsetblue > div.radiocontent').prop("hidden", true);
 
 	const id = $(this).attr("id");
-	if (id == "radiobluetext") {
+	if (id === "radiobluetext") {
 
 		$('#divbluetext').prop("hidden", false);
 	}
-	else if (id == "radioblueimage") {
+	else if (id === "radioblueimage") {
 
 		$('#divblueimage').prop("hidden", false);
 	}
@@ -46,11 +46,11 @@ $('#fieldsetlegacy > input[type="radio"]').checkboxradio().change(function() {
 	$('#fieldsetlegacy > div.radiocontent').prop("hidden", true);
 
 	const id = $(this).attr("id");
-	if (id == "radiolegacytext") {
+	if (id === "radiolegacytext") {
 
 		$('#divlegacytext').prop("hidden", false);
 	}
-	else if (id == "radiolegacyimage") {
+	else if (id === "radiolegacyimage") {
 
 		$('#divlegacyimage').prop("hidden", false);
 	}
@@ -69,8 +69,9 @@ chrome.storage.local.get([
 
 	// GENERAL
 
-	$('#blue').toggles(result.showblue ?? true);
-	$('#legacy').toggles(result.showlegacy ?? true);
+	// do not use new here
+	$('#blue').toggles(Boolean(result.showblue ?? true));
+	$('#legacy').toggles(Boolean(result.showlegacy ?? true));
 
 	$('#blue').on("toggle", (_, active) => {
 
@@ -89,32 +90,33 @@ chrome.storage.local.get([
 	const blueLook = result.bluelook ?? "default";
 	const legacyLook = result.legacylook ?? "default";
 
-	if (blueLook == "text") {
+	if (blueLook === "text") {
 
 		$('#radiobluetext').trigger("click");
 	}
-	else if (blueLook == "image") {
+	else if (blueLook === "image") {
 
 		$('#radioblueimage').trigger("click");
 	}
 
-	if (legacyLook == "text") {
+	if (legacyLook === "text") {
 
 		$('#radiolegacytext').trigger("click");
 	}
-	else if (legacyLook == "image") {
+	else if (legacyLook === "image") {
 
 		$('#radiolegacyimage').trigger("click");
 	}
 
-	$('#bluecolor').val(result.bluecolor ?? "");
-	$('#legacycolor').val(result.legacycolor ?? "");
+	// do not use new here
+	$('#bluecolor').val(String(result.bluecolor ?? ""));
+	$('#legacycolor').val(String(result.legacycolor ?? ""));
 
-	$('#bluetext').val(result.bluetext ?? "");
-	$('#legacytext').val(result.legacytext ?? "");
+	$('#bluetext').val(String(result.bluetext ?? ""));
+	$('#legacytext').val(String(result.legacytext ?? ""));
 
-	const blueURL = result.blueimage ?? "";
-	const legacyURL = result.legacyimage ?? "";
+	const blueURL = String(result.blueimage ?? "");
+	const legacyURL = String(result.legacyimage ?? "");
 
 	if (blueURL.length > 0) {
 
@@ -204,11 +206,11 @@ $('#savebluebutton').on("click", function() {
 
 		const radioId = $('#fieldsetblue > input[type="radio"]:checked').attr("id");
 		let look;
-		if (radioId == "radiobluetext") {
+		if (radioId === "radiobluetext") {
 
 			look = "text";
 		}
-		else if (radioId == "radioblueimage") {
+		else if (radioId === "radioblueimage") {
 
 			look = "image";
 		}
@@ -221,7 +223,7 @@ $('#savebluebutton').on("click", function() {
 		if (look != "text" || text.length > 0) {
 
 			const canvas = document.getElementById("canvasblueimage");
-			const imageURL = (canvas == null || $(canvas).prop("hidden")) ? "" : canvas.toDataURL();
+			const imageURL = (canvas === null || $(canvas).prop("hidden")) ? "" : canvas.toDataURL();
 			if (look != "image" || imageURL.length > 0) {
 
 				$('#blueerror').prop("hidden", true);
@@ -250,11 +252,11 @@ $('#savelegacybutton').on("click", function() {
 
 		const radioId = $('#fieldsetlegacy > input[type="radio"]:checked').attr("id");
 		let look;
-		if (radioId == "radiolegacytext") {
+		if (radioId === "radiolegacytext") {
 
 			look = "text";
 		}
-		else if (radioId == "radiolegacyimage") {
+		else if (radioId === "radiolegacyimage") {
 
 			look = "image";
 		}
@@ -267,7 +269,7 @@ $('#savelegacybutton').on("click", function() {
 		if (look != "text" || text.length > 0) {
 
 			const canvas = document.getElementById("canvaslegacyimage");
-			const imageURL = (canvas == null || $(canvas).prop("hidden")) ? "" : canvas.toDataURL();
+			const imageURL = (canvas === null || $(canvas).prop("hidden")) ? "" : canvas.toDataURL();
 			if (look != "image" || imageURL.length > 0) {
 
 				$('#legacyerror').prop("hidden", true);
