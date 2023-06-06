@@ -1,3 +1,6 @@
+const JSON_DATA_URL_PREFIX = "data:application/json;base64,";
+const DEFAULT_SELECTORS_URL = "https://original-birds.pages.dev/selectors.json";
+
 if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
 
 	const headLink = document.createElement("link");
@@ -64,7 +67,8 @@ $('#fieldsetlegacy > input[type="radio"]').checkboxradio().change(function() {
 
 chrome.storage.local.get([
 	"checkmark", "showblue", "showlegacy", "bluelook", "legacylook", "bluecolor", "legacycolor",
-	"bluetext", "legacytext", "blueimage", "legacyimage", "invocations", "polldelay"
+	"bluetext", "legacytext", "blueimage", "legacyimage", "invocations", "polldelay",
+	"selectorsurl"
 ], (result) => {
 
 	// GENERAL
@@ -146,13 +150,16 @@ chrome.storage.local.get([
 
 	// ADVANCED
 
-	const checkHtml = result.checkmark ?? "";
+	// do not use new here
+	const checkHtml = String(result.checkmark ?? "");
 	const checkBlob = new Blob([checkHtml], {type: "text/plain"});
 	$('#checkmarkdownload').attr("href", URL.createObjectURL(checkBlob));
 	$('#checkmarkhtml').val(checkHtml);
 
 	$('#invocations').val(result.invocations ?? 10);
 	$('#polldelay').val(result.polldelay ?? 200);
+
+	$('#selectorsurl').val(String(result.selectorsurl ?? DEFAULT_SELECTORS_URL));
 });
 
 // APPEARANCE
@@ -223,7 +230,8 @@ $('#savebluebutton').on("click", function() {
 		if (look != "text" || text.length > 0) {
 
 			const canvas = document.getElementById("canvasblueimage");
-			const imageURL = (canvas === null || $(canvas).prop("hidden")) ? "" : canvas.toDataURL();
+			const imageURL = (canvas === null || $(canvas).prop("hidden")) ?
+				"" : canvas.toDataURL();
 			if (look != "image" || imageURL.length > 0) {
 
 				$('#blueerror').prop("hidden", true);
@@ -269,7 +277,8 @@ $('#savelegacybutton').on("click", function() {
 		if (look != "text" || text.length > 0) {
 
 			const canvas = document.getElementById("canvaslegacyimage");
-			const imageURL = (canvas === null || $(canvas).prop("hidden")) ? "" : canvas.toDataURL();
+			const imageURL = (canvas === null || $(canvas).prop("hidden")) ?
+				"" : canvas.toDataURL();
 			if (look != "image" || imageURL.length > 0) {
 
 				$('#legacyerror').prop("hidden", true);
@@ -295,7 +304,8 @@ chrome.storage.onChanged.addListener((changes) => {
 
 	if (changes.checkmark !== undefined) {
 
-		const checkHtml = changes.checkmark.newValue ?? "";
+		// do not use new here
+		const checkHtml = String(changes.checkmark.newValue ?? "");
 		const checkBlob = new Blob([checkHtml], {type: "text/plain"});
 		const prevURL = $('#checkmarkdownload').attr("href");
 		if (prevURL != null) {
@@ -321,7 +331,9 @@ $('#invocationsbutton').on("click", function() {
 	const value = $('#invocations').val() ?? "";
 	if (value.match(/^[1-9]\d{0,6}$/)) {
 
-		chrome.storage.local.set({invocations: parseInt(value)}, () => $(this).prop("disabled", false));
+		chrome.storage.local.set({
+			invocations: parseInt(value)
+		}, () => $(this).prop("disabled", false));
 	}
 	else {
 
@@ -338,7 +350,9 @@ $('#polldelaybutton').on("click", function() {
 	const value = $('#polldelay').val() ?? "";
 	if (value.match(/^[1-9]\d{0,6}$/)) {
 
-		chrome.storage.local.set({polldelay: parseInt(value)}, () => $(this).prop("disabled", false));
+		chrome.storage.local.set({
+			polldelay: parseInt(value)
+		}, () => $(this).prop("disabled", false));
 	}
 	else {
 
@@ -409,14 +423,27 @@ $('#selectorsbutton').on("click", function() {
 
 	try {
 
-		const base64Prefix = 'data:application/json;base64,';
-		if (value.startsWith(base64Prefix)) {
+		if (value.startsWith(JSON_DATA_URL_PREFIX)) {
 
-			const decodedData = atob(value.substring(base64Prefix.length));
+			const decodedData = atob(value.substring(JSON_DATA_URL_PREFIX.length));
 			// validate JSON
 			JSON.parse(decodedData);
 
-			chrome.storage.local.set({selectorsurl: value}, () => $(this).prop("disabled", false));
+			chrome.storage.local.set({selectorsurl: value}, () =>
+				chrome.runtime.sendMessage({text: "fetchselectors?"}, (response) => {
+					if (!response.success) {
+
+						$('#fieldsetselectors > legend').effect({
+							effect: "shake",
+							complete: () => $(this).prop("disabled", false)
+						});
+					}
+					else {
+
+						$(this).prop("disabled", false);
+					}
+				}
+			));
 			return;
 		}
 
@@ -425,7 +452,9 @@ $('#selectorsbutton').on("click", function() {
 		if (inputURL.protocol === "https:" && inputURL.search === "" &&
 			inputURL.username === "" && inputURL.password === "") {
 
-			chrome.storage.local.set({selectorsurl: inputURL.toString()}, () => $(this).prop("disabled", false));
+			chrome.storage.local.set({
+				selectorsurl: inputURL.toString()
+			}, () => $(this).prop("disabled", false));
 			return;
 		}
 	}

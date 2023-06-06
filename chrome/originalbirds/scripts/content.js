@@ -796,7 +796,8 @@ async function checkmarkManagerFactory() {
 	}
 
 	const parser = new DOMParser();
-	const checkDoc = parser.parseFromString(DOMPurify.sanitize(properties.checkmark), "text/html");
+	// do not use new here
+	const checkDoc = parser.parseFromString(DOMPurify.sanitize(String(properties.checkmark)), "text/html");
 
 	const checkHtml = checkDoc?.body?.firstChild;
 	if (checkHtml == null || checkDoc.querySelector("parsererror") !== null) {

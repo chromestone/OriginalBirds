@@ -1,3 +1,6 @@
+const JSON_DATA_URL_PREFIX = "data:application/json;base64,";
+const DEFAULT_SELECTORS_URL = "https://original-birds.pages.dev/selectors.json";
+
 let closemeListener = (_, sendResponse) => sendResponse({closeme: false});
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
@@ -5,6 +8,13 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 	if (msg.text === "closeme?") {
 
 		closemeListener(sender, sendResponse);
+		return true;
+	}
+	else if (msg.text === "fetchselectors?") {
+
+		chrome.storage.local.get("selectorsurl", (result) => 
+			fetchSelectors(result.selectorsurl ?? DEFAULT_SELECTORS_URL).then((success) =>
+				sendResponse({success: success})));
 		return true;
 	}
 	else if (msg.text === "cachecheckmark!") {
@@ -177,32 +187,55 @@ function setDefaultSelectors() {
 	}, () => resolve(null)));
 }
 
-async function fetchSelectors() {
+async function fetchSelectors(urlString) {
+
+	urlString = (urlString ?? "").trim();
 
 	let data;
 	try {
 
-		const response = await fetch("https://original-birds.pages.dev/selectors.json",
-			{cache: "no-store", redirect: "error"});
+		if (urlString.startsWith(JSON_DATA_URL_PREFIX)) {
 
-		if (!response.ok) {
-
-			throw new Error("Original Birds encountered status [" + response.status + "] retrieving the selectors.");
+			const decodedData = atob(urlString.substring(JSON_DATA_URL_PREFIX.length));
+			data = JSON.parse(decodedData);
 		}
+		else {
 
-		data = await response.text();
+			const inputURL = new URL(urlString);
+
+			if (!(inputURL.protocol === "https:" && inputURL.search === "" &&
+				inputURL.username === "" && inputURL.password === "")) {
+
+				console.log("Warning: Original Birds encountered invalid selectors URL.");
+				return false;
+			}
+
+			const response = await fetch(inputURL, {cache: "no-store", redirect: "error"});
+
+			if (!response.ok) {
+
+				throw new Error(
+					"Original Birds encountered status [" +
+					response.status +
+					"] retrieving the selectors."
+				);
+			}
+
+			data = await response.text();
+		}
 	}
 	catch (error) {
 
 		console.log("Warning: Original Birds could not retrieve the latest selectors.");
 		console.error(error);
-		return;
+		return false;
 	}
 
 	const theDate = new Date();
 	theDate.setHours(0,0,0,0);
 
 	chrome.storage.local.set({selectors: data, lastlaunch: theDate.toJSON()});
+	return true;
 }
 
 async function fetchSupporters() {
@@ -254,7 +287,8 @@ function freq2millis(freq) {
 
 chrome.storage.local.get([
 	"checkmark", "handles", "selectors", "supporters", "lastlaunch",
-	"lastcheckmarkupdate", "lasthandlesupdate", "handlesfrequency"
+	"lastcheckmarkupdate", "lasthandlesupdate", "handlesfrequency",
+	"selectorsurl"
 ], (result) => {
 
 	const theDate = new Date();
@@ -288,13 +322,14 @@ chrome.storage.local.get([
 	const overdue = result.lastlaunch === undefined ||
 		Math.abs(theDate - new Date(result.lastlaunch)) >= freq2millis("daily");
 
+	const selectorsURL = result.selectorsurl ?? DEFAULT_SELECTORS_URL;
 	if (result.selectors === undefined) {
 
-		setDefaultSelectors().then(fetchSelectors);
+		setDefaultSelectors().then((_) => fetchSelectors(selectorsURL));
 	}
 	else if (overdue) {
 
-		fetchSelectors();
+		fetchSelectors(selectorsURL);
 	}
 
 	// BEGIN SUPPORTER SECTION
