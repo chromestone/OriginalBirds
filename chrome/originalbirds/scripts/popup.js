@@ -68,7 +68,7 @@ $('#fieldsetlegacy > input[type="radio"]').checkboxradio().change(function() {
 chrome.storage.local.get([
 	"checkmark", "showblue", "showlegacy", "bluelook", "legacylook", "bluecolor", "legacycolor",
 	"bluetext", "legacytext", "blueimage", "legacyimage", "invocations", "polldelay",
-	"selectorsurl"
+	"selectors", "selectorsurl"
 ], (result) => {
 
 	// GENERAL
@@ -156,9 +156,16 @@ chrome.storage.local.get([
 	$('#checkmarkdownload').attr("href", URL.createObjectURL(checkBlob));
 	$('#checkmarkhtml').val(checkHtml);
 
-	$('#invocations').val(result.invocations ?? 10);
-	$('#polldelay').val(result.polldelay ?? 200);
+	// do not use new here
+	$('#invocations').val(Number(result.invocations ?? 10).toString());
+	$('#polldelay').val(Number(result.polldelay ?? 200).toString());
 
+	const selectorsJSON = String(result.selectors ?? "");
+	const selectorsBlob = new Blob([selectorsJSON], {type: "application/json"});
+	$('#selectorsdownload').attr("href", URL.createObjectURL(selectorsBlob));
+	$('#selectorsjson').val(selectorsJSON);
+
+	// do not use new here
 	$('#selectorsurl').val(String(result.selectorsurl ?? DEFAULT_SELECTORS_URL));
 });
 
@@ -325,6 +332,37 @@ $('#reloadcheckmark').on("click", function() {
 	chrome.runtime.sendMessage({text: "cachecheckmark!"});
 });
 
+$('#reloadselectors').on("click", function() {
+
+	$(this).prop("disabled", true);
+	chrome.runtime.sendMessage({text: "fetchselectors?"}, (response) => {
+
+		if (!response.success) {
+
+			$('#selectorserror').prop("hidden", false);
+			$(this).prop("disabled", false);
+			return;
+		}
+		$('#selectorserror').prop("hidden", true);
+
+		chrome.storage.local.get("selectors", (result) => {
+
+			// do not use new here
+			const selectorsJSON = String(result.selectors ?? "");
+			const selectorsBlob = new Blob([selectorsJSON], {type: "application/json"});
+			const prevURL = $('#selectorsdownload').attr("href");
+			if (prevURL != null) {
+
+				URL.revokeObjectURL(prevURL);
+			}
+			$('#selectorsdownload').attr("href", URL.createObjectURL(selectorsBlob));
+			$('#selectorsjson').val(selectorsJSON);
+
+			$(this).prop("disabled", false);
+		});
+	});
+});
+
 $('#invocationsbutton').on("click", function() {
 
 	$(this).prop("disabled", true);
@@ -421,6 +459,7 @@ $('#selectorsbutton').on("click", function() {
 	$(this).prop("disabled", true);
 	const value = ($('#selectorsurl').val() ?? "").trim();
 
+	let success = false;
 	try {
 
 		if (value.startsWith(JSON_DATA_URL_PREFIX)) {
@@ -428,34 +467,13 @@ $('#selectorsbutton').on("click", function() {
 			const decodedData = atob(value.substring(JSON_DATA_URL_PREFIX.length));
 			// validate JSON
 			JSON.parse(decodedData);
-
-			chrome.storage.local.set({selectorsurl: value}, () =>
-				chrome.runtime.sendMessage({text: "fetchselectors?"}, (response) => {
-					if (!response.success) {
-
-						$('#fieldsetselectors > legend').effect({
-							effect: "shake",
-							complete: () => $(this).prop("disabled", false)
-						});
-					}
-					else {
-
-						$(this).prop("disabled", false);
-					}
-				}
-			));
-			return;
+			success = true;
 		}
+		else {
 
-		const inputURL = new URL(value);
-
-		if (inputURL.protocol === "https:" && inputURL.search === "" &&
-			inputURL.username === "" && inputURL.password === "") {
-
-			chrome.storage.local.set({
-				selectorsurl: inputURL.toString()
-			}, () => $(this).prop("disabled", false));
-			return;
+			const inputURL = new URL(value);
+			success = inputURL.protocol === "https:" && inputURL.search === "" &&
+				inputURL.username === "" && inputURL.password === "";
 		}
 	}
 	catch(error) {
@@ -463,8 +481,28 @@ $('#selectorsbutton').on("click", function() {
 		console.log(error.message);
 	}
 
-	$('#fieldsetselectors > legend').effect({
-		effect: "shake",
-		complete: () => $(this).prop("disabled", false)
-	});
+	if (!success) {
+
+		$('#fieldsetselectors > legend').effect({
+			effect: "shake",
+			complete: () => $(this).prop("disabled", false)
+		});
+		return;
+	}
+
+	chrome.storage.local.set({selectorsurl: value}, () =>
+		chrome.runtime.sendMessage({text: "fetchselectors?"}, (response) => {
+
+			if (!response.success) {
+
+				$('#fieldsetselectors > legend').effect({
+					effect: "shake",
+					complete: () => $(this).prop("disabled", false)
+				});
+				return;
+			}
+
+			$(this).prop("disabled", false);
+		}
+	));
 });

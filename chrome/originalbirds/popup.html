@@ -172,12 +172,15 @@
 			</details>
 			<button id="reloadcheckmark">Reload Checkmark</button>
 			<p class="text-color"><b>Selectors&nbsp;JSON</b></p>
-			<details style="margin-bottom: 1rem;">
+			<details style="margin-bottom: 0.5rem;">
 				<summary class="text-color">Inspect</summary>
 				<textarea id="selectorsjson" rows="4" cols="32" readonly style="vertical-align: middle;"></textarea>
 				<a id="selectorsdownload" download="selectors.json"><button style="font-size: 1.5rem; font-weight: bold;">&#10515;</button></a>
 			</details>
-			<button id="reloadselectors">Reload Selectors</button>
+			<div id="selectorserror" class="ui-widget ui-state-error ui-corner-all" style="margin-top: 0.5rem; padding: 0.2rem;" hidden>
+				<strong>Alert:</strong> Original Birds encountered an error reloading selectors.
+			</div>
+			<button id="reloadselectors" style="margin-top: 0.5rem;">Reload Selectors</button>
 			<label for="invocations">
 				<p class="text-color">
 					<b>Number&nbsp;of&nbsp;Polls</b><br>

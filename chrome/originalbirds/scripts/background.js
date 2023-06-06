@@ -189,15 +189,14 @@ function setDefaultSelectors() {
 
 async function fetchSelectors(urlString) {
 
-	urlString = (urlString ?? "").trim();
+	urlString = (urlString ?? DEFAULT_SELECTORS_URL).trim();
 
 	let data;
 	try {
 
 		if (urlString.startsWith(JSON_DATA_URL_PREFIX)) {
 
-			const decodedData = atob(urlString.substring(JSON_DATA_URL_PREFIX.length));
-			data = JSON.parse(decodedData);
+			data = atob(urlString.substring(JSON_DATA_URL_PREFIX.length));
 		}
 		else {
 
@@ -214,20 +213,24 @@ async function fetchSelectors(urlString) {
 
 			if (!response.ok) {
 
-				throw new Error(
-					"Original Birds encountered status [" +
+				console.log(
+					"Warning: Original Birds encountered status [" +
 					response.status +
 					"] retrieving the selectors."
 				);
+				return false;
 			}
 
 			data = await response.text();
 		}
+
+		// validate JSON
+		JSON.parse(data);
 	}
 	catch (error) {
 
-		console.log("Warning: Original Birds could not retrieve the latest selectors.");
 		console.error(error);
+		console.log("Warning: Original Birds could not retrieve the latest selectors.");
 		return false;
 	}
 
@@ -247,7 +250,12 @@ async function fetchSupporters() {
 
 		if (!response.ok) {
 
-			throw new Error("Original Birds encountered status [" + response.status + "] retrieving supporters.");
+			console.log(
+				"Warning: Original Birds encountered status [" +
+				response.status +
+				"] retrieving supporters."
+			);
+			return;
 		}
 
 		const data = await response.text();
@@ -259,8 +267,8 @@ async function fetchSupporters() {
 	}
 	catch (error) {
 
+		console.error(error);
 		console.log("Warning: Original Birds encountered an error retrieving supporters.");
-		console.log(error.message);
 	}
 }
 
@@ -322,14 +330,13 @@ chrome.storage.local.get([
 	const overdue = result.lastlaunch === undefined ||
 		Math.abs(theDate - new Date(result.lastlaunch)) >= freq2millis("daily");
 
-	const selectorsURL = result.selectorsurl ?? DEFAULT_SELECTORS_URL;
 	if (result.selectors === undefined) {
 
-		setDefaultSelectors().then((_) => fetchSelectors(selectorsURL));
+		setDefaultSelectors().then((_) => fetchSelectors(result.selectorsurl));
 	}
 	else if (overdue) {
 
-		fetchSelectors(selectorsURL);
+		fetchSelectors(result.selectorsurl);
 	}
 
 	// BEGIN SUPPORTER SECTION
