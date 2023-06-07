@@ -1,28 +1,7 @@
 const JSON_DATA_URL_PREFIX = "data:application/json;base64,";
 const DEFAULT_SELECTORS_URL = "https://original-birds.pages.dev/selectors.json";
 
-if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
-
-	const headLink = document.createElement("link");
-	headLink.rel = "stylesheet";
-	headLink.href = "css/dark-hive/jquery-ui.css";
-	document.head.appendChild(headLink);
-
-	// Set the background color of your extension's page to a dark color
-	document.body.style["background-color"] = "black";// "#202124";
-	$('.text-color').css("color", "white");
-}
-else {
-
-	const headLink = document.createElement("link");
-	headLink.rel = "stylesheet";
-	headLink.href = "css/base/jquery-ui.css";
-	document.head.appendChild(headLink);
-}
-
 // INITIALIZATION
-
-$('.toggle').toggles({type: "select"});
 
 $('#tabs').tabs();
 $('button').button();
@@ -74,17 +53,21 @@ chrome.storage.local.get([
 	// GENERAL
 
 	// do not use new here
-	$('#blue').toggles(Boolean(result.showblue ?? true));
-	$('#legacy').toggles(Boolean(result.showlegacy ?? true));
+	$('#blue').toggles({on: Boolean(result.showblue ?? true)});
+	$('#legacy').toggles({on: Boolean(result.showlegacy ?? true)});
 
-	$('#blue').on("toggle", (_, active) => {
+	$('#blue').on("toggle", function (_, active) {
 
-		chrome.storage.local.set({showblue: active});
+		$(this).toggleClass("disabled", true);
+		chrome.storage.local.set({showblue: active}, () =>
+			$(this).toggleClass("disabled", false));
 	});
 
 	$('#legacy').on("toggle", (_, active) => {
 
-		chrome.storage.local.set({showlegacy: active});
+		$(this).toggleClass("disabled", true);
+		chrome.storage.local.set({showlegacy: active}, () =>
+			$(this).toggleClass("disabled", false));
 	});
 
 	$('.toggle').toggleClass("disabled", false);

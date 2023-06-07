@@ -3,7 +3,7 @@
 <head>
 	<style>
 		body {
-			min-width: 100vw;
+			width: 800px;
 		}
 		a, a:visited {
 			color: rgb(29, 155, 240);
@@ -26,7 +26,21 @@
 		input:invalid {
 			outline: 2px solid red;
 		}
+		table {
+			border-spacing: 1rem 1rem;
+			margin-left: -1rem;
+			margin-bottom: -1rem;
+		}
+		@media (prefers-color-scheme: dark) {
+			body {
+				background-color: black;
+			}
+			.text-color {
+				color: white;
+			}
+		}
 	</style>
+	<link rel="stylesheet" href="css/dark-hive/jquery-ui.css">
 	<link rel="stylesheet" href="css/toggles.css">
 	<link rel="stylesheet" href="css/toggles-dark.css">
 	<script src="scripts/jquery.js"></script>
@@ -35,10 +49,10 @@
 </head>
 <body>
 	<span hidden id="permission_span">
-		<p class="text-color">Original Birds needs access to Twitter to function.</p>
+		<p class="text-color">Original Birds needs access to Twitter to function. (Why? Please see the <a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/#faq">FAQ</a>.)</p>
 		<div id="perm" class="toggle toggle-dark disabled" style="display: inline-block;"></div>
-		<p class="text-color">Why? See the FAQ on our <a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/#faq">home page</a>.</p>
 		<p class="text-color">Note: Your browser will briefly visit Elon Musk's Twitter to retrieve Twitter's checkmark.</p>
+		<p class="text-color"> <a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/">Home Page</a> | <a target="_blank" rel="noopener noreferrer" href="https://github.com/chromestone/OriginalBirds">Source Code</a> | <a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/privacy.html">Privacy Policy</a></p>
 	</span>
 	<span hidden id="normal_span">
 		<div id="tabs">
@@ -48,15 +62,26 @@
 				<li><a href="#advanced">Advanced</a></li>
 			</ul>
 			<div id="general">
-				<p class="text-color"><b>Twitter&nbsp;Blue</b></p>
-				<div id="blue" class="toggle toggle-dark disabled" style="display: inline-block;"></div>
-				<p class="text-color"><b>Legacy&nbsp;Checkmark</b></p>
-				<div id="legacy" class="toggle toggle-dark disabled" style="display: inline-block;"></div>
+				<table>
+					<tr>
+						<td class="text-color"><b>Twitter&nbsp;Blue</b></td>
+						<td><div id="blue" class="toggle toggle-dark disabled" style="display: inline-block;"></div></td>
+					</tr>
+					<tr>
+						<td class="text-color"><b>Legacy&nbsp;Checkmark</b></td>
+						<td><div id="legacy" class="toggle toggle-dark disabled" style="display: inline-block;"></div></td>
+					</tr>
+				</table>
+				<hr style="margin-top: 1rem;">
 				<p class="text-color">&#128030;Found a bug? Tweet us <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/intent/tweet?screen_name=RealOpenBirds">@RealOpenBirds</a> or see how to <a target="_blank" rel="noopener noreferrer" href="https://github.com/chromestone/OriginalBirds/blob/main/CONTRIBUTING.md">contribute</a>.</p>
 				<p class="text-color">&#10067;Have a question? Read the <a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/#faq">FAQ</a>.</p>
 				<p class="text-color">&#11088;&#11088;&#11088;&#11088;&#11088;Enjoying the extension? Please leave a <a target="_blank" rel="noopener noreferrer" href="https://addons.mozilla.org/en-US/firefox/addon/original-birds/">review</a>.</p>
 				<p class="text-color">&#9749;<a target="_blank" rel="noopener noreferrer" href="https://www.buymeacoffee.com/openbirds">Donations</a> are welcome!</p>
-				<p class="text-color">&#128156;Thank you to all of our generous <a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/contributors.html">donors</a> and <a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/contributors.html">contributors</a>!!! Go check them out and show them some &#128156;!</p>
+				<p class="text-color">
+					&#128156;Thank you to all of our generous <a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/contributors.html">donors</a> and <a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/contributors.html">contributors</a>!<br>
+					Go check them out and show them some &#128156;!!!
+				</p>
+				<hr>
 				<p class="text-color"> <a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/">Home Page</a> | <a target="_blank" rel="noopener noreferrer" href="https://github.com/chromestone/OriginalBirds">Source Code</a> | <a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/privacy.html">Privacy Policy</a></p>
 			</div>
 			<div id="appearance">
@@ -164,12 +189,15 @@
 				</details>
 				<button id="reloadcheckmark">Reload Checkmark</button>
 				<p class="text-color"><b>Selectors&nbsp;JSON</b></p>
-				<details style="margin-bottom: 1rem;">
+				<details style="margin-bottom: 0.5rem;">
 					<summary class="text-color">Inspect</summary>
 					<textarea id="selectorsjson" rows="4" cols="32" readonly style="vertical-align: middle;"></textarea>
 					<a id="selectorsdownload" download="selectors.json"><button style="font-size: 1.5rem; font-weight: bold;">&#10515;</button></a>
 				</details>
-				<button id="reloadselectors">Reload Selectors</button>
+				<div id="selectorserror" class="ui-widget ui-state-error ui-corner-all" style="margin-top: 0.5rem; padding: 0.2rem;" hidden>
+					<strong>Alert:</strong> Original Birds encountered an error reloading selectors.
+				</div>
+				<button id="reloadselectors" style="margin-top: 0.5rem;">Reload Selectors</button>
 				<label for="invocations">
 					<p class="text-color">
 						<b>Number&nbsp;of&nbsp;Polls</b><br>

@@ -1,25 +1,4 @@
-if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
-
-	const headLink = document.createElement("link");
-	headLink.rel = "stylesheet";
-	headLink.href = "css/dark-hive/jquery-ui.css";
-	document.head.appendChild(headLink);
-
-	// Set the background color of your extension's page to a dark color
-	document.body.style["background-color"] = "black";// "#202124";
-	$('.text-color').css("color", "white");
-}
-else {
-
-	const headLink = document.createElement("link");
-	headLink.rel = "stylesheet";
-	headLink.href = "css/base/jquery-ui.css";
-	document.head.appendChild(headLink);
-}
-
 // INITIALIZATION
-
-$('.toggle').toggles({type: "select"});
 
 function displayNormalSpan() {
 
@@ -83,19 +62,24 @@ function displayNormalSpan() {
 
 		// GENERAL
 
-		$('#blue').toggles(result.showblue ?? true);
-		$('#legacy').toggles(result.showlegacy ?? true);
-
-		$('#blue').on("toggle", (_, active) => {
-
-			chrome.storage.local.set({showblue: active});
+		// do not use new here
+		$('#blue').toggles({on: Boolean(result.showblue ?? true)});
+		$('#legacy').toggles({on: Boolean(result.showlegacy ?? true)});
+	
+		$('#blue').on("toggle", function (_, active) {
+	
+			$(this).toggleClass("disabled", true);
+			chrome.storage.local.set({showblue: active}, () =>
+				$(this).toggleClass("disabled", false));
 		});
-
+	
 		$('#legacy').on("toggle", (_, active) => {
-
-			chrome.storage.local.set({showlegacy: active});
+	
+			$(this).toggleClass("disabled", true);
+			chrome.storage.local.set({showlegacy: active}, () =>
+				$(this).toggleClass("disabled", false));
 		});
-
+	
 		$('.toggle').toggleClass("disabled", false);
 
 		// APPEARANCE
@@ -450,6 +434,7 @@ browser.permissions.contains({origins: ["https://*.twitter.com/*"]}).then((resul
 	}
 	else {
 
+		$('#perm').toggles({type: "select"});
 		$('#perm').on("toggle", actionListener);
 		$('#perm').toggleClass("disabled", false);
 		$('#permission_span').prop("hidden", false);

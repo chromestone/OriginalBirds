@@ -6,7 +6,7 @@
 			margin-top: 0;
 			margin-bottom: 0;
 			margin-left: 0;
-			min-width: 100vw;
+			width: 800px;
 		}
 		a, a:visited {
 			color: rgb(29, 155, 240);
@@ -29,7 +29,27 @@
 		input:invalid {
 			outline: 2px solid red;
 		}
+		table {
+			border-spacing: 1rem 1rem;
+			margin-left: -1rem;
+			margin-bottom: -1rem;
+		}
+		input[type="file"] {
+			color: black;
+		}
+		@media (prefers-color-scheme: dark) {
+			body {
+				background-color: black;
+			}
+			.text-color {
+				color: white;
+			}
+			input[type="file"] {
+				color: white;
+			}
+		}
 	</style>
+	<link rel="stylesheet" href="css/dark-hive/jquery-ui.css">
 	<link rel="stylesheet" href="css/toggles.css">
 	<link rel="stylesheet" href="css/toggles-dark.css">
 	<script src="scripts/jquery.js"></script>
@@ -44,15 +64,26 @@
 			<li><a href="#advanced">Advanced</a></li>
 		</ul>
 		<div id="general">
-			<p class="text-color"><b>Twitter&nbsp;Blue</b></p>
-			<div id="blue" class="toggle toggle-dark disabled" style="display: inline-block;"></div>
-			<p class="text-color"><b>Legacy&nbsp;Checkmark</b></p>
-			<div id="legacy" class="toggle toggle-dark disabled" style="display: inline-block;"></div>
+			<table>
+				<tr>
+					<td class="text-color"><b>Twitter&nbsp;Blue</b></td>
+					<td><div id="blue" class="toggle toggle-dark disabled" style="display: inline-block;"></div></td>
+				</tr>
+				<tr>
+					<td class="text-color"><b>Legacy&nbsp;Checkmark</b></td>
+					<td><div id="legacy" class="toggle toggle-dark disabled" style="display: inline-block;"></div></td>
+				</tr>
+			</table>
+			<hr style="margin-top: 1rem;">
 			<p class="text-color">&#128030;Found a bug? Tweet us <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/intent/tweet?screen_name=RealOpenBirds">@RealOpenBirds</a> or see how to <a target="_blank" rel="noopener noreferrer" href="https://github.com/chromestone/OriginalBirds/blob/main/CONTRIBUTING.md">contribute</a>.</p>
 			<p class="text-color">&#10067;Have a question? Read the <a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/#faq">FAQ</a>.</p>
 			<p class="text-color">&#11088;&#11088;&#11088;&#11088;&#11088;Enjoying the extension? Please leave a <a target="_blank" rel="noopener noreferrer" href="https://chrome.google.com/webstore/detail/original-birds/chhgbpmapfgibdoimakecicdlhhmkpjn">review</a>.</p>
 			<p class="text-color">&#9749;<a target="_blank" rel="noopener noreferrer" href="https://www.buymeacoffee.com/openbirds">Donations</a> are welcome!</p>
-			<p class="text-color">&#128156;Thank you to all of our generous <a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/contributors.html">donors</a> and <a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/contributors.html">contributors</a>!!! Go check them out and show them some &#128156;!</p>
+			<p class="text-color">
+				&#128156;Thank you to all of our generous <a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/contributors.html">donors</a> and <a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/contributors.html">contributors</a>!<br>
+				Go check them out and show them some &#128156;!!!
+			</p>
+			<hr>
 			<p class="text-color"> <a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/">Home Page</a> | <a target="_blank" rel="noopener noreferrer" href="https://github.com/chromestone/OriginalBirds">Source Code</a> | <a target="_blank" rel="noopener noreferrer" href="https://chromestone.github.io/OriginalBirds/privacy.html">Privacy Policy</a></p>
 		</div>
 		<div id="appearance">
