@@ -185,16 +185,6 @@
 			</fieldset>
 		</div>
 		<div id="advanced">
-			<label for="handlesfrequency">
-				<p class="text-color"><b>Legacy Verified List Updates</b></p>
-			</label>
-			<select id="handlesfrequency">
-				<option value="never">Never</option>
-				<option value="daily">Daily</option>
-				<option value="weekly" selected>Weekly</option>
-				<option value="monthly">Monthly</option>
-				<option value="yearly">Yearly</option>
-			</select>
 			<p class="text-color"><b>Checkmark&nbsp;HTML</b></p>
 			<details style="margin-bottom: 1rem;">
 				<summary class="text-color">Inspect</summary>
@@ -212,6 +202,28 @@
 				<strong>Alert:</strong> Original Birds encountered an error reloading selectors.
 			</div>
 			<button id="reloadselectors" style="margin-top: 0.5rem;">Reload Selectors</button>
+			<p class="text-color">
+				<b>Legacy&nbsp;Verified&nbsp;List</b><br>
+			</p>
+			<p class="text-color">
+				Version: <span id="handlesversion"></span>
+			</p>
+			<label for="handlesfrequency" class="text-color">Check for Update:</label>
+			<select id="handlesfrequency">
+				<option value="never">Never</option>
+				<option value="daily">Daily</option>
+				<option value="weekly" selected>Weekly</option>
+				<option value="monthly">Monthly</option>
+				<option value="yearly">Yearly</option>
+			</select><br>
+			<button id="checkhandles" style="margin-top: 1rem;">Check for Update Now</button>
+			<div id="askfetchhandles" hidden>
+				<p class="text-color">List update found!</p>
+				<button id="fetchhandles">Download New List</button>
+			</div>
+			<div id="nofetchhandles" hidden>
+				<p class="text-color">No list update found.</p>
+			</div>
 			<label for="invocations">
 				<p class="text-color">
 					<b>Number&nbsp;of&nbsp;Polls</b><br>
@@ -231,6 +243,11 @@
 			<div class="ui-widget ui-state-error ui-corner-all" style="margin-top: 0.5rem; padding: 0.2rem;">
 				<strong>Warning:</strong> Improper settings below may cause Original Birds to malfunction.
 			</div>
+			<fieldset id="fieldsetselectors" style="margin-top: 1rem;">
+				<legend class="text-color"><b>Selectors URL</b></legend>
+				<input id="selectorsurl" type="text" style="margin-top: 1rem; width: 100%;"><br>
+				<button id="selectorsbutton" style="margin-top: 1rem;">Save and Load</button>
+			</fieldset>
 			<fieldset style="margin-top: 1rem;">
 				<legend class="text-color"><b>Legacy Verified List URL</b></legend>
 				<p class="text-color" style="margin-top: 0.5rem;">Both values must be set for correct functionality.</p>
@@ -242,12 +259,7 @@
 					<p class="text-color"><b>List URL</b></p>
 				</label>
 				<input id="handlesurl" type="text" style="width: 100%;"><br>
-				<button id="handlesbutton" style="margin-top: 1rem;">Save All</button>
-			</fieldset>
-			<fieldset id="fieldsetselectors" style="margin-top: 1rem;">
-				<legend class="text-color"><b>Selectors URL</b></legend>
-				<input id="selectorsurl" type="text" style="margin-top: 1rem; width: 100%;"><br>
-				<button id="selectorsbutton" style="margin-top: 1rem;">Save</button>
+				<button id="handlesbutton" style="margin-top: 1rem;">Save and Load</button>
 			</fieldset>
 		</div>
 	</div>

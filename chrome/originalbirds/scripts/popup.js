@@ -47,6 +47,7 @@ $('#fieldsetlegacy > input[type="radio"]').checkboxradio().change(function() {
 chrome.storage.local.get([
 	"checkmark", "showblue", "showlegacy", "bluelook", "legacylook", "bluecolor", "legacycolor",
 	"bluetext", "legacytext", "blueimage", "legacyimage", "invocations", "polldelay",
+	"handlesfrequency", "handlesversion", "handlesversionurl", "handlesurl",
 	"selectors", "selectorsurl"
 ], (result) => {
 
@@ -134,6 +135,9 @@ chrome.storage.local.get([
 	// ADVANCED
 
 	// do not use new here
+	// does not trigger change function
+	$('#handlesfrequency').val(String(result.handlesfrequency ?? "weekly"))
+
 	const checkHtml = String(result.checkmark ?? "");
 	const checkBlob = new Blob([checkHtml], {type: "text/plain"});
 	$('#checkmarkdownload').attr("href", URL.createObjectURL(checkBlob));
@@ -290,7 +294,14 @@ $('#savelegacybutton').on("click", function() {
 
 // ADVANCED
 
-chrome.storage.onChanged.addListener((changes) => {
+$('#handlesfrequency').change(function() {
+
+	$(this).prop("disabled", true);
+	chrome.storage.local.set({handlesfrequency: $(this).val()}, () =>
+		$(this).prop("disabled", false));
+});
+
+chrome.storage.local.onChanged.addListener((changes) => {
 
 	if (changes.checkmark !== undefined) {
 

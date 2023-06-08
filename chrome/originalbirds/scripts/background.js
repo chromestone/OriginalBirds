@@ -1,3 +1,7 @@
+const DEFAULT_HANDLES_VERSION = ["0"];
+const DEFAULT_HANDLES_VERSION_URL = "https://original-birds.pages.dev/version.txt";
+const DEFAULT_HANDLES_URL = "https://original-birds.pages.dev/verified_handles.txt";
+
 const JSON_DATA_URL_PREFIX = "data:application/json;base64,";
 const DEFAULT_SELECTORS_URL = "https://original-birds.pages.dev/selectors.json";
 
@@ -49,7 +53,7 @@ async function setDefaultHandles() {
 
 		console.log("Warning: Original Birds could not find a local fallback list.");
 		console.error(error);
-		return Promise.resolve(null);
+		return Promise.resolve(false);
 	}
 
 	const handles = data.split('\n').filter((str) => str !== "").map((str) => str.toLowerCase());
@@ -59,33 +63,95 @@ async function setDefaultHandles() {
 
 	return new Promise((resolve) => chrome.storage.local.set({
 		handles: handles,
+		handlesversion: DEFAULT_HANDLES_VERSION,
 		lasthandlesupdate: theDate.toJSON()
-	}, () => resolve(null)));
+	}, () => resolve(true)));
 }
 
-async function fetchHandles() {
+async function fetchHandlesVersion(urlString) {
+
+	urlString = (urlString ?? DEFAULT_HANDLES_VERSION_URL).trim();
 
 	let data;
 	try {
 
-		const response = await fetch("https://original-birds.pages.dev/verified_handles.txt",
-			{cache: "no-store", redirect: "error"});
+		const inputURL = new URL(urlString);
+
+		if (!(inputURL.protocol === "https:" && inputURL.search === "" &&
+			inputURL.username === "" && inputURL.password === "")) {
+
+			console.log("Warning: Original Birds encountered invalid handles VERSION URL.");
+			return;
+		}
+
+		const response = await fetch(inputURL, {cache: "no-store", redirect: "error"});
 
 		if (!response.ok) {
 
-			throw new Error("Original Birds encountered status [" + response.status + "] retrieving the list.");
+			console.log(
+				"Warning: Original Birds encountered status [" +
+				response.status +
+				"] retrieving the list VERSION."
+			);
+			return Promise.resolve(null);
 		}
 
 		data = await response.text();
 	}
 	catch (error) {
 
-		console.log("Warning: Original Birds could not retrieve the latest legacy users list.");
 		console.error(error);
+		console.log("Warning: Original Birds could not retrieve the legacy users list VERSION.");
+		return Promise.resolve(null);
+	}
+
+	return Promise.resolve(data.split(","));
+}
+
+async function fetchHandles(urlString, currentVersion, latestVersionPromise) {
+
+	if (currentVersion == null) {
+
 		return;
 	}
 
-	const handles = data.split('\n').filter((str) => str !== "").map((str) => str.toLowerCase());
+
+	urlString = (urlString ?? DEFAULT_HANDLES_URL).trim();
+
+	let data;
+	try {
+
+		const inputURL = new URL(urlString);
+
+		if (!(inputURL.protocol === "https:" && inputURL.search === "" &&
+			inputURL.username === "" && inputURL.password === "")) {
+
+			console.log("Warning: Original Birds encountered invalid handles URL.");
+			return;
+		}
+
+		const response = await fetch(inputURL, {cache: "no-store", redirect: "error"});
+
+		if (!response.ok) {
+
+			console.log(
+				"Warning: Original Birds encountered status [" +
+				response.status +
+				"] retrieving the list."
+			);
+			return;
+		}
+
+		data = await response.text();
+	}
+	catch (error) {
+
+		console.error(error);
+		console.log("Warning: Original Birds could not retrieve the latest legacy users list.");
+		return;
+	}
+
+	const handles = data.split("\n").filter((str) => str !== "").map((str) => str.toLowerCase());
 
 	const theDate = new Date();
 	theDate.setHours(0,0,0,0);
@@ -184,7 +250,7 @@ function setDefaultSelectors() {
 	return new Promise((resolve) => chrome.storage.local.set({
 		selectors: data,
 		lastlaunch: theDate.toJSON()
-	}, () => resolve(null)));
+	}, () => resolve(true)));
 }
 
 async function fetchSelectors(urlString) {
@@ -206,7 +272,7 @@ async function fetchSelectors(urlString) {
 				inputURL.username === "" && inputURL.password === "")) {
 
 				console.log("Warning: Original Birds encountered invalid selectors URL.");
-				return false;
+				return Promise.resolve(false);
 			}
 
 			const response = await fetch(inputURL, {cache: "no-store", redirect: "error"});
@@ -218,7 +284,7 @@ async function fetchSelectors(urlString) {
 					response.status +
 					"] retrieving the selectors."
 				);
-				return false;
+				return Promise.resolve(false);
 			}
 
 			data = await response.text();
@@ -294,8 +360,9 @@ function freq2millis(freq) {
 }
 
 chrome.storage.local.get([
-	"checkmark", "handles", "selectors", "supporters", "lastlaunch",
-	"lastcheckmarkupdate", "lasthandlesupdate", "handlesfrequency",
+	"checkmark", "handles", "selectors", "supporters",
+	"lastlaunch", "lastcheckmarkupdate", "lasthandlesupdate",
+	"handlesfrequency", "handlesversion", "handlesversionurl", "handlesurl",
 	"selectorsurl"
 ], (result) => {
 
@@ -315,11 +382,11 @@ chrome.storage.local.get([
 		cacheCheckmark();
 	}
 
-	result.handlesfrequency ??= "monthly";
+	result.handlesfrequency ??= "weekly";
 
 	if (result.handles === undefined) {
 
-		setDefaultHandles().then(fetchHandles);
+		setDefaultHandles().then((success) => fetchHandles(result.handlesurl));
 	}
 	else if (result.lasthandlesupdate === undefined ||
 		Math.abs(theDate - new Date(result.lasthandlesupdate)) >= freq2millis(result.handlesfrequency)) {
