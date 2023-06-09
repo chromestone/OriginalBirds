@@ -14,10 +14,16 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 		closemeListener(sender, sendResponse);
 		return true;
 	}
+	else if (msg.text === "fetchhandles?") {
+		
+		chrome.storage.local.get(["handlesversionurl", "handlesurl"], (result) => 
+			fetchHandles(result.handlesversionurl, result.handlesurl, null).then((success) =>
+				sendResponse({success: success})));
+	}
 	else if (msg.text === "fetchselectors?") {
 
 		chrome.storage.local.get("selectorsurl", (result) => 
-			fetchSelectors(result.selectorsurl ?? DEFAULT_SELECTORS_URL).then((success) =>
+			fetchSelectors(result.selectorsurl).then((success) =>
 				sendResponse({success: success})));
 		return true;
 	}
@@ -68,20 +74,49 @@ async function setDefaultHandles() {
 	}, () => resolve(true)));
 }
 
-async function fetchHandlesVersion(urlString) {
+function versionCompare(versionA, versionB) {
 
-	urlString = (urlString ?? DEFAULT_HANDLES_VERSION_URL).trim();
+	if (versionA.length > versionB.length) {
 
-	let data;
+		return 1;
+	}
+	else if (versionA.length < versionB.length) {
+
+		return -1;
+	}
+
+	const collator = new Intl.Collator("en", {sensitivity: "base"});
+	return collator.compare(versionA, versionB);
+}
+
+async function fetchHandles(versionURL, handlesURL, currentVersionData) {
+
+	versionURL = (versionURL ?? DEFAULT_HANDLES_VERSION_URL).trim();
+	handlesURL = (handlesURL ?? DEFAULT_HANDLES_URL).trim();
+
+	if (currentVersionData != null) {
+
+		// TODO
+	}
+	else {
+
+		const success = await setDefaultHandles();
+		if (success) {
+
+			currentVersionData = DEFAULT_HANDLES_VERSION;
+		}
+	}
+
+	let latestVersion, latestMoniker;
 	try {
 
-		const inputURL = new URL(urlString);
+		const inputURL = new URL(versionURL);
 
 		if (!(inputURL.protocol === "https:" && inputURL.search === "" &&
 			inputURL.username === "" && inputURL.password === "")) {
 
 			console.log("Warning: Original Birds encountered invalid handles VERSION URL.");
-			return;
+			return Promise.resolve(false);
 		}
 
 		const response = await fetch(inputURL, {cache: "no-store", redirect: "error"});
@@ -93,41 +128,44 @@ async function fetchHandlesVersion(urlString) {
 				response.status +
 				"] retrieving the list VERSION."
 			);
-			return Promise.resolve(null);
+			return Promise.resolve(false);
 		}
 
-		data = await response.text();
+		const latestVersionData = await response.text();
+		[latestVersion, latestMoniker=null] = latestVersionData.split(",");
 	}
 	catch (error) {
 
 		console.error(error);
 		console.log("Warning: Original Birds could not retrieve the legacy users list VERSION.");
-		return Promise.resolve(null);
+		return Promise.resolve(false);
 	}
 
-	return Promise.resolve(data.split(","));
-}
+	if (currentVersionData != null) {
 
-async function fetchHandles(urlString, currentVersion, latestVersionPromise) {
+		const [currentVersion, currentMoniker=null] = currentVersionData;
 
-	if (currentVersion == null) {
+		const compareNeeded = (currentMoniker == null && latestMoniker == null) ||
+			(currentMoniker != null && latestMoniker != null &&
+				// do not use new here
+				String(currentMoniker) === String(latestMoniker));
+		if (compareNeeded && versionCompare(currentVersion, latestVersion) >= 0) {
 
-		return;
+			// we have the latest version already
+			return Promise.resolve(true);
+		}
 	}
-
-
-	urlString = (urlString ?? DEFAULT_HANDLES_URL).trim();
 
 	let data;
 	try {
 
-		const inputURL = new URL(urlString);
+		const inputURL = new URL(handlesURL);
 
 		if (!(inputURL.protocol === "https:" && inputURL.search === "" &&
 			inputURL.username === "" && inputURL.password === "")) {
 
 			console.log("Warning: Original Birds encountered invalid handles URL.");
-			return;
+			return Promise.resolve(false);
 		}
 
 		const response = await fetch(inputURL, {cache: "no-store", redirect: "error"});
@@ -139,7 +177,7 @@ async function fetchHandles(urlString, currentVersion, latestVersionPromise) {
 				response.status +
 				"] retrieving the list."
 			);
-			return;
+			return Promise.resolve(false);
 		}
 
 		data = await response.text();
@@ -148,7 +186,7 @@ async function fetchHandles(urlString, currentVersion, latestVersionPromise) {
 
 		console.error(error);
 		console.log("Warning: Original Birds could not retrieve the latest legacy users list.");
-		return;
+		return Promise.resolve(false);
 	}
 
 	const handles = data.split("\n").filter((str) => str !== "").map((str) => str.toLowerCase());
@@ -156,7 +194,14 @@ async function fetchHandles(urlString, currentVersion, latestVersionPromise) {
 	const theDate = new Date();
 	theDate.setHours(0,0,0,0);
 
-	chrome.storage.local.set({handles: handles, lasthandlesupdate: theDate.toJSON()});
+	const handlesVersion = latestMoniker == null ?
+		[latestVersion] : [latestVersion, latestMoniker];
+
+	return new Promise((resolve) => chrome.storage.local.set({
+		handles: handles,
+		handlesversion: handlesVersion,
+		lasthandlesupdate: theDate.toJSON()
+	}, () => resolve(handlesVersion)));
 }
 
 function setDefaultSelectors() {
@@ -253,20 +298,20 @@ function setDefaultSelectors() {
 	}, () => resolve(true)));
 }
 
-async function fetchSelectors(urlString) {
+async function fetchSelectors(selectorsURL) {
 
-	urlString = (urlString ?? DEFAULT_SELECTORS_URL).trim();
+	selectorsURL = (selectorsURL ?? DEFAULT_SELECTORS_URL).trim();
 
 	let data;
 	try {
 
-		if (urlString.startsWith(JSON_DATA_URL_PREFIX)) {
+		if (selectorsURL.startsWith(JSON_DATA_URL_PREFIX)) {
 
-			data = atob(urlString.substring(JSON_DATA_URL_PREFIX.length));
+			data = atob(selectorsURL.substring(JSON_DATA_URL_PREFIX.length));
 		}
 		else {
 
-			const inputURL = new URL(urlString);
+			const inputURL = new URL(selectorsURL);
 
 			if (!(inputURL.protocol === "https:" && inputURL.search === "" &&
 				inputURL.username === "" && inputURL.password === "")) {
@@ -384,14 +429,11 @@ chrome.storage.local.get([
 
 	result.handlesfrequency ??= "weekly";
 
-	if (result.handles === undefined) {
-
-		setDefaultHandles().then((success) => fetchHandles(result.handlesurl));
-	}
-	else if (result.lasthandlesupdate === undefined ||
+	if (result.handles === undefined ||
+		result.lasthandlesupdate === undefined ||
 		Math.abs(theDate - new Date(result.lasthandlesupdate)) >= freq2millis(result.handlesfrequency)) {
 
-		fetchHandles();
+		fetchHandles(result.handlesversionurl, result.handlesurl, null);
 	}
 
 	const overdue = result.lastlaunch === undefined ||
