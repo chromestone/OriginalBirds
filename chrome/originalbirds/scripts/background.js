@@ -47,7 +47,38 @@ function cacheCheckmark() {
 	});
 }
 
-async function setDefaultHandles() {
+function versionCompare(versionA, versionB) {
+
+	if (versionA.length > versionB.length) {
+
+		return 1;
+	}
+	else if (versionA.length < versionB.length) {
+
+		return -1;
+	}
+
+	const collator = new Intl.Collator("en", {sensitivity: "base"});
+	return collator.compare(versionA, versionB);
+}
+
+async function setDefaultHandles(currentVersionData) {
+
+	if (currentVersionData != null) {
+
+		const [currentVersion, currentMoniker = null] = currentVersionData;
+		const [defaultVersion, defaultMoniker = null] = DEFAULT_HANDLES_URL;
+
+		// do not use new here
+		const compareNeeded = (currentMoniker == null && defaultMoniker == null) ||
+			(currentMoniker != null && defaultMoniker != null &&
+				String(currentMoniker) === String(defaultMoniker));
+		if (compareNeeded && versionCompare(currentVersion, defaultVersion) >= 0) {
+
+			// we have a version equal or later than the default; nothing to do
+			return Promise.resolve(true);
+		}
+	}
 
 	let data;
 	try {
@@ -71,22 +102,7 @@ async function setDefaultHandles() {
 		handles: handles,
 		handlesversion: DEFAULT_HANDLES_VERSION,
 		lasthandlesupdate: theDate.toJSON()
-	}, () => resolve(true)));
-}
-
-function versionCompare(versionA, versionB) {
-
-	if (versionA.length > versionB.length) {
-
-		return 1;
-	}
-	else if (versionA.length < versionB.length) {
-
-		return -1;
-	}
-
-	const collator = new Intl.Collator("en", {sensitivity: "base"});
-	return collator.compare(versionA, versionB);
+	}, () => resolve(DEFAULT_HANDLES_VERSION)));
 }
 
 async function fetchHandles(versionURL, handlesURL, currentVersionData) {
@@ -94,17 +110,10 @@ async function fetchHandles(versionURL, handlesURL, currentVersionData) {
 	versionURL = (versionURL ?? DEFAULT_HANDLES_VERSION_URL).trim();
 	handlesURL = (handlesURL ?? DEFAULT_HANDLES_URL).trim();
 
-	if (currentVersionData != null) {
+	const success = await setDefaultHandles(currentVersionData);
+	if (Array.isArray(success)) {
 
-		// TODO
-	}
-	else {
-
-		const success = await setDefaultHandles();
-		if (success) {
-
-			currentVersionData = DEFAULT_HANDLES_VERSION;
-		}
+		currentVersionData = success;
 	}
 
 	let latestVersion, latestMoniker;
@@ -132,7 +141,7 @@ async function fetchHandles(versionURL, handlesURL, currentVersionData) {
 		}
 
 		const latestVersionData = await response.text();
-		[latestVersion, latestMoniker=null] = latestVersionData.split(",");
+		[latestVersion, latestMoniker = null] = latestVersionData.split(",");
 	}
 	catch (error) {
 
@@ -143,11 +152,11 @@ async function fetchHandles(versionURL, handlesURL, currentVersionData) {
 
 	if (currentVersionData != null) {
 
-		const [currentVersion, currentMoniker=null] = currentVersionData;
+		const [currentVersion, currentMoniker = null] = currentVersionData;
 
+		// do not use new here
 		const compareNeeded = (currentMoniker == null && latestMoniker == null) ||
 			(currentMoniker != null && latestMoniker != null &&
-				// do not use new here
 				String(currentMoniker) === String(latestMoniker));
 		if (compareNeeded && versionCompare(currentVersion, latestVersion) >= 0) {
 
