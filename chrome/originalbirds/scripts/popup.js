@@ -1,5 +1,7 @@
-const JSON_DATA_URL_PREFIX = "data:application/json;base64,";
 const DEFAULT_SELECTORS_URL = "https://original-birds.pages.dev/selectors.json";
+
+const DEFAULT_HANDLES_VERSION_URL = "https://original-birds.pages.dev/version.txt";
+const DEFAULT_HANDLES_URL = "https://original-birds.pages.dev/verified_handles.txt";
 
 // INITIALIZATION
 
@@ -135,25 +137,34 @@ chrome.storage.local.get([
 	// ADVANCED
 
 	// do not use new here
-	// does not trigger change function
-	$('#handlesfrequency').val(String(result.handlesfrequency ?? "weekly"))
-
 	const checkHtml = String(result.checkmark ?? "");
 	const checkBlob = new Blob([checkHtml], {type: "text/plain"});
 	$('#checkmarkdownload').attr("href", URL.createObjectURL(checkBlob));
 	$('#checkmarkhtml').val(checkHtml);
 
 	// do not use new here
-	$('#invocations').val(Number(result.invocations ?? 10).toString());
-	$('#polldelay').val(Number(result.polldelay ?? 200).toString());
-
 	const selectorsJSON = String(result.selectors ?? "");
 	const selectorsBlob = new Blob([selectorsJSON], {type: "application/json"});
 	$('#selectorsdownload').attr("href", URL.createObjectURL(selectorsBlob));
 	$('#selectorsjson').val(selectorsJSON);
 
+	const handlesVersion = result.handlesversion ?? ["0"];
 	// do not use new here
+	$('#handlesversion').text(String(Array.isArray(handlesVersion) && handlesVersion.length > 0 ?
+		handlesVersion[0] : "none"));
+
+	// do not use new here
+	// does not trigger change function
+	$('#handlesfrequency').val(String(result.handlesfrequency ?? "weekly"))
+
+	// do not use new here
+	$('#invocations').val(Number(result.invocations ?? 10).toString());
+	$('#polldelay').val(Number(result.polldelay ?? 200).toString());
+
 	$('#selectorsurl').val(String(result.selectorsurl ?? DEFAULT_SELECTORS_URL));
+
+	$('#handlesversionurl').val(String(result.handlesversionurl ?? DEFAULT_HANDLES_VERSION_URL));
+	$('#handlesurl').val(String(result.handlesurl ?? DEFAULT_HANDLES_URL));
 });
 
 // APPEARANCE
@@ -422,35 +433,57 @@ $('#handlesbutton').on("click", function() {
 		});
 		return;
 	}
-	
+
+	let inputURL;
+	success = false;
 	try {
 
-		const inputURL = new URL(handlesValue);
+		inputURL = new URL(handlesValue);
 
-		if (inputURL.protocol === "https:" && inputURL.search === "" &&
-			inputURL.username === "" && inputURL.password === "") {
-
-			chrome.storage.local.set({
-				handlesversionurl: versionURL.toString(),
-				handlesurl: inputURL.toString()
-			}, () => $(this).prop("disabled", false));
-			return;
-		}
+		success = inputURL.protocol === "https:" && inputURL.search === "" &&
+			inputURL.username === "" && inputURL.password === "";
 	}
 	catch(error) {
 
 		console.log(error.message);
 	}
 
-	$('label[for="handlesurl"] > p').effect({
-		effect: "shake",
-		complete: () => $(this).prop("disabled", false)
-	});
+	if (!success) {
+
+		$('label[for="handlesversionurl"] > p').effect({
+			effect: "shake",
+			complete: () => $(this).prop("disabled", false)
+		});
+		return;
+	}
+
+	chrome.storage.local.get(["handlesversionurl", "handlesurl"], (result) =>
+		chrome.storage.local.set({
+			handlesversionurl: versionURL.toString(),
+			handlesurl: inputURL.toString()
+		}, () => chrome.runtime.sendMessage({text: "fetchhandles?"}, (response) => {
+
+			if (!response.success) {
+				// reset to original value
+				chrome.storage.local.set({
+					handlesversionurl: result.handlesversionurl ?? DEFAULT_HANDLES_VERSION_URL,
+					handlesurl: result.handlesurl ?? DEFAULT_HANDLES_URL
+				}, () => $(this).prop("disabled", false));
+
+				$('label[for="handlesversionurl"] > p').effect("shake");
+				return;
+			}
+
+			$(this).prop("disabled", false);
+		}
+	)));
 });
 
 $('#selectorsbutton').on("click", function() {
 
 	$(this).prop("disabled", true);
+	const JSON_DATA_URL_PREFIX = "data:application/json;base64,";
+
 	const value = ($('#selectorsurl').val() ?? "").trim();
 
 	let success = false;
@@ -484,19 +517,22 @@ $('#selectorsbutton').on("click", function() {
 		return;
 	}
 
-	chrome.storage.local.set({selectorsurl: value}, () =>
-		chrome.runtime.sendMessage({text: "fetchselectors?"}, (response) => {
+	chrome.storage.local.get("selectorsurl", (result) =>
+		chrome.storage.local.set({selectorsurl: value}, () =>
+			chrome.runtime.sendMessage({text: "fetchselectors?"}, (response) => {
 
-			if (!response.success) {
+				if (!response.success) {
 
-				$('#fieldsetselectors > legend').effect({
-					effect: "shake",
-					complete: () => $(this).prop("disabled", false)
-				});
-				return;
+					// reset to original value
+					chrome.storage.local.set({
+						selectorsurl: result.selectorsurl ?? DEFAULT_SELECTORS_URL
+					}, () => $(this).prop("disabled", false));
+
+					$('#fieldsetselectors > legend').effect("shake");
+					return;
+				}
+
+				$(this).prop("disabled", false);
 			}
-
-			$(this).prop("disabled", false);
-		}
-	));
+	)));
 });

@@ -8,10 +8,16 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 		return true;
 	}
 	else if (msg.text === "fetchhandles?") {
-		
-		chrome.storage.local.get(["handlesversionurl", "handlesurl"], (result) => 
-			fetchHandles(result.handlesversionurl, result.handlesurl, null).then((success) =>
-				sendResponse({success: success})));
+
+		chrome.storage.local.get([
+			"handles", "handlesversion", "handlesversionurl", "handlesurl"
+		], (result) =>
+			setDefaultHandles(result.handles === undefined ? null : result.handlesversion).
+			then((successOrVersion) => fetchHandles(result.handlesversionurl, result.handlesurl,
+				Array.isArray(successOrVersion) ? successOrVersion : result.handlesversion)).
+			then((success) => sendResponse({success: success}))
+		);
+		return true;
 	}
 	else if (msg.text === "fetchselectors?") {
 
@@ -293,8 +299,8 @@ function setDefaultSelectors() {
 
 async function fetchSelectors(selectorsURL) {
 
-	const JSON_DATA_URL_PREFIX = "data:application/json;base64,";
 	const DEFAULT_SELECTORS_URL = "https://original-birds.pages.dev/selectors.json";
+	const JSON_DATA_URL_PREFIX = "data:application/json;base64,";
 
 	selectorsURL = (selectorsURL ?? DEFAULT_SELECTORS_URL).trim();
 
@@ -431,8 +437,8 @@ chrome.storage.local.get([
 		Math.abs(theDate - new Date(result.lasthandlesupdate)) >= freq2millis(result.handlesfrequency)) {
 
 		setDefaultHandles(result.handles === undefined ? null : result.handlesversion).
-		then((result) => fetchHandles(result.handlesversionurl, result.handlesurl,
-			Array.isArray(result) ? result : result.handlesversion));
+		then((successOrVersion) => fetchHandles(result.handlesversionurl, result.handlesurl,
+			Array.isArray(successOrVersion) ? successOrVersion : result.handlesversion));
 	}
 
 	const overdue = result.lastlaunch === undefined ||
