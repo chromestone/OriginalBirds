@@ -199,8 +199,8 @@
 				<textarea id="selectorsjson" rows="4" cols="32" readonly style="vertical-align: middle;"></textarea>
 				<a id="selectorsdownload" download="selectors.json"><button style="font-size: 1.5rem; font-weight: bold;">&#10515;</button></a>
 			</details>
-			<p id="selectorssuccess" class="text-color">Success!</p>
-			<div id="selectorserror" class="ui-widget ui-state-error ui-corner-all" style="margin-bottom: 1rem; padding: 0.2rem;" hidden>
+			<p id="selectorssuccess" class="text-color" hidden>Success!</p>
+			<div id="selectorserror" class="ui-widget ui-state-error ui-corner-all" style="margin-top: 1rem; padding: 0.2rem;" hidden>
 				<strong>Alert:</strong> Original Birds encountered an error reloading selectors.
 			</div>
 			<button id="reloadselectors" style="margin-top: 1rem; display: block;">Reload Selectors</button>
@@ -218,7 +218,7 @@
 				<option value="monthly">Monthly</option>
 				<option value="yearly">Yearly</option>
 			</select>
-			<p id="handlessuccess" class="text-color">Success!</p>
+			<p id="handlessuccess" class="text-color" hidden>Success!</p>
 			<div id="handleserror" class="ui-widget ui-state-error ui-corner-all" style="margin-top: 1rem; padding: 0.2rem;" hidden>
 				<strong>Alert:</strong> Original Birds encountered an error reloading the list.
 			</div>
@@ -260,6 +260,13 @@
 				<input id="handlesurl" type="text" style="width: 100%;"><br>
 				<button id="handlesbutton" style="margin-top: 1rem;">Save and Load</button>
 			</fieldset>
+			<details style="margin-top: 1rem;">
+				<summary class="text-color"><span style="color: red;">Reset All Advanced Settings</span></summary>
+				<div class="ui-widget ui-state-error ui-corner-all" style="margin-top: 1rem; padding: 0.2rem;">
+					<strong>Warning:</strong> Clicking this button will reset all settings on this page to their defaults.
+				</div>
+				<button id="advancedresetbutton" style="margin-top: 1rem;">Reset Settings</button>
+			</details>
 		</div>
 	</div>
 	<script src="scripts/popup.js"></script>

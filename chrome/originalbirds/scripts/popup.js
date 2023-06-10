@@ -557,3 +557,27 @@ $('#selectorsbutton').on("click", function() {
 			}
 	)));
 });
+
+$('#advancedresetbutton').on("click", function() {
+
+	$(this).prop("disabled", true);
+
+	$('#handlesfrequency').val("weekly")
+
+	$('#invocations').val((10).toString());
+	$('#polldelay').val((200).toString());
+
+	$('#selectorsurl').val(DEFAULT_SELECTORS_URL);
+
+	$('#handlesversionurl').val(DEFAULT_HANDLES_VERSION_URL);
+	$('#handlesurl').val(DEFAULT_HANDLES_URL);
+
+	chrome.storage.local.set({
+		handlesfrequency: "weekly",
+		invocations: 10,
+		polldelay: 200,
+		selectorsurl: DEFAULT_SELECTORS_URL,
+		handlesversionurl: DEFAULT_HANDLES_VERSION_URL,
+		handlesurl: DEFAULT_HANDLES_URL
+	}, () => $(this).prop("disabled", false));
+});
