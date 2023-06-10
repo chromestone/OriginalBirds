@@ -1,10 +1,3 @@
-const DEFAULT_HANDLES_VERSION = ["0"];
-const DEFAULT_HANDLES_VERSION_URL = "https://original-birds.pages.dev/version.txt";
-const DEFAULT_HANDLES_URL = "https://original-birds.pages.dev/verified_handles.txt";
-
-const JSON_DATA_URL_PREFIX = "data:application/json;base64,";
-const DEFAULT_SELECTORS_URL = "https://original-birds.pages.dev/selectors.json";
-
 let closemeListener = (_, sendResponse) => sendResponse({closeme: false});
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
@@ -62,22 +55,29 @@ function versionCompare(versionA, versionB) {
 	return collator.compare(versionA, versionB);
 }
 
+function updateNeeded(currentVersionData, latestVersionData) {
+
+	const [currentVersion, currentMoniker = null] = currentVersionData;
+	const [latestVersion, latestMoniker = null] = latestVersionData;
+
+	// do not use new here
+	const monikerSame = (currentMoniker == null && latestMoniker == null) ||
+		(currentMoniker != null && latestMoniker != null &&
+			String(currentMoniker) === String(latestMoniker));
+
+	return !monikerSame || versionCompare(currentVersion, latestVersion) < 0;
+}
+
 async function setDefaultHandles(currentVersionData) {
 
-	if (currentVersionData != null) {
+	const DEFAULT_HANDLES_VERSION = ["0"];
 
-		const [currentVersion, currentMoniker = null] = currentVersionData;
-		const [defaultVersion, defaultMoniker = null] = DEFAULT_HANDLES_URL;
+	// skip when moniker is set or default version is not newer
+	if (currentVersionData != null &&
+		(currentVersionData.length > 1 ||
+			!updateNeeded(currentVersionData, DEFAULT_HANDLES_VERSION))) {
 
-		// do not use new here
-		const compareNeeded = (currentMoniker == null && defaultMoniker == null) ||
-			(currentMoniker != null && defaultMoniker != null &&
-				String(currentMoniker) === String(defaultMoniker));
-		if (compareNeeded && versionCompare(currentVersion, defaultVersion) >= 0) {
-
-			// we have a version equal or later than the default; nothing to do
-			return Promise.resolve(true);
-		}
+		return Promise.resolve(true);
 	}
 
 	let data;
@@ -88,8 +88,8 @@ async function setDefaultHandles(currentVersionData) {
 	}
 	catch (error) {
 
-		console.log("Warning: Original Birds could not find a local fallback list.");
 		console.error(error);
+		console.log("Warning: Original Birds could not find a local fallback handles list.");
 		return Promise.resolve(false);
 	}
 
@@ -107,16 +107,13 @@ async function setDefaultHandles(currentVersionData) {
 
 async function fetchHandles(versionURL, handlesURL, currentVersionData) {
 
+	const DEFAULT_HANDLES_VERSION_URL = "https://original-birds.pages.dev/version.txt";
+	const DEFAULT_HANDLES_URL = "https://original-birds.pages.dev/verified_handles.txt";
+
 	versionURL = (versionURL ?? DEFAULT_HANDLES_VERSION_URL).trim();
 	handlesURL = (handlesURL ?? DEFAULT_HANDLES_URL).trim();
 
-	const success = await setDefaultHandles(currentVersionData);
-	if (Array.isArray(success)) {
-
-		currentVersionData = success;
-	}
-
-	let latestVersion, latestMoniker;
+	let latestVersionData;
 	try {
 
 		const inputURL = new URL(versionURL);
@@ -135,34 +132,24 @@ async function fetchHandles(versionURL, handlesURL, currentVersionData) {
 			console.log(
 				"Warning: Original Birds encountered status [" +
 				response.status +
-				"] retrieving the list VERSION."
+				"] retrieving the handles list VERSION."
 			);
 			return Promise.resolve(false);
 		}
 
-		const latestVersionData = await response.text();
-		[latestVersion, latestMoniker = null] = latestVersionData.split(",");
+		const data = await response.text();
+		latestVersionData = data.split(",", 2);
 	}
 	catch (error) {
 
 		console.error(error);
-		console.log("Warning: Original Birds could not retrieve the legacy users list VERSION.");
+		console.log("Warning: Original Birds could not retrieve the handles list VERSION.");
 		return Promise.resolve(false);
 	}
 
-	if (currentVersionData != null) {
+	if (!updateNeeded(currentVersionData, latestVersionData)) {
 
-		const [currentVersion, currentMoniker = null] = currentVersionData;
-
-		// do not use new here
-		const compareNeeded = (currentMoniker == null && latestMoniker == null) ||
-			(currentMoniker != null && latestMoniker != null &&
-				String(currentMoniker) === String(latestMoniker));
-		if (compareNeeded && versionCompare(currentVersion, latestVersion) >= 0) {
-
-			// we have the latest version already
-			return Promise.resolve(true);
-		}
+		return Promise.resolve(true);
 	}
 
 	let data;
@@ -184,7 +171,7 @@ async function fetchHandles(versionURL, handlesURL, currentVersionData) {
 			console.log(
 				"Warning: Original Birds encountered status [" +
 				response.status +
-				"] retrieving the list."
+				"] retrieving the handles list."
 			);
 			return Promise.resolve(false);
 		}
@@ -194,7 +181,7 @@ async function fetchHandles(versionURL, handlesURL, currentVersionData) {
 	catch (error) {
 
 		console.error(error);
-		console.log("Warning: Original Birds could not retrieve the latest legacy users list.");
+		console.log("Warning: Original Birds could not retrieve the latest handles list.");
 		return Promise.resolve(false);
 	}
 
@@ -203,14 +190,11 @@ async function fetchHandles(versionURL, handlesURL, currentVersionData) {
 	const theDate = new Date();
 	theDate.setHours(0,0,0,0);
 
-	const handlesVersion = latestMoniker == null ?
-		[latestVersion] : [latestVersion, latestMoniker];
-
 	return new Promise((resolve) => chrome.storage.local.set({
 		handles: handles,
-		handlesversion: handlesVersion,
+		handlesversion: latestVersionData,
 		lasthandlesupdate: theDate.toJSON()
-	}, () => resolve(handlesVersion)));
+	}, () => resolve(true)));
 }
 
 function setDefaultSelectors() {
@@ -308,6 +292,9 @@ function setDefaultSelectors() {
 }
 
 async function fetchSelectors(selectorsURL) {
+
+	const JSON_DATA_URL_PREFIX = "data:application/json;base64,";
+	const DEFAULT_SELECTORS_URL = "https://original-birds.pages.dev/selectors.json";
 
 	selectorsURL = (selectorsURL ?? DEFAULT_SELECTORS_URL).trim();
 
@@ -437,12 +424,15 @@ chrome.storage.local.get([
 	}
 
 	result.handlesfrequency ??= "weekly";
+	result.handlesversion ??= ["0"];
 
 	if (result.handles === undefined ||
 		result.lasthandlesupdate === undefined ||
 		Math.abs(theDate - new Date(result.lasthandlesupdate)) >= freq2millis(result.handlesfrequency)) {
 
-		fetchHandles(result.handlesversionurl, result.handlesurl, null);
+		setDefaultHandles(result.handles === undefined ? null : result.handlesversion).
+		then((result) => fetchHandles(result.handlesversionurl, result.handlesurl,
+			Array.isArray(result) ? result : result.handlesversion));
 	}
 
 	const overdue = result.lastlaunch === undefined ||
