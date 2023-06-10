@@ -773,7 +773,7 @@ async function checkmarkManagerFactory() {
 			}
 		}
 
-		if (selectors.selectors instanceof Array) {
+		if (Array.isArray(selectors.selectors)) {
 
 			const l = selectors.selectors.length;
 			selectors.selectors = selectors.selectors.filter(selectorObjValid);

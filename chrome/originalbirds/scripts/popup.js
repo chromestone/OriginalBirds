@@ -305,12 +305,7 @@ $('#savelegacybutton').on("click", function() {
 
 // ADVANCED
 
-$('#handlesfrequency').change(function() {
 
-	$(this).prop("disabled", true);
-	chrome.storage.local.set({handlesfrequency: $(this).val()}, () =>
-		$(this).prop("disabled", false));
-});
 
 chrome.storage.local.onChanged.addListener((changes) => {
 
@@ -344,11 +339,13 @@ $('#reloadselectors').on("click", function() {
 
 		if (!response.success) {
 
+			$('#selectorssuccess').prop("hidden", true);
 			$('#selectorserror').prop("hidden", false);
 			$(this).prop("disabled", false);
 			return;
 		}
 		$('#selectorserror').prop("hidden", true);
+		$('#selectorssuccess').prop("hidden", false);
 
 		chrome.storage.local.get("selectors", (result) => {
 
@@ -365,6 +362,30 @@ $('#reloadselectors').on("click", function() {
 
 			$(this).prop("disabled", false);
 		});
+	});
+});
+
+$('#handlesfrequency').change(function() {
+
+	$(this).prop("disabled", true);
+	chrome.storage.local.set({handlesfrequency: $(this).val()}, () =>
+		$(this).prop("disabled", false));
+});
+
+$('#fetchhandles').on("click", function() {
+
+	$(this).prop("disabled", true);
+	chrome.runtime.sendMessage({text: "fetchhandles?"}, (response) => {
+
+		if (!response.success) {
+
+			$('#handlessuccess').prop("hidden", true);
+			$('#handleserror').prop("hidden", false);
+			$(this).prop("disabled", false);
+			return;
+		}
+		$('#handleserror').prop("hidden", true);
+		$('#handlessuccess').prop("hidden", false);
 	});
 });
 

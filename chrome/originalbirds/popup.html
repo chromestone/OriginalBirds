@@ -187,22 +187,23 @@
 		</div>
 		<div id="advanced">
 			<p class="text-color"><b>Checkmark&nbsp;HTML</b></p>
-			<details style="margin-bottom: 1rem;">
+			<details>
 				<summary class="text-color">Inspect</summary>
 				<textarea id="checkmarkhtml" rows="4" cols="32" readonly style="vertical-align: middle;"></textarea>
 				<a id="checkmarkdownload" download="checkmark.txt"><button style="font-size: 1.5rem; font-weight: bold;">&#10515;</button></a>
 			</details>
-			<button id="reloadcheckmark">Reload Checkmark</button>
+			<button id="reloadcheckmark" style="margin-top: 1rem;">Reload Checkmark</button>
 			<p class="text-color"><b>Selectors&nbsp;JSON</b></p>
-			<details style="margin-bottom: 0.5rem;">
+			<details>
 				<summary class="text-color">Inspect</summary>
 				<textarea id="selectorsjson" rows="4" cols="32" readonly style="vertical-align: middle;"></textarea>
 				<a id="selectorsdownload" download="selectors.json"><button style="font-size: 1.5rem; font-weight: bold;">&#10515;</button></a>
 			</details>
-			<div id="selectorserror" class="ui-widget ui-state-error ui-corner-all" style="margin-top: 0.5rem; padding: 0.2rem;" hidden>
+			<p id="selectorssuccess" class="text-color">Success!</p>
+			<div id="selectorserror" class="ui-widget ui-state-error ui-corner-all" style="margin-bottom: 1rem; padding: 0.2rem;" hidden>
 				<strong>Alert:</strong> Original Birds encountered an error reloading selectors.
 			</div>
-			<button id="reloadselectors" style="margin-top: 0.5rem;">Reload Selectors</button>
+			<button id="reloadselectors" style="margin-top: 1rem; display: block;">Reload Selectors</button>
 			<p class="text-color">
 				<b>Legacy&nbsp;Verified&nbsp;List</b><br>
 			</p>
@@ -217,8 +218,11 @@
 				<option value="monthly">Monthly</option>
 				<option value="yearly">Yearly</option>
 			</select>
-			<p class="text-color">test</p>
-			<button id="fetchhandles">Update List Now</button>
+			<p id="handlessuccess" class="text-color">Success!</p>
+			<div id="handleserror" class="ui-widget ui-state-error ui-corner-all" style="margin-top: 1rem; padding: 0.2rem;" hidden>
+				<strong>Alert:</strong> Original Birds encountered an error reloading the list.
+			</div>
+			<button id="fetchhandles" style="margin-top: 1rem; display: block;">Update List Now</button>
 			<label for="invocations">
 				<p class="text-color">
 					<b>Number&nbsp;of&nbsp;Polls</b><br>
@@ -235,7 +239,7 @@
 			</label>
 			<input id="polldelay" type="text" title="Number must be between 1 to 9999999." style="vertical-align: middle;">
 			<button id="polldelaybutton">&#8617;</button>
-			<div class="ui-widget ui-state-error ui-corner-all" style="margin-top: 0.5rem; padding: 0.2rem;">
+			<div class="ui-widget ui-state-error ui-corner-all" style="margin-top: 1rem; padding: 0.2rem;">
 				<strong>Warning:</strong> Improper settings below may cause Original Birds to malfunction.
 			</div>
 			<fieldset id="fieldsetselectors" style="margin-top: 1rem;">
