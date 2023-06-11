@@ -53,6 +53,11 @@ chrome.storage.local.get([
 	"selectors", "selectorsurl"
 ], (result) => {
 
+	if (result.checkmark === undefined) {
+
+		chrome.runtime.sendMessage({text: "cachecheckmark!"});
+	}
+
 	// GENERAL
 
 	// do not use new here
@@ -304,8 +309,6 @@ $('#savelegacybutton').on("click", function() {
 });
 
 // ADVANCED
-
-
 
 chrome.storage.local.onChanged.addListener((changes) => {
 

@@ -1,10 +1,39 @@
-let closemeListener = (_, sendResponse) => sendResponse({closeme: false});
+const closemeListener = {
+	waitingForResponse: false,
+	tabId: null,
+	callbacks: [],
+	run: function(sender, sendResponse) {
+
+		if (this.waitingForResponse) {
+
+			if (this.tabId == null) {
+
+				callbacks.push([sender, sendResponse]);
+			}
+			else {
+
+				const closeme = sender.tab.id === this.tabId;
+				sendResponse({closeme: closeme});
+				this.waitingForResponse = !closeme;
+			}
+		}
+		else {
+
+			sendResponse({closeme: false});
+		}
+	},
+	flush: function() {
+
+		callbacks.forEach((theArgs) => this.run(...theArgs));
+		this.callbacks = [];
+	}
+};
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
 	if (msg.text === "closeme?") {
 
-		closemeListener(sender, sendResponse);
+		closemeListener.run(sender, sendResponse);
 		return true;
 	}
 	else if (msg.text === "fetchhandles?") {
@@ -35,14 +64,18 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
 function cacheCheckmark() {
 
-	const callbacks = [];
-	closemeListener = (...theArgs) => callbacks.push(theArgs);
+	if (closemeListener.waitingForResponse) {
+
+		return;
+	}
+	closemeListener.waitingForResponse = true;
+
 	chrome.tabs.create({url: "https://twitter.com/elonmusk", active: false}, (tab) => {
 
-		closemeListener = (sender, sendResponse) => sendResponse({closeme: sender.tab.id === tab.id});
+		closemeListener.tabId = tab.id;
 		// if the previous line does not outpace the content script's request
 		// then clearing the backlog handles it
-		callbacks.forEach((theArgs) => closemeListener(...theArgs));
+		closemeListener.flush();
 	});
 }
 

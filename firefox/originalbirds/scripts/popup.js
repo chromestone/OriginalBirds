@@ -1,4 +1,7 @@
-// INITIALIZATION
+const DEFAULT_SELECTORS_URL = "https://original-birds.pages.dev/selectors.json";
+
+const DEFAULT_HANDLES_VERSION_URL = "https://original-birds.pages.dev/version.txt";
+const DEFAULT_HANDLES_URL = "https://original-birds.pages.dev/verified_handles.txt";
 
 function displayNormalSpan() {
 
@@ -11,11 +14,11 @@ function displayNormalSpan() {
 		$('#fieldsetblue > div.radiocontent').prop("hidden", true);
 
 		const id = $(this).attr("id");
-		if (id == "radiobluetext") {
+		if (id === "radiobluetext") {
 
 			$('#divbluetext').prop("hidden", false);
 		}
-		else if (id == "radioblueimage") {
+		else if (id === "radioblueimage") {
 
 			$('#divblueimage').prop("hidden", false);
 		}
@@ -29,11 +32,11 @@ function displayNormalSpan() {
 		$('#fieldsetlegacy > div.radiocontent').prop("hidden", true);
 
 		const id = $(this).attr("id");
-		if (id == "radiolegacytext") {
+		if (id === "radiolegacytext") {
 
 			$('#divlegacytext').prop("hidden", false);
 		}
-		else if (id == "radiolegacyimage") {
+		else if (id === "radiolegacyimage") {
 
 			$('#divlegacyimage').prop("hidden", false);
 		}
@@ -43,16 +46,16 @@ function displayNormalSpan() {
 		}
 	});
 
-	document.body.style["margin-top"] = "0";
-	document.body.style["margin-bottom"] = "0";
-	document.body.style["margin-left"] = "0";
+	$(document.body).addClass("no-margin");
 	$('#normal_span').prop("hidden", false);
 
 	// POPULATE VALUES
 
 	chrome.storage.local.get([
 		"checkmark", "showblue", "showlegacy", "bluelook", "legacylook", "bluecolor", "legacycolor",
-		"bluetext", "legacytext", "blueimage", "legacyimage", "invocations", "polldelay"
+		"bluetext", "legacytext", "blueimage", "legacyimage", "invocations", "polldelay",
+		"handlesfrequency", "handlesversion", "handlesversionurl", "handlesurl",
+		"selectors", "selectorsurl"
 	], (result) => {
 
 		if (result.checkmark === undefined) {
@@ -87,32 +90,33 @@ function displayNormalSpan() {
 		const blueLook = result.bluelook ?? "default";
 		const legacyLook = result.legacylook ?? "default";
 
-		if (blueLook == "text") {
+		if (blueLook === "text") {
 
 			$('#radiobluetext').trigger("click");
 		}
-		else if (blueLook == "image") {
+		else if (blueLook === "image") {
 
 			$('#radioblueimage').trigger("click");
 		}
 
-		if (legacyLook == "text") {
+		if (legacyLook === "text") {
 
 			$('#radiolegacytext').trigger("click");
 		}
-		else if (legacyLook == "image") {
+		else if (legacyLook === "image") {
 
 			$('#radiolegacyimage').trigger("click");
 		}
 
-		$('#bluecolor').val(result.bluecolor ?? "");
-		$('#legacycolor').val(result.legacycolor ?? "");
+		// do not use new here
+		$('#bluecolor').val(String(result.bluecolor ?? ""));
+		$('#legacycolor').val(String(result.legacycolor ?? ""));
 
-		$('#bluetext').val(result.bluetext ?? "");
-		$('#legacytext').val(result.legacytext ?? "");
+		$('#bluetext').val(String(result.bluetext ?? ""));
+		$('#legacytext').val(String(result.legacytext ?? ""));
 
-		const blueURL = result.blueimage ?? "";
-		const legacyURL = result.legacyimage ?? "";
+		const blueURL = String(result.blueimage ?? "");
+		const legacyURL = String(result.legacyimage ?? "");
 
 		if (blueURL.length > 0) {
 
@@ -142,13 +146,35 @@ function displayNormalSpan() {
 
 		// ADVANCED
 
-		const checkHtml = result.checkmark ?? "";
+		// do not use new here
+		const checkHtml = String(result.checkmark ?? "");
 		const checkBlob = new Blob([checkHtml], {type: "text/plain"});
 		$('#checkmarkdownload').attr("href", URL.createObjectURL(checkBlob));
 		$('#checkmarkhtml').val(checkHtml);
 
-		$('#invocations').val(result.invocations ?? 10);
-		$('#polldelay').val(result.polldelay ?? 200);
+		// do not use new here
+		const selectorsJSON = String(result.selectors ?? "");
+		const selectorsBlob = new Blob([selectorsJSON], {type: "application/json"});
+		$('#selectorsdownload').attr("href", URL.createObjectURL(selectorsBlob));
+		$('#selectorsjson').val(selectorsJSON);
+
+		const handlesVersion = result.handlesversion ?? ["0"];
+		// do not use new here
+		$('#handlesversion').text(String(Array.isArray(handlesVersion) && handlesVersion.length > 0 ?
+			handlesVersion[0] : "none"));
+
+		// do not use new here
+		// does not trigger change function
+		$('#handlesfrequency').val(String(result.handlesfrequency ?? "weekly"))
+
+		// do not use new here
+		$('#invocations').val(Number(result.invocations ?? 10).toString());
+		$('#polldelay').val(Number(result.polldelay ?? 200).toString());
+
+		$('#selectorsurl').val(String(result.selectorsurl ?? DEFAULT_SELECTORS_URL));
+
+		$('#handlesversionurl').val(String(result.handlesversionurl ?? DEFAULT_HANDLES_VERSION_URL));
+		$('#handlesurl').val(String(result.handlesurl ?? DEFAULT_HANDLES_URL));
 	});
 
 	// APPEARANCE
@@ -172,11 +198,11 @@ function displayNormalSpan() {
 
 			const radioId = $('#fieldsetblue > input[type="radio"]:checked').attr("id");
 			let look;
-			if (radioId == "radiobluetext") {
+			if (radioId === "radiobluetext") {
 
 				look = "text";
 			}
-			else if (radioId == "radioblueimage") {
+			else if (radioId === "radioblueimage") {
 
 				look = "image";
 			}
@@ -189,7 +215,8 @@ function displayNormalSpan() {
 			if (look != "text" || text.length > 0) {
 
 				const canvas = document.getElementById("canvasblueimage");
-				const imageURL = (canvas == null || $(canvas).prop("hidden")) ? "" : canvas.toDataURL();
+				const imageURL = (canvas === null || $(canvas).prop("hidden")) ?
+					"" : canvas.toDataURL();
 				if (look != "image" || imageURL.length > 0) {
 
 					$('#blueerror').prop("hidden", true);
@@ -218,11 +245,11 @@ function displayNormalSpan() {
 
 			const radioId = $('#fieldsetlegacy > input[type="radio"]:checked').attr("id");
 			let look;
-			if (radioId == "radiolegacytext") {
+			if (radioId === "radiolegacytext") {
 
 				look = "text";
 			}
-			else if (radioId == "radiolegacyimage") {
+			else if (radioId === "radiolegacyimage") {
 
 				look = "image";
 			}
@@ -235,7 +262,8 @@ function displayNormalSpan() {
 			if (look != "text" || text.length > 0) {
 
 				const canvas = document.getElementById("canvaslegacyimage");
-				const imageURL = (canvas == null || $(canvas).prop("hidden")) ? "" : canvas.toDataURL();
+				const imageURL = (canvas === null || $(canvas).prop("hidden")) ?
+					"" : canvas.toDataURL();
 				if (look != "image" || imageURL.length > 0) {
 
 					$('#legacyerror').prop("hidden", true);
@@ -257,11 +285,12 @@ function displayNormalSpan() {
 
 	// ADVANCED
 
-	chrome.storage.onChanged.addListener((changes) => {
+	chrome.storage.local.onChanged.addListener((changes) => {
 
 		if (changes.checkmark !== undefined) {
 
-			const checkHtml = changes.checkmark.newValue ?? "";
+			// do not use new here
+			const checkHtml = String(changes.checkmark.newValue ?? "");
 			const checkBlob = new Blob([checkHtml], {type: "text/plain"});
 			const prevURL = $('#checkmarkdownload').attr("href");
 			if (prevURL != null) {
@@ -281,13 +310,72 @@ function displayNormalSpan() {
 		chrome.runtime.sendMessage({text: "cachecheckmark!"});
 	});
 
+	$('#reloadselectors').on("click", function() {
+
+		$(this).prop("disabled", true);
+		chrome.runtime.sendMessage({text: "fetchselectors?"}, (response) => {
+
+			if (!response.success) {
+
+				$('#selectorssuccess').prop("hidden", true);
+				$('#selectorserror').prop("hidden", false);
+				$(this).prop("disabled", false);
+				return;
+			}
+			$('#selectorserror').prop("hidden", true);
+			$('#selectorssuccess').prop("hidden", false);
+
+			chrome.storage.local.get("selectors", (result) => {
+
+				// do not use new here
+				const selectorsJSON = String(result.selectors ?? "");
+				const selectorsBlob = new Blob([selectorsJSON], {type: "application/json"});
+				const prevURL = $('#selectorsdownload').attr("href");
+				if (prevURL != null) {
+
+					URL.revokeObjectURL(prevURL);
+				}
+				$('#selectorsdownload').attr("href", URL.createObjectURL(selectorsBlob));
+				$('#selectorsjson').val(selectorsJSON);
+	
+				$(this).prop("disabled", false);
+			});
+		});
+	});
+
+	$('#handlesfrequency').change(function() {
+
+		$(this).prop("disabled", true);
+		chrome.storage.local.set({handlesfrequency: $(this).val()}, () =>
+			$(this).prop("disabled", false));
+	});
+
+	$('#fetchhandles').on("click", function() {
+
+		$(this).prop("disabled", true);
+		chrome.runtime.sendMessage({text: "fetchhandles?"}, (response) => {
+
+			if (!response.success) {
+
+				$('#handlessuccess').prop("hidden", true);
+				$('#handleserror').prop("hidden", false);
+				$(this).prop("disabled", false);
+				return;
+			}
+			$('#handleserror').prop("hidden", true);
+			$('#handlessuccess').prop("hidden", false);
+		});
+	});
+
 	$('#invocationsbutton').on("click", function() {
 
 		$(this).prop("disabled", true);
 		const value = $('#invocations').val() ?? "";
 		if (value.match(/^[1-9]\d{0,6}$/)) {
 
-			chrome.storage.local.set({invocations: parseInt(value)}, () => $(this).prop("disabled", false));
+			chrome.storage.local.set({
+				invocations: parseInt(value)
+			}, () => $(this).prop("disabled", false));
 		}
 		else {
 
@@ -304,7 +392,9 @@ function displayNormalSpan() {
 		const value = $('#polldelay').val() ?? "";
 		if (value.match(/^[1-9]\d{0,6}$/)) {
 
-			chrome.storage.local.set({polldelay: parseInt(value)}, () => $(this).prop("disabled", false));
+			chrome.storage.local.set({
+				polldelay: parseInt(value)
+			}, () => $(this).prop("disabled", false));
 		}
 		else {
 
@@ -320,14 +410,97 @@ function displayNormalSpan() {
 		$(this).prop("disabled", true);
 		const versionValue = $('#handlesversionurl').val() ?? "";
 		const handlesValue = $('#handlesurl').val() ?? "";
-
+	
 		let versionURL;
 		let success = false;
 		try {
-
+	
 			versionURL = new URL(versionValue);
 			success = versionURL.protocol === "https:" && versionURL.search === "" &&
 				versionURL.username === "" && versionURL.password === "";
+		}
+		catch(error) {
+	
+			console.log(error.message);
+		}
+	
+		if (!success) {
+	
+			$('label[for="handlesversionurl"] > p').effect({
+				effect: "shake",
+				complete: () => $(this).prop("disabled", false)
+			});
+			return;
+		}
+	
+		let inputURL;
+		success = false;
+		try {
+	
+			inputURL = new URL(handlesValue);
+	
+			success = inputURL.protocol === "https:" && inputURL.search === "" &&
+				inputURL.username === "" && inputURL.password === "";
+		}
+		catch(error) {
+	
+			console.log(error.message);
+		}
+	
+		if (!success) {
+	
+			$('label[for="handlesversionurl"] > p').effect({
+				effect: "shake",
+				complete: () => $(this).prop("disabled", false)
+			});
+			return;
+		}
+	
+		chrome.storage.local.get(["handlesversionurl", "handlesurl"], (result) =>
+			chrome.storage.local.set({
+				handlesversionurl: versionURL.toString(),
+				handlesurl: inputURL.toString()
+			}, () => chrome.runtime.sendMessage({text: "fetchhandles?"}, (response) => {
+	
+				if (!response.success) {
+					// reset to original value
+					chrome.storage.local.set({
+						handlesversionurl: result.handlesversionurl ?? DEFAULT_HANDLES_VERSION_URL,
+						handlesurl: result.handlesurl ?? DEFAULT_HANDLES_URL
+					}, () => $(this).prop("disabled", false));
+	
+					$('label[for="handlesversionurl"] > p').effect("shake");
+					return;
+				}
+	
+				$(this).prop("disabled", false);
+			}
+		)));
+	});
+
+	$('#selectorsbutton').on("click", function() {
+
+		$(this).prop("disabled", true);
+		const JSON_DATA_URL_PREFIX = "data:application/json;base64,";
+
+		const value = ($('#selectorsurl').val() ?? "").trim();
+
+		let success = false;
+		try {
+
+			if (value.startsWith(JSON_DATA_URL_PREFIX)) {
+
+				const decodedData = atob(value.substring(JSON_DATA_URL_PREFIX.length));
+				// validate JSON
+				JSON.parse(decodedData);
+				success = true;
+			}
+			else {
+
+				const inputURL = new URL(value);
+				success = inputURL.protocol === "https:" && inputURL.search === "" &&
+					inputURL.username === "" && inputURL.password === "";
+			}
 		}
 		catch(error) {
 
@@ -336,74 +509,55 @@ function displayNormalSpan() {
 
 		if (!success) {
 
-			$('label[for="handlesversionurl"] > p').effect({
+			$('#fieldsetselectors > legend').effect({
 				effect: "shake",
 				complete: () => $(this).prop("disabled", false)
 			});
 			return;
 		}
-		
-		try {
 
-			const inputURL = new URL(handlesValue);
+		chrome.storage.local.get("selectorsurl", (result) =>
+			chrome.storage.local.set({selectorsurl: value}, () =>
+				chrome.runtime.sendMessage({text: "fetchselectors?"}, (response) => {
 
-			if (inputURL.protocol === "https:" && inputURL.search === "" &&
-				inputURL.username === "" && inputURL.password === "") {
+					if (!response.success) {
 
-				chrome.storage.local.set({
-					handlesversionurl: versionURL.toString(),
-					handlesurl: inputURL.toString()
-				}, () => $(this).prop("disabled", false));
-				return;
-			}
-		}
-		catch(error) {
+						// reset to original value
+						chrome.storage.local.set({
+							selectorsurl: result.selectorsurl ?? DEFAULT_SELECTORS_URL
+						}, () => $(this).prop("disabled", false));
 
-			console.log(error.message);
-		}
+						$('#fieldsetselectors > legend').effect("shake");
+						return;
+					}
 
-		$('label[for="handlesurl"] > p').effect({
-			effect: "shake",
-			complete: () => $(this).prop("disabled", false)
-		});
+					$(this).prop("disabled", false);
+				}
+		)));
 	});
 
-	$('#selectorsbutton').on("click", function() {
+	$('#advancedresetbutton').on("click", function() {
 
 		$(this).prop("disabled", true);
-		const value = ($('#selectorsurl').val() ?? "").trim();
 
-		try {
+		$('#handlesfrequency').val("weekly")
 
-			const base64Prefix = 'data:application/json;base64,';
-			if (value.startsWith(base64Prefix)) {
+		$('#invocations').val((10).toString());
+		$('#polldelay').val((200).toString());
 
-				const decodedData = atob(value.substring(base64Prefix.length));
-				// validate JSON
-				JSON.parse(decodedData);
+		$('#selectorsurl').val(DEFAULT_SELECTORS_URL);
 
-				chrome.storage.local.set({selectorsurl: value}, () => $(this).prop("disabled", false));
-				return;
-			}
+		$('#handlesversionurl').val(DEFAULT_HANDLES_VERSION_URL);
+		$('#handlesurl').val(DEFAULT_HANDLES_URL);
 
-			const inputURL = new URL(value);
-
-			if (inputURL.protocol === "https:" && inputURL.search === "" &&
-				inputURL.username === "" && inputURL.password === "") {
-
-				chrome.storage.local.set({selectorsurl: inputURL.toString()}, () => $(this).prop("disabled", false));
-				return;
-			}
-		}
-		catch(error) {
-
-			console.log(error.message);
-		}
-
-		$('#fieldsetselectors > legend').effect({
-			effect: "shake",
-			complete: () => $(this).prop("disabled", false)
-		});
+		chrome.storage.local.set({
+			handlesfrequency: "weekly",
+			invocations: 10,
+			polldelay: 200,
+			selectorsurl: DEFAULT_SELECTORS_URL,
+			handlesversionurl: DEFAULT_HANDLES_VERSION_URL,
+			handlesurl: DEFAULT_HANDLES_URL
+		}, () => $(this).prop("disabled", false));
 	});
 
 }

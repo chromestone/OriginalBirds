@@ -3,7 +3,13 @@
 <head>
 	<style>
 		body {
+			background-color: #f2f5ff;
 			width: 800px;
+		}
+		.no-margin {
+			margin-top: 0;
+			margin-bottom: 0;
+			margin-left: 0;
 		}
 		a, a:visited {
 			color: rgb(29, 155, 240);
@@ -104,6 +110,7 @@
 							<p class="text-color"><b>Text</b></p>
 						</label>
 						<input id="bluetext" type="text" maxlength="64">
+						<p class="text-color" style="margin: 0.5rem 0 0;">Tip: You can paste in emojis and set the color under default.</p>
 					</div>
 					<div id="divblueimage" class="radiocontent" hidden>
 						<label for="blueimage">
@@ -146,6 +153,7 @@
 							<p class="text-color"><b>Text</b></p>
 						</label>
 						<input id="legacytext" type="text" maxlength="64">
+						<p class="text-color" style="margin: 0.5rem 0 0;">Tip: You can paste in emojis and set the color under default.</p>
 					</div>
 					<div id="divlegacyimage" class="radiocontent" hidden>
 						<label for="legacyimage">
@@ -171,9 +179,31 @@
 				</fieldset>
 			</div>
 			<div id="advanced">
-				<label for="handlesfrequency">
-					<p class="text-color"><b>Legacy Verified List Updates</b></p>
-				</label>
+				<p class="text-color"><b>Checkmark&nbsp;HTML</b></p>
+				<details>
+					<summary class="text-color">Inspect</summary>
+					<textarea id="checkmarkhtml" rows="4" cols="32" readonly style="vertical-align: middle;"></textarea>
+					<a id="checkmarkdownload" download="checkmark.txt"><button style="font-size: 1.5rem; font-weight: bold;">&#10515;</button></a>
+				</details>
+				<button id="reloadcheckmark" style="margin-top: 1rem;">Reload Checkmark</button>
+				<p class="text-color"><b>Selectors&nbsp;JSON</b></p>
+				<details>
+					<summary class="text-color">Inspect</summary>
+					<textarea id="selectorsjson" rows="4" cols="32" readonly style="vertical-align: middle;"></textarea>
+					<a id="selectorsdownload" download="selectors.json"><button style="font-size: 1.5rem; font-weight: bold;">&#10515;</button></a>
+				</details>
+				<p id="selectorssuccess" class="text-color" hidden>Success!</p>
+				<div id="selectorserror" class="ui-widget ui-state-error ui-corner-all" style="margin-top: 1rem; padding: 0.2rem;" hidden>
+					<strong>Alert:</strong> Original Birds encountered an error reloading selectors.
+				</div>
+				<button id="reloadselectors" style="margin-top: 1rem;">Reload Selectors</button>
+				<p class="text-color">
+					<b>Legacy&nbsp;Verified&nbsp;List</b><br>
+				</p>
+				<p class="text-color">
+					Version: <span id="handlesversion"></span>
+				</p>
+				<label for="handlesfrequency" class="text-color">Check for Update:</label>
 				<select id="handlesfrequency">
 					<option value="never">Never</option>
 					<option value="daily">Daily</option>
@@ -181,23 +211,11 @@
 					<option value="monthly">Monthly</option>
 					<option value="yearly">Yearly</option>
 				</select>
-				<p class="text-color"><b>Checkmark&nbsp;HTML</b></p>
-				<details style="margin-bottom: 1rem;">
-					<summary class="text-color">Inspect</summary>
-					<textarea id="checkmarkhtml" rows="4" cols="32" readonly style="vertical-align: middle;"></textarea>
-					<a id="checkmarkdownload" download="checkmark.txt"><button style="font-size: 1.5rem; font-weight: bold;">&#10515;</button></a>
-				</details>
-				<button id="reloadcheckmark">Reload Checkmark</button>
-				<p class="text-color"><b>Selectors&nbsp;JSON</b></p>
-				<details style="margin-bottom: 0.5rem;">
-					<summary class="text-color">Inspect</summary>
-					<textarea id="selectorsjson" rows="4" cols="32" readonly style="vertical-align: middle;"></textarea>
-					<a id="selectorsdownload" download="selectors.json"><button style="font-size: 1.5rem; font-weight: bold;">&#10515;</button></a>
-				</details>
-				<div id="selectorserror" class="ui-widget ui-state-error ui-corner-all" style="margin-top: 0.5rem; padding: 0.2rem;" hidden>
-					<strong>Alert:</strong> Original Birds encountered an error reloading selectors.
+				<p id="handlessuccess" class="text-color" hidden>Success!</p>
+				<div id="handleserror" class="ui-widget ui-state-error ui-corner-all" style="margin-top: 1rem; padding: 0.2rem;" hidden>
+					<strong>Alert:</strong> Original Birds encountered an error reloading the list.
 				</div>
-				<button id="reloadselectors" style="margin-top: 0.5rem;">Reload Selectors</button>
+				<button id="fetchhandles" style="margin-top: 1rem; display: block;">Update List Now</button>
 				<label for="invocations">
 					<p class="text-color">
 						<b>Number&nbsp;of&nbsp;Polls</b><br>
@@ -214,9 +232,14 @@
 				</label>
 				<input id="polldelay" type="text" title="Number must be between 1 to 9999999." style="vertical-align: middle;">
 				<button id="polldelaybutton">&#8617;</button>
-				<div class="ui-widget ui-state-error ui-corner-all" style="margin-top: 0.5rem; padding: 0.2rem;">
+				<div class="ui-widget ui-state-error ui-corner-all" style="margin-top: 1rem; padding: 0.2rem;">
 					<strong>Warning:</strong> Improper settings below may cause Original Birds to malfunction.
 				</div>
+				<fieldset id="fieldsetselectors" style="margin-top: 1rem;">
+					<legend class="text-color"><b>Selectors URL</b></legend>
+					<input id="selectorsurl" type="text" style="margin-top: 1rem; width: 100%;"><br>
+					<button id="selectorsbutton" style="margin-top: 1rem;">Save and Load</button>
+				</fieldset>
 				<fieldset style="margin-top: 1rem;">
 					<legend class="text-color"><b>Legacy Verified List URL</b></legend>
 					<p class="text-color" style="margin-top: 0.5rem;">Both values must be set for correct functionality.</p>
@@ -228,13 +251,15 @@
 						<p class="text-color"><b>List URL</b></p>
 					</label>
 					<input id="handlesurl" type="text" style="width: 100%;"><br>
-					<button id="handlesbutton" style="margin-top: 1rem;">Save All</button>
+					<button id="handlesbutton" style="margin-top: 1rem;">Save and Load</button>
 				</fieldset>
-				<fieldset id="fieldsetselectors" style="margin-top: 1rem;">
-					<legend class="text-color"><b>Selectors URL</b></legend>
-					<input id="selectorsurl" type="text" style="margin-top: 1rem; width: 100%;"><br>
-					<button id="selectorsbutton" style="margin-top: 1rem;">Save</button>
-				</fieldset>
+				<details style="margin-top: 1rem;">
+					<summary class="text-color"><span style="color: red;">Reset All Advanced Settings</span></summary>
+					<div class="ui-widget ui-state-error ui-corner-all" style="margin-top: 1rem; padding: 0.2rem;">
+						<strong>Warning:</strong> Clicking this button will reset all settings on this page to their defaults.
+					</div>
+					<button id="advancedresetbutton" style="margin-top: 1rem;">Reset Settings</button>
+				</details>
 			</div>
 		</div>
 	</span>
