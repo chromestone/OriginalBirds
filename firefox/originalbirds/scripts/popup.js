@@ -14,36 +14,16 @@ function displayNormalSpan() {
 		$('#fieldsetblue > div.radiocontent').prop("hidden", true);
 
 		const id = $(this).attr("id");
-		if (id === "radiobluetext") {
-
-			$('#divbluetext').prop("hidden", false);
-		}
-		else if (id === "radioblueimage") {
-
-			$('#divblueimage').prop("hidden", false);
-		}
-		else {
-
-			$('#divbluedefault').prop("hidden", false);
-		}
+		$(id === "radiobluetext" ? '#divbluetext' :
+			id === "radioblueimage" ? '#divblueimage' : '#divbluedefault').prop("hidden", false);
 	});
 	$('#fieldsetlegacy > input[type="radio"]').checkboxradio().change(function() {
 
 		$('#fieldsetlegacy > div.radiocontent').prop("hidden", true);
 
 		const id = $(this).attr("id");
-		if (id === "radiolegacytext") {
-
-			$('#divlegacytext').prop("hidden", false);
-		}
-		else if (id === "radiolegacyimage") {
-
-			$('#divlegacyimage').prop("hidden", false);
-		}
-		else {
-
-			$('#divlegacydefault').prop("hidden", false);
-		}
+		$(id === "radiolegacytext" ? '#divlegacytext' :
+			id === "radiolegacyimage" ? '#divlegacyimage' : '#divlegacydefault').prop("hidden", false);
 	});
 
 	$(document.body).addClass("no-margin");
@@ -90,23 +70,10 @@ function displayNormalSpan() {
 		const blueLook = result.bluelook ?? "default";
 		const legacyLook = result.legacylook ?? "default";
 
-		if (blueLook === "text") {
-
-			$('#radiobluetext').trigger("click");
-		}
-		else if (blueLook === "image") {
-
-			$('#radioblueimage').trigger("click");
-		}
-
-		if (legacyLook === "text") {
-
-			$('#radiolegacytext').trigger("click");
-		}
-		else if (legacyLook === "image") {
-
-			$('#radiolegacyimage').trigger("click");
-		}
+		$(blueLook === "text" ? '#radiobluetext' :
+			blueLook === "image" ? '#radioblueimage' : '#radiobluedefault').trigger("click");
+		$(legacyLook === "text" ? '#radiolegacytext' :
+			legacyLook === "image" ? '#radiolegacyimage' : '#radiolegacydefault').trigger("click");
 
 		// do not use new here
 		$('#bluecolor').val(String(result.bluecolor ?? ""));
@@ -161,7 +128,7 @@ function displayNormalSpan() {
 		const handlesVersion = result.handlesversion ?? ["0"];
 		// do not use new here
 		$('#handlesversion').text(String(Array.isArray(handlesVersion) && handlesVersion.length > 0 ?
-			handlesVersion[0] : "none"));
+			handlesVersion[0] : "???"));
 
 		// do not use new here
 		// does not trigger change function
@@ -194,30 +161,19 @@ function displayNormalSpan() {
 		$(this).prop("disabled", true);
 
 		const color = $('#bluecolor').val() ?? "";
-		if (color.length === 0 || color.match(/^#[0-9A-F]{6}$/i)) {
+		if (color.length === 0 || color.match(/^#[0-9A-Fa-f]{6}$/)) {
 
 			const radioId = $('#fieldsetblue > input[type="radio"]:checked').attr("id");
-			let look;
-			if (radioId === "radiobluetext") {
-
-				look = "text";
-			}
-			else if (radioId === "radioblueimage") {
-
-				look = "image";
-			}
-			else {
-
-				look = "default";
-			}
+			const look = radioId === "radiobluetext" ?
+				"text" : radioId === "radioblueimage" ? "image" : "default";
 
 			const text = $('#bluetext').val()?.substring(0, 64) ?? "";
-			if (look != "text" || text.length > 0) {
+			if (look !== "text" || text.length > 0) {
 
 				const canvas = document.getElementById("canvasblueimage");
 				const imageURL = (canvas === null || $(canvas).prop("hidden")) ?
 					"" : canvas.toDataURL();
-				if (look != "image" || imageURL.length > 0) {
+				if (look !== "image" || imageURL.length > 0) {
 
 					$('#blueerror').prop("hidden", true);
 
@@ -241,30 +197,19 @@ function displayNormalSpan() {
 		$(this).prop("disabled", true);
 
 		const color = $('#legacycolor').val() ?? "";
-		if (color.length === 0 || color.match(/^#[0-9A-F]{6}$/i)) {
+		if (color.length === 0 || color.match(/^#[0-9A-Fa-f]{6}$/)) {
 
 			const radioId = $('#fieldsetlegacy > input[type="radio"]:checked').attr("id");
-			let look;
-			if (radioId === "radiolegacytext") {
-
-				look = "text";
-			}
-			else if (radioId === "radiolegacyimage") {
-
-				look = "image";
-			}
-			else {
-
-				look = "default";
-			}
+			const look = radioId === "radiolegacytext" ?
+				"text" : radioId === "radiolegacyimage"? "image" : "default";
 
 			const text = $('#legacytext').val()?.substring(0, 64) ?? "";
-			if (look != "text" || text.length > 0) {
+			if (look !== "text" || text.length > 0) {
 
 				const canvas = document.getElementById("canvaslegacyimage");
 				const imageURL = (canvas === null || $(canvas).prop("hidden")) ?
 					"" : canvas.toDataURL();
-				if (look != "image" || imageURL.length > 0) {
+				if (look !== "image" || imageURL.length > 0) {
 
 					$('#legacyerror').prop("hidden", true);
 
@@ -315,15 +260,14 @@ function displayNormalSpan() {
 		$(this).prop("disabled", true);
 		chrome.runtime.sendMessage({text: "fetchselectors?"}, (response) => {
 
+			$('#selectorssuccess').prop("hidden", !response.success);
+			$('#selectorserror').prop("hidden", response.success);	
+
 			if (!response.success) {
 
-				$('#selectorssuccess').prop("hidden", true);
-				$('#selectorserror').prop("hidden", false);
 				$(this).prop("disabled", false);
 				return;
 			}
-			$('#selectorserror').prop("hidden", true);
-			$('#selectorssuccess').prop("hidden", false);
 
 			chrome.storage.local.get("selectors", (result) => {
 
@@ -355,15 +299,9 @@ function displayNormalSpan() {
 		$(this).prop("disabled", true);
 		chrome.runtime.sendMessage({text: "fetchhandles?"}, (response) => {
 
-			if (!response.success) {
-
-				$('#handlessuccess').prop("hidden", true);
-				$('#handleserror').prop("hidden", false);
-				$(this).prop("disabled", false);
-				return;
-			}
-			$('#handleserror').prop("hidden", true);
-			$('#handlessuccess').prop("hidden", false);
+			$('#handlessuccess').prop("hidden", !response.success);
+			$('#handleserror').prop("hidden", response.success);
+			$(this).prop("disabled", false);
 		});
 	});
 
@@ -408,71 +346,56 @@ function displayNormalSpan() {
 	$('#handlesbutton').on("click", function() {
 
 		$(this).prop("disabled", true);
-		const versionValue = $('#handlesversionurl').val() ?? "";
-		const handlesValue = $('#handlesurl').val() ?? "";
-	
-		let versionURL;
-		let success = false;
+
+		let versionValue, handlesValue;
 		try {
 	
-			versionURL = new URL(versionValue);
-			success = versionURL.protocol === "https:" && versionURL.search === "" &&
-				versionURL.username === "" && versionURL.password === "";
+			const versionURL = new URL($('#handlesversionurl').val() ?? "");
+			if (versionURL.protocol === "https:" && versionURL.search === "" &&
+				versionURL.username === "" && versionURL.password === "") {
+	
+				versionValue = versionURL.toString();
+			}
+	
+			const inputURL = new URL($('#handlesurl').val() ?? "");
+			if (inputURL.protocol === "https:" && inputURL.search === "" &&
+				inputURL.username === "" && inputURL.password === "") {
+	
+				handlesValue = inputURL.toString();
+			}
 		}
 		catch(error) {
 	
 			console.log(error.message);
 		}
 	
-		if (!success) {
+		if (versionValue == null || handlesValue == null) {
 	
-			$('label[for="handlesversionurl"] > p').effect({
+			$('#fieldsethandles > legend').effect({
 				effect: "shake",
 				complete: () => $(this).prop("disabled", false)
 			});
 			return;
 		}
-	
-		let inputURL;
-		success = false;
-		try {
-	
-			inputURL = new URL(handlesValue);
-	
-			success = inputURL.protocol === "https:" && inputURL.search === "" &&
-				inputURL.username === "" && inputURL.password === "";
-		}
-		catch(error) {
-	
-			console.log(error.message);
-		}
-	
-		if (!success) {
-	
-			$('label[for="handlesversionurl"] > p').effect({
-				effect: "shake",
-				complete: () => $(this).prop("disabled", false)
-			});
-			return;
-		}
-	
+
 		chrome.storage.local.get(["handlesversionurl", "handlesurl"], (result) =>
 			chrome.storage.local.set({
-				handlesversionurl: versionURL.toString(),
-				handlesurl: inputURL.toString()
+				handlesversionurl: versionValue,
+				handlesurl: handlesValue
 			}, () => chrome.runtime.sendMessage({text: "fetchhandles?"}, (response) => {
-	
+
 				if (!response.success) {
+
 					// reset to original value
 					chrome.storage.local.set({
 						handlesversionurl: result.handlesversionurl ?? DEFAULT_HANDLES_VERSION_URL,
 						handlesurl: result.handlesurl ?? DEFAULT_HANDLES_URL
 					}, () => $(this).prop("disabled", false));
-	
-					$('label[for="handlesversionurl"] > p').effect("shake");
+
+					$('#fieldsethandles > legend').effect("shake");
 					return;
 				}
-	
+
 				$(this).prop("disabled", false);
 			}
 		)));
@@ -485,7 +408,7 @@ function displayNormalSpan() {
 
 		const value = ($('#selectorsurl').val() ?? "").trim();
 
-		let success = false;
+		let selectorsValue;
 		try {
 
 			if (value.startsWith(JSON_DATA_URL_PREFIX)) {
@@ -493,13 +416,16 @@ function displayNormalSpan() {
 				const decodedData = atob(value.substring(JSON_DATA_URL_PREFIX.length));
 				// validate JSON
 				JSON.parse(decodedData);
-				success = true;
+				selectorsValue = value;
 			}
 			else {
 
 				const inputURL = new URL(value);
-				success = inputURL.protocol === "https:" && inputURL.search === "" &&
-					inputURL.username === "" && inputURL.password === "";
+				if (inputURL.protocol === "https:" && inputURL.search === "" &&
+					inputURL.username === "" && inputURL.password === "") {
+
+					selectorsValue = inputURL.toString();
+				}
 			}
 		}
 		catch(error) {
@@ -507,7 +433,7 @@ function displayNormalSpan() {
 			console.log(error.message);
 		}
 
-		if (!success) {
+		if (selectorsValue == null) {
 
 			$('#fieldsetselectors > legend').effect({
 				effect: "shake",
@@ -517,7 +443,7 @@ function displayNormalSpan() {
 		}
 
 		chrome.storage.local.get("selectorsurl", (result) =>
-			chrome.storage.local.set({selectorsurl: value}, () =>
+			chrome.storage.local.set({selectorsurl: selectorsValue}, () =>
 				chrome.runtime.sendMessage({text: "fetchselectors?"}, (response) => {
 
 					if (!response.success) {
@@ -559,25 +485,27 @@ function displayNormalSpan() {
 			handlesurl: DEFAULT_HANDLES_URL
 		}, () => $(this).prop("disabled", false));
 	});
-
 }
 
-function actionListener(_, __) {
+function permissionHandler(_, active) {
 
-	$('#perm').toggleClass("disabled", true);
-	browser.permissions.request({origins: ['https://*.twitter.com/*']}).then((result) => {
+	if (active) {
 
-		if (result) {
+		$('#perm').toggleClass("disabled", true);
+		browser.permissions.request({origins: ["https://*.twitter.com/*"]}).then((result) => {
 
-			$('#permission_span').prop("hidden", true);
-			displayNormalSpan();
-		}
-		else {
+			if (result) {
 
-			$('#perm').toggles(false);
-			$('#perm').toggleClass("disabled", false);
-		}
-	});
+				$('#permission_span').prop("hidden", true);
+				displayNormalSpan();
+			}
+			else {
+
+				$('#perm').toggles(false);
+				$('#perm').toggleClass("disabled", false);
+			}
+		});
+	}
 }
 
 browser.permissions.contains({origins: ["https://*.twitter.com/*"]}).then((result) => {
@@ -588,12 +516,9 @@ browser.permissions.contains({origins: ["https://*.twitter.com/*"]}).then((resul
 	}
 	else {
 
-		$('#perm').toggles({type: "select"});
-		$('#perm').on("toggle", actionListener);
+		$('#perm').toggles({on: false, type: "select"});
+		$('#perm').on("toggle", permissionHandler);
 		$('#perm').toggleClass("disabled", false);
 		$('#permission_span').prop("hidden", false);
 	}
-}).catch((error) => {
-
-	console.error(error);
-});
+}).catch((error) => console.error(error));

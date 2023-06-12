@@ -1,4 +1,4 @@
-const closemeListener = {
+const CLOSEME_LISTENER = {
 	waitingForResponse: false,
 	tabId: null,
 	callbacks: [],
@@ -33,7 +33,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
 	if (msg.text === "closeme?") {
 
-		closemeListener.run(sender, sendResponse);
+		CLOSEME_LISTENER.run(sender, sendResponse);
 		return true;
 	}
 	else if (msg.text === "fetchhandles?") {
@@ -64,18 +64,18 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
 function cacheCheckmark() {
 
-	if (closemeListener.waitingForResponse) {
+	if (CLOSEME_LISTENER.waitingForResponse) {
 
 		return;
 	}
-	closemeListener.waitingForResponse = true;
+	CLOSEME_LISTENER.waitingForResponse = true;
 
 	chrome.tabs.create({url: "https://twitter.com/elonmusk", active: false}, (tab) => {
 
-		closemeListener.tabId = tab.id;
+		CLOSEME_LISTENER.tabId = tab.id;
 		// if the previous line does not outpace the content script's request
 		// then clearing the backlog handles it
-		closemeListener.flush();
+		CLOSEME_LISTENER.flush();
 	});
 }
 
@@ -458,7 +458,6 @@ chrome.storage.local.get([
 		// check if last Twitter update is newer than when checkmark was last retrieved
 		LAST_TWITTER_UPDATE >= result.lastcheckmarkupdate) {
 
-		console.log("checkmark");
 		cacheCheckmark();
 	}
 

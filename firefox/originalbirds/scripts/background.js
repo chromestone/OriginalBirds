@@ -48,11 +48,28 @@ async function getSupporters() {
 	chrome.storage.local.set({lastlaunch: theDate.toJSON()});
 }
 
-chrome.storage.local.get(["handles", "supporters", "lastlaunch"], (result) => {
+chrome.storage.local.get([
+	"handles", "supporters", "lastlaunch"
+], (result) => {
 
-	const oneWeekInMilliseconds = 5 * 24 * 60 * 60 * 1000; // 5 days in milliseconds
 	const theDate = new Date();
 	theDate.setHours(0,0,0,0);
+
+	// this is not a true value,
+	// rather it is used to force a checkmark cache if an update deems it necessary.
+	const LAST_TWITTER_UPDATE = new Date("2023-04-22T16:00:00.000Z");
+	result.lastcheckmarkupdate ??= new Date("2023-04-26T16:00:00.000Z");
+
+	if (result.checkmark === undefined ||
+		// check if last Twitter update is newer than when checkmark was last retrieved
+		LAST_TWITTER_UPDATE >= result.lastcheckmarkupdate) {
+
+			browser.permissions.contains({origins: ["https://*.twitter.com/*"]}).then((result) =>
+				result && cacheCheckmark());
+	}
+
+	const oneWeekInMilliseconds = 5 * 24 * 60 * 60 * 1000; // 5 days in milliseconds
+
 	const overdue = typeof result.lastlaunch === 'undefined' ||
 		Math.abs(theDate - new Date(result.lastlaunch)) >= oneWeekInMilliseconds;
 
