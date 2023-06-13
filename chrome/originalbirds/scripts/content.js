@@ -105,6 +105,10 @@ class CheckmarkManager {
 
 			// do not use new here
 			this.blueURL = String(properties.blueimage ?? "");
+			if (!this.blueURL.startsWith("data:")) {
+
+				this.blueURL = "";
+			}
 			this.useBlueImage = this.blueURL.length > 0;
 		}
 
@@ -120,6 +124,10 @@ class CheckmarkManager {
 
 			// do not use new here
 			this.legacyURL = String(properties.legacyimage ?? "");
+			if (!this.legacyURL.startsWith("data:")) {
+
+				this.legacyURL = "";
+			}
 			this.useLegacyImage = this.legacyURL.length > 0;
 		}
 

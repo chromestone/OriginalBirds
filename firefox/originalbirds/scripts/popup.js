@@ -85,7 +85,7 @@ function displayNormalSpan() {
 		const blueURL = String(result.blueimage ?? "");
 		const legacyURL = String(result.legacyimage ?? "");
 
-		if (blueURL.length > 0) {
+		if (blueURL.length > 0 && blueURL.startsWith("data:")) {
 
 			const inputImg = document.createElement("img");
 			$(inputImg).on("load", function() {
@@ -98,7 +98,7 @@ function displayNormalSpan() {
 			$(inputImg).attr("src", blueURL);
 		}
 
-		if (legacyURL.length > 0) {
+		if (legacyURL.length > 0 && legacyURL.startsWith("data:")) {
 
 			const inputImg = document.createElement("img");
 			$(inputImg).on("load", function() {
@@ -371,10 +371,7 @@ function displayNormalSpan() {
 	
 		if (versionValue == null || handlesValue == null) {
 	
-			$('#fieldsethandles > legend').effect({
-				effect: "shake",
-				complete: () => $(this).prop("disabled", false)
-			});
+			$('#handlesurlerror').prop("hidden", false);
 			return;
 		}
 
@@ -384,6 +381,8 @@ function displayNormalSpan() {
 				handlesurl: handlesValue
 			}, () => chrome.runtime.sendMessage({text: "fetchhandles?"}, (response) => {
 
+				$('#handlesurlerror').prop("hidden", response.success);
+
 				if (!response.success) {
 
 					// reset to original value
@@ -391,14 +390,12 @@ function displayNormalSpan() {
 						handlesversionurl: result.handlesversionurl ?? DEFAULT_HANDLES_VERSION_URL,
 						handlesurl: result.handlesurl ?? DEFAULT_HANDLES_URL
 					}, () => $(this).prop("disabled", false));
-
-					$('#fieldsethandles > legend').effect("shake");
 					return;
 				}
 
 				$(this).prop("disabled", false);
-			}
-		)));
+			}))
+		);
 	});
 
 	$('#selectorsbutton').on("click", function() {
@@ -435,10 +432,7 @@ function displayNormalSpan() {
 
 		if (selectorsValue == null) {
 
-			$('#fieldsetselectors > legend').effect({
-				effect: "shake",
-				complete: () => $(this).prop("disabled", false)
-			});
+			$('#selectorsurlerror').prop("hidden", false);
 			return;
 		}
 
@@ -446,20 +440,21 @@ function displayNormalSpan() {
 			chrome.storage.local.set({selectorsurl: selectorsValue}, () =>
 				chrome.runtime.sendMessage({text: "fetchselectors?"}, (response) => {
 
+					$('#selectorsurlerror').prop("hidden", response.success);
+
 					if (!response.success) {
 
 						// reset to original value
 						chrome.storage.local.set({
 							selectorsurl: result.selectorsurl ?? DEFAULT_SELECTORS_URL
 						}, () => $(this).prop("disabled", false));
-
-						$('#fieldsetselectors > legend').effect("shake");
 						return;
 					}
 
 					$(this).prop("disabled", false);
-				}
-		)));
+				})
+			)
+		);
 	});
 
 	$('#advancedresetbutton').on("click", function() {
