@@ -8,13 +8,17 @@ const CLOSEME_LISTENER = {
 
 			if (this.tabId == null) {
 
-				callbacks.push([sender, sendResponse]);
+				this.callbacks.push([sender, sendResponse]);
 			}
 			else {
 
 				const closeme = sender.tab.id === this.tabId;
 				sendResponse({closeme: closeme});
-				this.waitingForResponse = !closeme;
+				if (closeme) {
+
+					this.waitingForResponse = false;
+					this.tabId = null;
+				}
 			}
 		}
 		else {
@@ -24,7 +28,7 @@ const CLOSEME_LISTENER = {
 	},
 	flush: function() {
 
-		callbacks.forEach((theArgs) => this.run(...theArgs));
+		this.callbacks.forEach((theArgs) => this.run(...theArgs));
 		this.callbacks = [];
 	}
 };
@@ -40,12 +44,14 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
 		chrome.storage.local.get([
 			"handles", "handlesversion", "handlesversionurl", "handlesurl"
-		], (result) =>
+		], (result) => {
+
+			result.handlesversion ??= ["0"];
+
 			setDefaultHandles(result.handles === undefined ? null : result.handlesversion).
-			then((successOrVersion) => fetchHandles(result.handlesversionurl, result.handlesurl,
-				Array.isArray(successOrVersion) ? successOrVersion : result.handlesversion)).
+			then((version) => fetchHandles(result.handlesversionurl, result.handlesurl, version)).
 			then((success) => sendResponse({success: success}))
-		);
+		});
 		return true;
 	}
 	else if (msg.text === "fetchselectors?") {
@@ -116,7 +122,7 @@ async function setDefaultHandles(currentVersionData) {
 		(currentVersionData.length > 1 ||
 			!updateNeeded(currentVersionData, DEFAULT_HANDLES_VERSION))) {
 
-		return Promise.resolve(true);
+		return Promise.resolve(currentVersionData);
 	}
 
 	let data;
@@ -129,10 +135,10 @@ async function setDefaultHandles(currentVersionData) {
 
 		console.error(error);
 		console.log("Warning: Original Birds could not find a local fallback handles list.");
-		return Promise.resolve(false);
+		return Promise.resolve(currentVersionData);
 	}
 
-	const handles = data.split('\n').filter((str) => str !== "").map((str) => str.toLowerCase());
+	const handles = data.split("\n").filter((str) => str !== "").map((str) => str.toLowerCase());
 
 	const theDate = new Date();
 	theDate.setHours(0,0,0,0);
@@ -144,15 +150,12 @@ async function setDefaultHandles(currentVersionData) {
 	}, () => resolve(DEFAULT_HANDLES_VERSION)));
 }
 
-async function fetchHandles(versionURL, handlesURL, currentVersionData) {
+async function fetchHandlesVersion(versionURL) {
 
 	const DEFAULT_HANDLES_VERSION_URL = "https://original-birds.pages.dev/version.txt";
-	const DEFAULT_HANDLES_URL = "https://original-birds.pages.dev/verified_handles.txt";
 
 	versionURL = (versionURL ?? DEFAULT_HANDLES_VERSION_URL).trim();
-	handlesURL = (handlesURL ?? DEFAULT_HANDLES_URL).trim();
 
-	let latestVersionData;
 	try {
 
 		const inputURL = new URL(versionURL);
@@ -161,7 +164,7 @@ async function fetchHandles(versionURL, handlesURL, currentVersionData) {
 			inputURL.username === "" && inputURL.password === "")) {
 
 			console.log("Warning: Original Birds encountered invalid handles VERSION URL.");
-			return Promise.resolve(false);
+			return null;
 		}
 
 		const response = await fetch(inputURL, {cache: "no-store", redirect: "error"});
@@ -173,22 +176,37 @@ async function fetchHandles(versionURL, handlesURL, currentVersionData) {
 				response.status +
 				"] retrieving the handles list VERSION."
 			);
-			return Promise.resolve(false);
+			return null;
 		}
 
 		const data = await response.text();
-		latestVersionData = data.split(",", 2);
+		return data.split(",", 2);
 	}
 	catch (error) {
 
 		console.error(error);
 		console.log("Warning: Original Birds could not retrieve the handles list VERSION.");
-		return Promise.resolve(false);
+		return null;
 	}
+}
 
-	if (!updateNeeded(currentVersionData, latestVersionData)) {
+async function fetchHandles(versionURL, handlesURL, currentVersionData) {
 
-		return Promise.resolve(true);
+	const DEFAULT_HANDLES_URL = "https://original-birds.pages.dev/verified_handles.txt";
+
+	handlesURL = (handlesURL ?? DEFAULT_HANDLES_URL).trim();
+
+	if (currentVersionData != null) {
+
+		const latestVersionData = await fetchHandlesVersion(versionURL);
+		if (latestVersionData == null) {
+
+			return Promise.resolve(false);
+		}
+		if (!updateNeeded(currentVersionData, latestVersionData)) {
+	
+			return Promise.resolve(true);
+		}
 	}
 
 	let data;
@@ -420,77 +438,70 @@ async function fetchSupporters() {
 
 function freq2millis(freq) {
 
-	if (freq === "daily") {
-
-		return 24 * 60 * 60 * 1000;
-	}
-	if (freq === "weekly") {
-
-		return 7 * 24 * 60 * 60 * 1000;
-	}
-	if (freq === "monthly") {
-
-		return 28 * 24 * 60 * 60 * 1000;
-	}
-	if (freq === "yearly") {
-
-		return 365 * 24 * 60 * 60 * 1000;
-	}
-	return Infinity;
+	return (
+		freq === "daily"    ?       24 * 60 * 60 * 1000 :
+		freq === "weekly"   ?   7 * 24 * 60 * 60 * 1000 :
+		freq === "monthly"  ?  28 * 24 * 60 * 60 * 1000 :
+		freq === "yearly"   ? 365 * 24 * 60 * 60 * 1000 : Infinity
+	);
 }
 
-chrome.storage.local.get([
-	"checkmark", "handles", "selectors", "supporters",
-	"lastlaunch", "lastcheckmarkupdate", "lasthandlesupdate",
-	"handlesfrequency", "handlesversion", "handlesversionurl", "handlesurl",
-	"selectorsurl"
-], (result) => {
+function checkForUpdates() {
 
-	const theDate = new Date();
-	theDate.setHours(0,0,0,0);
+	chrome.storage.local.get([
+		"checkmark", "handles", "selectors", "supporters",
+		"lastlaunch", "lastcheckmarkupdate", "lasthandlesupdate",
+		"handlesfrequency", "handlesversion", "handlesversionurl", "handlesurl",
+		"selectorsurl"
+	], (result) => {
 
-	// this is not a true value,
-	// rather it is used to force a checkmark cache if an update deems it necessary.
-	const LAST_TWITTER_UPDATE = new Date("2023-04-22T16:00:00.000Z");
-	result.lastcheckmarkupdate ??= new Date("2023-04-26T16:00:00.000Z");
+		const theDate = new Date();
+		theDate.setHours(0,0,0,0);
 
-	if (result.checkmark === undefined ||
-		// check if last Twitter update is newer than when checkmark was last retrieved
-		LAST_TWITTER_UPDATE >= result.lastcheckmarkupdate) {
+		// this is not a true value,
+		// rather it is used to force a checkmark cache if an update deems it necessary.
+		const LAST_TWITTER_UPDATE = new Date("2023-04-22T16:00:00.000Z");
+		result.lastcheckmarkupdate ??= new Date("2023-04-26T16:00:00.000Z");
 
-		cacheCheckmark();
-	}
+		if (result.checkmark === undefined ||
+			// check if last Twitter update is newer than when checkmark was last retrieved
+			LAST_TWITTER_UPDATE >= result.lastcheckmarkupdate) {
 
-	result.handlesfrequency ??= "weekly";
-	result.handlesversion ??= ["0"];
+			cacheCheckmark();
+		}
 
-	if (result.handles === undefined ||
-		result.lasthandlesupdate === undefined ||
-		Math.abs(theDate - new Date(result.lasthandlesupdate)) >= freq2millis(result.handlesfrequency)) {
+		result.handlesfrequency ??= "weekly";
+		result.handlesversion ??= ["0"];
 
-		setDefaultHandles(result.handles === undefined ? null : result.handlesversion).
-		then((successOrVersion) => fetchHandles(result.handlesversionurl, result.handlesurl,
-			Array.isArray(successOrVersion) ? successOrVersion : result.handlesversion));
-	}
+		if (result.handles === undefined ||
+			result.lasthandlesupdate === undefined ||
+			Math.abs(theDate - new Date(result.lasthandlesupdate)) >= freq2millis(result.handlesfrequency)) {
 
-	const overdue = result.lastlaunch === undefined ||
-		Math.abs(theDate - new Date(result.lastlaunch)) >= freq2millis("daily");
+			setDefaultHandles(result.handles === undefined ? null : result.handlesversion).
+			then((version) => fetchHandles(result.handlesversionurl, result.handlesurl, version));
+		}
 
-	if (result.selectors === undefined) {
+		const overdue = result.lastlaunch === undefined ||
+			Math.abs(theDate - new Date(result.lastlaunch)) >= freq2millis("daily");
 
-		setDefaultSelectors().then((_) => fetchSelectors(result.selectorsurl));
-	}
-	else if (overdue) {
+		if (result.selectors === undefined) {
 
-		fetchSelectors(result.selectorsurl);
-	}
+			setDefaultSelectors().then((_) => fetchSelectors(result.selectorsurl));
+		}
+		else if (overdue) {
 
-	// BEGIN SUPPORTER SECTION
+			fetchSelectors(result.selectorsurl);
+		}
 
-	if (result.supporters === undefined || overdue) {
+		// BEGIN SUPPORTER SECTION
 
-		fetchSupporters();
-	}
+		if (result.supporters === undefined || overdue) {
 
-	// END SUPPORTER SECTION
-});
+			fetchSupporters();
+		}
+
+		// END SUPPORTER SECTION
+	});
+}
+
+chrome.runtime.onInstalled.addListener(checkForUpdates);

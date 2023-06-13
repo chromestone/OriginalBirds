@@ -12,16 +12,20 @@ $('#fieldsetblue > input[type="radio"]').checkboxradio().change(function() {
 	$('#fieldsetblue > div.radiocontent').prop("hidden", true);
 
 	const id = $(this).attr("id");
-	$(id === "radiobluetext" ? '#divbluetext' :
-		id === "radioblueimage" ? '#divblueimage' : '#divbluedefault').prop("hidden", false);
+	$(
+		id === "radiobluetext"  ? '#divbluetext'  :
+		id === "radioblueimage" ? '#divblueimage' : '#divbluedefault'
+	).prop("hidden", false);
 });
 $('#fieldsetlegacy > input[type="radio"]').checkboxradio().change(function() {
 
 	$('#fieldsetlegacy > div.radiocontent').prop("hidden", true);
 
 	const id = $(this).attr("id");
-	$(id === "radiolegacytext" ? '#divlegacytext' :
-		id === "radiolegacyimage" ? '#divlegacyimage' : '#divlegacydefault').prop("hidden", false);
+	$(
+		id === "radiolegacytext"  ? '#divlegacytext'  :
+		id === "radiolegacyimage" ? '#divlegacyimage' : '#divlegacydefault'
+	).prop("hidden", false);
 });
 
 // POPULATE VALUES
@@ -65,10 +69,14 @@ chrome.storage.local.get([
 	const blueLook = result.bluelook ?? "default";
 	const legacyLook = result.legacylook ?? "default";
 
-	$(blueLook === "text" ? '#radiobluetext' :
-		blueLook === "image" ? '#radioblueimage' : '#radiobluedefault').trigger("click");
-	$(legacyLook === "text" ? '#radiolegacytext' :
-		legacyLook === "image" ? '#radiolegacyimage' : '#radiolegacydefault').trigger("click");
+	$(
+		blueLook === "text"  ? '#radiobluetext'  :
+		blueLook === "image" ? '#radioblueimage' : '#radiobluedefault'
+	).trigger("click");
+	$(
+		legacyLook === "text"  ? '#radiolegacytext'  :
+		legacyLook === "image" ? '#radiolegacyimage' : '#radiolegacydefault'
+	).trigger("click");
 
 	// do not use new here
 	$('#bluecolor').val(String(result.bluecolor ?? ""));
@@ -189,8 +197,10 @@ $('#savebluebutton').on("click", function() {
 	if (color.length === 0 || color.match(/^#[0-9A-Fa-f]{6}$/)) {
 
 		const radioId = $('#fieldsetblue > input[type="radio"]:checked').attr("id");
-		const look = radioId === "radiobluetext" ?
-			"text" : radioId === "radioblueimage" ? "image" : "default";
+		const look = (
+			radioId === "radiobluetext"  ? "text"  :
+			radioId === "radioblueimage" ? "image" : "default"
+		);
 
 		const text = $('#bluetext').val()?.substring(0, 64) ?? "";
 		if (look !== "text" || text.length > 0) {
@@ -225,8 +235,10 @@ $('#savelegacybutton').on("click", function() {
 	if (color.length === 0 || color.match(/^#[0-9A-Fa-f]{6}$/)) {
 
 		const radioId = $('#fieldsetlegacy > input[type="radio"]:checked').attr("id");
-		const look = radioId === "radiolegacytext" ?
-			"text" : radioId === "radiolegacyimage"? "image" : "default";
+		const look = (
+			radioId === "radiolegacytext"  ? "text"  :
+			radioId === "radiolegacyimage" ? "image" : "default"
+		);
 
 		const text = $('#legacytext').val()?.substring(0, 64) ?? "";
 		if (look !== "text" || text.length > 0) {
@@ -404,22 +416,27 @@ $('#handlesbutton').on("click", function() {
 		chrome.storage.local.set({
 			handlesversionurl: versionValue,
 			handlesurl: handlesValue
-		}, () => chrome.runtime.sendMessage({text: "fetchhandles?"}, (response) => {
+		}, () =>
+			chrome.runtime.sendMessage({text: "fetchhandles?"}, (response) => {
 
-			$('#handlesurlerror').prop("hidden", response.success);
+				$('#handlesurlerror').prop("hidden", response.success);
 
-			if (!response.success) {
+				if (!response.success) {
 
-				// reset to original value
-				chrome.storage.local.set({
-					handlesversionurl: result.handlesversionurl ?? DEFAULT_HANDLES_VERSION_URL,
-					handlesurl: result.handlesurl ?? DEFAULT_HANDLES_URL
-				}, () => $(this).prop("disabled", false));
-				return;
-			}
+					result.handlesversionurl ??= DEFAULT_HANDLES_VERSION_URL;
+					result.handlesurl ??= DEFAULT_HANDLES_URL;
 
-			$(this).prop("disabled", false);
-		}))
+					// reset to original value
+					chrome.storage.local.set({
+						handlesversionurl: result.handlesversionurl,
+						handlesurl: result.handlesurl
+					}, () => $(this).prop("disabled", false));
+					return;
+				}
+
+				$(this).prop("disabled", false);
+			})
+		)
 	);
 });
 
@@ -469,9 +486,11 @@ $('#selectorsbutton').on("click", function() {
 
 				if (!response.success) {
 
+					result.selectorsurl ??= DEFAULT_SELECTORS_URL;
+
 					// reset to original value
 					chrome.storage.local.set({
-						selectorsurl: result.selectorsurl ?? DEFAULT_SELECTORS_URL
+						selectorsurl: result.selectorsurl
 					}, () => $(this).prop("disabled", false));
 					return;
 				}
