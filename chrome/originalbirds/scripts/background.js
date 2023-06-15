@@ -1,3 +1,15 @@
+const JSON_DATA_URL_PREFIX = "data:application/json;base64,";
+const DEFAULT_DOMAIN_NAME = "https://original-birds.pages.dev";
+
+const DEFAULT_HANDLES_VERSION = Object.freeze(["0"]);
+
+const DEFAULT_HANDLES_VERSION_URL = DEFAULT_DOMAIN_NAME + "/version.txt";
+const DEFAULT_HANDLES_URL = DEFAULT_DOMAIN_NAME + "/verified_handles.txt";
+
+const DEFAULT_SELECTORS_VERSION = Object.freeze(["0"]);
+
+const DEFAULT_SELECTORS_URL = DEFAULT_DOMAIN_NAME + "/selectors.json";
+
 const CLOSEME_LISTENER = {
 	waitingForResponse: false,
 	tabId: null,
@@ -18,6 +30,7 @@ const CLOSEME_LISTENER = {
 
 					this.waitingForResponse = false;
 					this.tabId = null;
+					return true;
 				}
 			}
 		}
@@ -25,6 +38,7 @@ const CLOSEME_LISTENER = {
 
 			sendResponse({closeme: false});
 		}
+		return false;
 	},
 	flush: function() {
 
@@ -37,7 +51,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
 	if (msg.text === "closeme?") {
 
-		CLOSEME_LISTENER.run(sender, sendResponse);
+		if (!CLOSEME_LISTENER.run(sender, sendResponse)) {
+
+			checkForUpdates(false);
+		}
 		return true;
 	}
 	else if (msg.text === "fetchhandles?") {
@@ -50,15 +67,25 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
 			setDefaultHandles(result.handles === undefined ? null : result.handlesversion).
 			then((version) => fetchHandles(result.handlesversionurl, result.handlesurl, version)).
-			then((success) => sendResponse({success: success}))
+			then(sendResponse);
 		});
 		return true;
 	}
 	else if (msg.text === "fetchselectors?") {
 
-		chrome.storage.local.get("selectorsurl", (result) => 
-			fetchSelectors(result.selectorsurl).then((success) =>
-				sendResponse({success: success})));
+		chrome.storage.local.get("selectorsurl", (result) => {
+
+			if (result.selectorsurl?.trimStart().startsWith(JSON_DATA_URL_PREFIX) === true) {
+
+				fetchSelectors(result.selectorsurl).then(sendResponse);
+			}
+			else {
+
+				setDefaultSelectors(parseSelectorsVersion(result.selectors)).
+				then((version) => fetchSelectors(result.selectorsurl, version)).
+				then(sendResponse);
+			}
+		});
 		return true;
 	}
 	else if (msg.text === "cachecheckmark!") {
@@ -106,16 +133,14 @@ function updateNeeded(currentVersionData, latestVersionData) {
 	const [latestVersion, latestMoniker = null] = latestVersionData;
 
 	// do not use new here
-	const monikerSame = (currentMoniker == null && latestMoniker == null) ||
-		(currentMoniker != null && latestMoniker != null &&
+	const monikerSame = (currentMoniker === null && latestMoniker === null) ||
+		(currentMoniker !== null && latestMoniker !== null &&
 			String(currentMoniker) === String(latestMoniker));
 
 	return !monikerSame || versionCompare(currentVersion, latestVersion) < 0;
 }
 
 async function setDefaultHandles(currentVersionData) {
-
-	const DEFAULT_HANDLES_VERSION = ["0"];
 
 	// skip when moniker is set or default version is not newer
 	if (currentVersionData != null &&
@@ -151,8 +176,6 @@ async function setDefaultHandles(currentVersionData) {
 }
 
 async function fetchHandlesVersion(versionURL) {
-
-	const DEFAULT_HANDLES_VERSION_URL = "https://original-birds.pages.dev/version.txt";
 
 	versionURL = (versionURL ?? DEFAULT_HANDLES_VERSION_URL).trim();
 
@@ -192,20 +215,18 @@ async function fetchHandlesVersion(versionURL) {
 
 async function fetchHandles(versionURL, handlesURL, currentVersionData) {
 
-	const DEFAULT_HANDLES_URL = "https://original-birds.pages.dev/verified_handles.txt";
-
 	handlesURL = (handlesURL ?? DEFAULT_HANDLES_URL).trim();
 
 	if (currentVersionData != null) {
 
 		const latestVersionData = await fetchHandlesVersion(versionURL);
-		if (latestVersionData == null) {
+		if (latestVersionData === null) {
 
-			return Promise.resolve(false);
+			return Promise.resolve({success: false});
 		}
 		if (!updateNeeded(currentVersionData, latestVersionData)) {
-	
-			return Promise.resolve(true);
+
+			return Promise.resolve({success: true});
 		}
 	}
 
@@ -218,7 +239,7 @@ async function fetchHandles(versionURL, handlesURL, currentVersionData) {
 			inputURL.username === "" && inputURL.password === "")) {
 
 			console.log("Warning: Original Birds encountered invalid handles URL.");
-			return Promise.resolve(false);
+			return Promise.resolve({success: false});
 		}
 
 		const response = await fetch(inputURL, {cache: "no-store", redirect: "error"});
@@ -230,7 +251,7 @@ async function fetchHandles(versionURL, handlesURL, currentVersionData) {
 				response.status +
 				"] retrieving the handles list."
 			);
-			return Promise.resolve(false);
+			return Promise.resolve({success: false});
 		}
 
 		data = await response.text();
@@ -239,7 +260,7 @@ async function fetchHandles(versionURL, handlesURL, currentVersionData) {
 
 		console.error(error);
 		console.log("Warning: Original Birds could not retrieve the latest handles list.");
-		return Promise.resolve(false);
+		return Promise.resolve({success: false});
 	}
 
 	const handles = data.split("\n").filter((str) => str !== "").map((str) => str.toLowerCase());
@@ -251,12 +272,41 @@ async function fetchHandles(versionURL, handlesURL, currentVersionData) {
 		handles: handles,
 		handlesversion: latestVersionData,
 		lasthandlesupdate: theDate.toJSON()
-	}, () => resolve(true)));
+	}, () => resolve({success: true})));
 }
 
-function setDefaultSelectors() {
+function parseSelectorsVersion(selectors) {
+
+	try {
+
+		const selectorsJSON = JSON.parse(selectors ?? "{}");
+		if (Array.isArray(selectorsJSON.version)) {
+
+			return selectorsJSON.version;
+		}
+	}
+	catch(error) {
+
+		console.error(error);
+		console.log("Warning: Original Birds failed to parse selectors version.");
+	}
+
+	return null;
+}
+
+function setDefaultSelectors(currentVersionData) {
+
+	// skip when moniker is set or default version is not newer
+	if (currentVersionData != null &&
+		(currentVersionData.length > 1 ||
+			!updateNeeded(currentVersionData, DEFAULT_SELECTORS_VERSION))) {
+
+		return Promise.resolve(currentVersionData);
+	}
 
 	const data = JSON.stringify({
+		version: DEFAULT_SELECTORS_VERSION,
+
 		verifiediconselector: 'svg[data-testid="icon-verified"]',
 
 		// targets user name on their profile/feed page
@@ -345,13 +395,10 @@ function setDefaultSelectors() {
 	return new Promise((resolve) => chrome.storage.local.set({
 		selectors: data,
 		lastlaunch: theDate.toJSON()
-	}, () => resolve(true)));
+	}, () => resolve(DEFAULT_SELECTORS_VERSION)));
 }
 
-async function fetchSelectors(selectorsURL) {
-
-	const DEFAULT_SELECTORS_URL = "https://original-birds.pages.dev/selectors.json";
-	const JSON_DATA_URL_PREFIX = "data:application/json;base64,";
+async function fetchSelectors(selectorsURL, currentVersionData) {
 
 	selectorsURL = (selectorsURL ?? DEFAULT_SELECTORS_URL).trim();
 
@@ -370,7 +417,7 @@ async function fetchSelectors(selectorsURL) {
 				inputURL.username === "" && inputURL.password === "")) {
 
 				console.log("Warning: Original Birds encountered invalid selectors URL.");
-				return Promise.resolve(false);
+				return Promise.resolve({success: false});
 			}
 
 			const response = await fetch(inputURL, {cache: "no-store", redirect: "error"});
@@ -382,27 +429,37 @@ async function fetchSelectors(selectorsURL) {
 					response.status +
 					"] retrieving the selectors."
 				);
-				return Promise.resolve(false);
+				return Promise.resolve({success: false});
 			}
 
 			data = await response.text();
 		}
-
-		// validate JSON
-		JSON.parse(data);
 	}
 	catch (error) {
 
 		console.error(error);
 		console.log("Warning: Original Birds could not retrieve the latest selectors.");
-		return false;
+		return Promise.resolve({success: false});
+	}
+
+	// also validates JSON
+	const latestVersionData = parseSelectorsVersion(data);
+	if (latestVersionData === null) {
+
+		return Promise.resolve({success: false});
+	}
+	if (!updateNeeded(currentVersionData, latestVersionData)) {
+
+		return Promise.resolve({success: true});
 	}
 
 	const theDate = new Date();
 	theDate.setHours(0,0,0,0);
 
-	chrome.storage.local.set({selectors: data, lastlaunch: theDate.toJSON()});
-	return true;
+	return new Promise((resolve) => chrome.storage.local.set({
+		selectors: data,
+		lastlaunch: theDate.toJSON()
+	}, () => resolve({success: true})));
 }
 
 async function fetchSupporters() {
@@ -423,6 +480,8 @@ async function fetchSupporters() {
 		}
 
 		const data = await response.text();
+		// validate JSON
+		JSON.parse(data);
 
 		const theDate = new Date();
 		theDate.setHours(0,0,0,0);
@@ -446,7 +505,7 @@ function freq2millis(freq) {
 	);
 }
 
-function checkForUpdates() {
+function checkForUpdates(onInstall = true) {
 
 	chrome.storage.local.get([
 		"checkmark", "handles", "selectors", "supporters",
@@ -463,7 +522,8 @@ function checkForUpdates() {
 		const LAST_TWITTER_UPDATE = new Date("2023-04-22T16:00:00.000Z");
 		result.lastcheckmarkupdate ??= new Date("2023-04-26T16:00:00.000Z");
 
-		if (result.checkmark === undefined ||
+		if (onInstall ||
+			result.checkmark === undefined ||
 			// check if last Twitter update is newer than when checkmark was last retrieved
 			LAST_TWITTER_UPDATE >= result.lastcheckmarkupdate) {
 
@@ -473,7 +533,8 @@ function checkForUpdates() {
 		result.handlesfrequency ??= "weekly";
 		result.handlesversion ??= ["0"];
 
-		if (result.handles === undefined ||
+		if (onInstall ||
+			result.handles === undefined ||
 			result.lasthandlesupdate === undefined ||
 			Math.abs(theDate - new Date(result.lasthandlesupdate)) >= freq2millis(result.handlesfrequency)) {
 
@@ -481,16 +542,20 @@ function checkForUpdates() {
 			then((version) => fetchHandles(result.handlesversionurl, result.handlesurl, version));
 		}
 
-		const overdue = result.lastlaunch === undefined ||
-			Math.abs(theDate - new Date(result.lastlaunch)) >= freq2millis("daily");
+		const overdue = (
+			onInstall ||
+			result.lastlaunch === undefined ||
+			Math.abs(theDate - new Date(result.lastlaunch)) >= freq2millis("daily")
+		);
 
-		if (result.selectors === undefined) {
-
-			setDefaultSelectors().then((_) => fetchSelectors(result.selectorsurl));
-		}
-		else if (overdue) {
+		if (result.selectorsurl?.trimStart().startsWith(JSON_DATA_URL_PREFIX) === true) {
 
 			fetchSelectors(result.selectorsurl);
+		}
+		else if (result.selectors === undefined || overdue) {
+
+			setDefaultSelectors(parseSelectorsVersion(result.selectors)).
+			then((version) => fetchSelectors(result.selectorsurl, version));
 		}
 
 		// BEGIN SUPPORTER SECTION

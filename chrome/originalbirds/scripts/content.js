@@ -10,8 +10,8 @@ const CHECKMARK_LOCATION = Object.freeze({
 	BIO: 1
 });
 
-const DONOR_STYLE = Object.freeze({"namecolor": "#FFDB98"});
-const CONTRIBUTOR_STYLE = Object.freeze({"namecolor": "#FFCDFF"});
+const DONOR_STYLE = Object.freeze({"namecolor": "#FFA500"});
+const CONTRIBUTOR_STYLE = Object.freeze({"namecolor": "#7B68EE"});
 
 function waitForElement(selector) {
 
@@ -45,7 +45,7 @@ function setCheckmark(targetElement) {
 	return new Promise((resolve) => chrome.storage.local.set({
 		checkmark: DOMPurify.sanitize(targetElement.outerHTML),
 		lastcheckmarkupdate: theDate.toJSON()
-	}, () => resolve(null)));
+	}, resolve));
 }
 
 function getProperties(keys) {
