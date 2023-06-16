@@ -1,6 +1,10 @@
 const JSON_DATA_URL_PREFIX = "data:application/json;base64,";
 const DEFAULT_DOMAIN_NAME = "https://original-birds.pages.dev";
 
+// this is not a true value,
+// rather it is used to force a checkmark cache if an update deems it necessary.
+const LAST_TWITTER_UPDATE = new Date("2023-04-22T16:00:00.000Z");
+
 const DEFAULT_HANDLES_VERSION = Object.freeze(["0"]);
 
 const DEFAULT_HANDLES_VERSION_URL = DEFAULT_DOMAIN_NAME + "/version.txt";
@@ -9,6 +13,8 @@ const DEFAULT_HANDLES_URL = DEFAULT_DOMAIN_NAME + "/verified_handles.txt";
 const DEFAULT_SELECTORS_VERSION = Object.freeze(["0"]);
 
 const DEFAULT_SELECTORS_URL = DEFAULT_DOMAIN_NAME + "/selectors.json";
+
+const SUPPORTERS_URL = DEFAULT_DOMAIN_NAME + "/supporters.json";
 
 const CLOSEME_LISTENER = {
 	waitingForResponse: false,
@@ -51,6 +57,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
 	if (msg.text === "closeme?") {
 
+		// checkForUpdates calls cacheCheckmark which indirectly sends this message
+		// this check prevents an infinite loop
 		if (!CLOSEME_LISTENER.run(sender, sendResponse)) {
 
 			checkForUpdates(false);
@@ -73,7 +81,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 	}
 	else if (msg.text === "fetchselectors?") {
 
-		chrome.storage.local.get("selectorsurl", (result) => {
+		chrome.storage.local.get(["selectors", "selectorsurl"], (result) => {
 
 			if (result.selectorsurl?.trimStart().startsWith(JSON_DATA_URL_PREFIX) === true) {
 
@@ -94,6 +102,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 	}
 	return false;
 });
+
+chrome.runtime.onInstalled.addListener(checkForUpdates);
 
 function cacheCheckmark() {
 
@@ -177,11 +187,9 @@ async function setDefaultHandles(currentVersionData) {
 
 async function fetchHandlesVersion(versionURL) {
 
-	versionURL = (versionURL ?? DEFAULT_HANDLES_VERSION_URL).trim();
-
 	try {
 
-		const inputURL = new URL(versionURL);
+		const inputURL = new URL(versionURL ?? DEFAULT_HANDLES_VERSION_URL);
 
 		if (!(inputURL.protocol === "https:" && inputURL.search === "" &&
 			inputURL.username === "" && inputURL.password === "")) {
@@ -215,25 +223,20 @@ async function fetchHandlesVersion(versionURL) {
 
 async function fetchHandles(versionURL, handlesURL, currentVersionData) {
 
-	handlesURL = (handlesURL ?? DEFAULT_HANDLES_URL).trim();
+	const latestVersionData = await fetchHandlesVersion(versionURL);
+	if (latestVersionData === null) {
 
-	if (currentVersionData != null) {
+		return Promise.resolve({success: false});
+	}
+	if (currentVersionData != null && !updateNeeded(currentVersionData, latestVersionData)) {
 
-		const latestVersionData = await fetchHandlesVersion(versionURL);
-		if (latestVersionData === null) {
-
-			return Promise.resolve({success: false});
-		}
-		if (!updateNeeded(currentVersionData, latestVersionData)) {
-
-			return Promise.resolve({success: true});
-		}
+		return Promise.resolve({success: true});
 	}
 
 	let data;
 	try {
 
-		const inputURL = new URL(handlesURL);
+		const inputURL = new URL(handlesURL ?? DEFAULT_HANDLES_URL);
 
 		if (!(inputURL.protocol === "https:" && inputURL.search === "" &&
 			inputURL.username === "" && inputURL.password === "")) {
@@ -433,6 +436,18 @@ async function fetchSelectors(selectorsURL, currentVersionData) {
 			}
 
 			data = await response.text();
+
+			// only perform version check when not using data URL
+			// also validates JSON
+			const latestVersionData = parseSelectorsVersion(data);
+			if (latestVersionData === null) {
+
+				return Promise.resolve({success: false});
+			}
+			if (currentVersionData != null && !updateNeeded(currentVersionData, latestVersionData)) {
+
+				return Promise.resolve({success: true});
+			}
 		}
 	}
 	catch (error) {
@@ -440,17 +455,6 @@ async function fetchSelectors(selectorsURL, currentVersionData) {
 		console.error(error);
 		console.log("Warning: Original Birds could not retrieve the latest selectors.");
 		return Promise.resolve({success: false});
-	}
-
-	// also validates JSON
-	const latestVersionData = parseSelectorsVersion(data);
-	if (latestVersionData === null) {
-
-		return Promise.resolve({success: false});
-	}
-	if (!updateNeeded(currentVersionData, latestVersionData)) {
-
-		return Promise.resolve({success: true});
 	}
 
 	const theDate = new Date();
@@ -466,8 +470,7 @@ async function fetchSupporters() {
 
 	try {
 
-		const response = await fetch("https://original-birds.pages.dev/supporters.json",
-			{cache: "no-store", redirect: "error"});
+		const response = await fetch(SUPPORTERS_URL, {cache: "no-store", redirect: "error"});
 
 		if (!response.ok) {
 
@@ -480,6 +483,7 @@ async function fetchSupporters() {
 		}
 
 		const data = await response.text();
+
 		// validate JSON
 		JSON.parse(data);
 
@@ -517,13 +521,11 @@ function checkForUpdates(onInstall = true) {
 		const theDate = new Date();
 		theDate.setHours(0,0,0,0);
 
-		// this is not a true value,
-		// rather it is used to force a checkmark cache if an update deems it necessary.
-		const LAST_TWITTER_UPDATE = new Date("2023-04-22T16:00:00.000Z");
 		result.lastcheckmarkupdate ??= new Date("2023-04-26T16:00:00.000Z");
 
-		if (onInstall ||
-			result.checkmark === undefined ||
+		// don't check onInstall here because this action is obtrusive
+		// and this condition already checks the version
+		if (result.checkmark === undefined ||
 			// check if last Twitter update is newer than when checkmark was last retrieved
 			LAST_TWITTER_UPDATE >= result.lastcheckmarkupdate) {
 
@@ -568,5 +570,3 @@ function checkForUpdates(onInstall = true) {
 		// END SUPPORTER SECTION
 	});
 }
-
-chrome.runtime.onInstalled.addListener(checkForUpdates);
