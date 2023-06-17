@@ -669,29 +669,7 @@ class CheckmarkManager {
 	}
 }
 
-async function checkmarkManagerFactory() {
-
-	const properties = await getProperties([
-		"checkmark", "handles", "selectors", "showblue", "showlegacy", "bluelook", "legacylook",
-		"bluecolor", "legacycolor", "bluetext", "legacytext", "blueimage", "legacyimage",
-		"invocations", "polldelay", "supporters"
-	]);
-
-	if (properties.selectors === undefined) {
-
-		console.error("Original Birds could not load selectors.");
-		return null;
-	}
-	if (properties.handles === undefined) {
-
-		console.error("Original Birds could not load verified handles.");
-		return null;
-	}
-	if (properties.checkmark === undefined) {
-
-		console.error("Original Birds could not load checkmark.");
-		return null;
-	}
+function validateSelectors(selectorsJSON) {
 
 	const selectorValid = ((dummyElement) => (selector) => {
 
@@ -753,10 +731,9 @@ async function checkmarkManagerFactory() {
 		return true;
 	}
 
-	let selectors;
 	try {
 
-		selectors = JSON.parse(properties.selectors);
+		const selectors = JSON.parse(selectorsJSON);
 
 		if (selectors.verifiediconselector != null && !selectorValid(selectors.verifiediconselector)) {
 
@@ -795,11 +772,44 @@ async function checkmarkManagerFactory() {
 			console.log("Warning: Original Birds encounted unexpected selectors type.");
 			selectors.selectors = [];
 		}
+
+		return selectors;
 	}
 	catch (error) {
 
-		console.error("Original Birds could not load selectors.");
 		console.error(error);
+		return null;
+	}
+}
+
+async function checkmarkManagerFactory() {
+
+	const properties = await getProperties([
+		"checkmark", "handles", "selectors", "showblue", "showlegacy", "bluelook", "legacylook",
+		"bluecolor", "legacycolor", "bluetext", "legacytext", "blueimage", "legacyimage",
+		"invocations", "polldelay", "supporters"
+	]);
+
+	if (properties.selectors === undefined) {
+
+		console.error("Original Birds could not load selectors.");
+		return null;
+	}
+	if (properties.handles === undefined) {
+
+		console.error("Original Birds could not load verified handles.");
+		return null;
+	}
+	if (properties.checkmark === undefined) {
+
+		console.error("Original Birds could not load checkmark.");
+		return null;
+	}
+
+	const selectors = validateSelectors(properties.selectors);
+	if (selectors === null) {
+
+		console.error("Original Birds could not load selectors.");
 		return null;
 	}
 
@@ -819,12 +829,43 @@ async function checkmarkManagerFactory() {
 	return new CheckmarkManager(selectors, verifiedHandles, checkHtml, properties);
 }
 
-function registerRecurringObserver(manager) {
+function listenForUpdates(manager) {
 
-	if (manager === null) {
+	function updateListener(changes) {
 
-		return;
+		if (changes.selectors?.newValue !== undefined) {
+
+			const selectors = validateSelectors(changes.selectors.newValue);
+			if (selectors !== null) {
+
+				manager.selectors = selectors;
+			}
+		}
+		if (changes.handles?.newValue !== undefined) {
+
+			manager.verifiedHandles = new Set(changes.handles.newValue);
+		}
 	}
+
+	chrome.runtime.sendMessage({text: "checkforupdates?"}, (response) => {
+
+		// console.log("hi" + response.checkingupdates);
+		if (response.checkingupdates) {
+
+			chrome.storage.local.onChanged.addListener(updateListener);
+			window.setTimeout(() =>
+				chrome.storage.local.onChanged.removeListener(updateListener), 90 * 1000);
+			/* window.setTimeout(() => {
+
+				console.log(chrome.storage.local.onChanged.hasListener(updateListener));
+				console.log("hello world");
+				chrome.storage.local.onChanged.removeListener(updateListener);
+			}, 90 * 1000);*/
+		}
+	});
+}
+
+function registerRecurringObserver(manager) {
 
 	var invocations = manager.invocations;
 	var stopped = false;
@@ -872,6 +913,57 @@ chrome.runtime.sendMessage({text: "closeme?"}, (response) => {
 	}
 	else {
 
-		checkmarkManagerFactory().then(registerRecurringObserver);
+		checkmarkManagerFactory().then((manager) => {
+
+			if (manager !== null) {
+
+				listenForUpdates(manager);
+				registerRecurringObserver(manager);
+			}
+		});
 	}
 });
+
+/*
+function registerStorageListener(manager) {
+
+	chrome.storage.local.onChanged.addListener((changes) => {
+
+		if (manager === null) {
+
+			if (changes.handles !== undefined || changes.selectors !== undefined) {
+
+				checkmarkManagerFactory().then((m) => {
+
+					// prevents possible race condition?
+					if (manager === null) {
+
+						manager = m;
+						registerRecurringObserver(manager);
+					}
+				});
+			}
+		}
+		else {
+
+			if (changes.selectors?.newValue !== undefined) {
+
+				const selectors = validateSelectors(changes.selectors.newValue);
+				if (selectors !== null) {
+
+					manager.selectors = selectors;
+				}
+			}
+			if (changes.handles?.newValue !== undefined) {
+
+				manager.handles = new Set(changes.handles.newValue);
+			}
+		}
+	});
+
+	if (manager !== null) {
+
+		registerRecurringObserver(manager);
+	}
+}
+*/

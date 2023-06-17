@@ -36,7 +36,6 @@ const CLOSEME_LISTENER = {
 
 					this.waitingForResponse = false;
 					this.tabId = null;
-					return true;
 				}
 			}
 		}
@@ -44,7 +43,6 @@ const CLOSEME_LISTENER = {
 
 			sendResponse({closeme: false});
 		}
-		return false;
 	},
 	flush: function() {
 
@@ -53,14 +51,21 @@ const CLOSEME_LISTENER = {
 	}
 };
 
+let updatesChecked = false;
+
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
 	if (msg.text === "closeme?") {
 
-		// checkForUpdates calls cacheCheckmark which indirectly sends this message
-		// this check prevents an infinite loop
-		if (!CLOSEME_LISTENER.run(sender, sendResponse)) {
+		CLOSEME_LISTENER.run(sender, sendResponse);
+		return true;
+	}
+	if (msg.text === "checkforupdates?") {
 
+		sendResponse({checkingupdates: !updatesChecked});
+		if (!updatesChecked) {
+
+			updatesChecked = true;
 			checkForUpdates(false);
 		}
 		return true;
@@ -278,14 +283,14 @@ async function fetchHandles(versionURL, handlesURL, currentVersionData) {
 	}, () => resolve({success: true})));
 }
 
-function parseSelectorsVersion(selectors) {
+function parseSelectorsVersion(selectorsJSON) {
 
 	try {
 
-		const selectorsJSON = JSON.parse(selectors ?? "{}");
-		if (Array.isArray(selectorsJSON.version)) {
+		const selectors = JSON.parse(selectorsJSON ?? "{}");
+		if (Array.isArray(selectors.version)) {
 
-			return selectorsJSON.version;
+			return selectors.version;
 		}
 	}
 	catch(error) {
@@ -401,7 +406,7 @@ function setDefaultSelectors(currentVersionData) {
 	}, () => resolve(DEFAULT_SELECTORS_VERSION)));
 }
 
-async function fetchSelectors(selectorsURL, currentVersionData) {
+async function fetchSelectors(selectorsURL, currentVersionData = null) {
 
 	selectorsURL = (selectorsURL ?? DEFAULT_SELECTORS_URL).trim();
 
@@ -444,7 +449,7 @@ async function fetchSelectors(selectorsURL, currentVersionData) {
 
 				return Promise.resolve({success: false});
 			}
-			if (currentVersionData != null && !updateNeeded(currentVersionData, latestVersionData)) {
+			if (currentVersionData !== null && !updateNeeded(currentVersionData, latestVersionData)) {
 
 				return Promise.resolve({success: true});
 			}
