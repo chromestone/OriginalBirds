@@ -12,7 +12,17 @@ const CHECKMARK_LOCATION = Object.freeze({
 
 const DONOR_STYLE = Object.freeze({"namecolor": "#FFA500"});
 const CONTRIBUTOR_STYLE = Object.freeze({"namecolor": "#7B68EE"});
+/*
+chrome.runtime.onMessage.addListener((msg, _, sendResponse) => {
 
+	if (msg.text === "alive?") {
+
+		sendResponse({alive: true});
+		return true;
+	}
+	return false;
+});
+*/
 function waitForElement(selector) {
 
 	return new Promise((resolve) => {
@@ -803,6 +813,7 @@ async function checkmarkManagerFactory() {
 	if (properties.checkmark === undefined) {
 
 		console.error("Original Birds could not load checkmark.");
+		chrome.runtime.sendMessage({text: "cachecheckmark!"});
 		return null;
 	}
 
@@ -849,18 +860,11 @@ function listenForUpdates(manager) {
 
 	chrome.runtime.sendMessage({text: "checkforupdates?"}, (response) => {
 
-		// console.log("hi" + response.checkingupdates);
 		if (response.checkingupdates) {
 
 			chrome.storage.local.onChanged.addListener(updateListener);
 			window.setTimeout(() =>
 				chrome.storage.local.onChanged.removeListener(updateListener), 90 * 1000);
-			/* window.setTimeout(() => {
-
-				console.log(chrome.storage.local.onChanged.hasListener(updateListener));
-				console.log("hello world");
-				chrome.storage.local.onChanged.removeListener(updateListener);
-			}, 90 * 1000);*/
 		}
 	});
 }
@@ -909,7 +913,7 @@ chrome.runtime.sendMessage({text: "closeme?"}, (response) => {
 	// go to page known to contain checkmark and cache it
 	if (response.closeme) {
 
-		waitForElement(CHECK_SELECTOR).then(setCheckmark).then((_) => window.close());
+		waitForElement(CHECK_SELECTOR).then(setCheckmark).then(window.close);
 	}
 	else {
 
@@ -923,47 +927,3 @@ chrome.runtime.sendMessage({text: "closeme?"}, (response) => {
 		});
 	}
 });
-
-/*
-function registerStorageListener(manager) {
-
-	chrome.storage.local.onChanged.addListener((changes) => {
-
-		if (manager === null) {
-
-			if (changes.handles !== undefined || changes.selectors !== undefined) {
-
-				checkmarkManagerFactory().then((m) => {
-
-					// prevents possible race condition?
-					if (manager === null) {
-
-						manager = m;
-						registerRecurringObserver(manager);
-					}
-				});
-			}
-		}
-		else {
-
-			if (changes.selectors?.newValue !== undefined) {
-
-				const selectors = validateSelectors(changes.selectors.newValue);
-				if (selectors !== null) {
-
-					manager.selectors = selectors;
-				}
-			}
-			if (changes.handles?.newValue !== undefined) {
-
-				manager.handles = new Set(changes.handles.newValue);
-			}
-		}
-	});
-
-	if (manager !== null) {
-
-		registerRecurringObserver(manager);
-	}
-}
-*/

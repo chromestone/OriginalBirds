@@ -16,11 +16,26 @@ const DEFAULT_SELECTORS_URL = DEFAULT_DOMAIN_NAME + "/selectors.json";
 
 const SUPPORTERS_URL = DEFAULT_DOMAIN_NAME + "/supporters.json";
 
-const CLOSEME_LISTENER = {
+const CHECKMARK_RESOURCE_MANAGER = {
 	waitingForResponse: false,
 	tabId: null,
 	callbacks: [],
-	run: function(sender, sendResponse) {
+	timeoutId: null,
+	// 5 seconds should be enough time for page load and storage set to complete
+	patience: 5000,
+	stopWaiting: function() {
+
+		clearTimeout(this.timeoutId);
+
+		this.timeoutId = setTimeout(() => {
+
+			this.waitingForResponse = false;
+			this.tabId = null;
+
+			this.patience *= 2;
+		}, this.patience);
+	},
+	listener: function(sender, sendResponse) {
 
 		if (this.waitingForResponse) {
 
@@ -34,8 +49,7 @@ const CLOSEME_LISTENER = {
 				sendResponse({closeme: closeme});
 				if (closeme) {
 
-					this.waitingForResponse = false;
-					this.tabId = null;
+					this.stopWaiting();
 				}
 			}
 		}
@@ -44,20 +58,40 @@ const CLOSEME_LISTENER = {
 			sendResponse({closeme: false});
 		}
 	},
-	flush: function() {
+	cacheCheckmark: async function() {
 
-		this.callbacks.forEach((theArgs) => this.run(...theArgs));
+		if (this.waitingForResponse) {
+	
+			return;
+		}
+		this.waitingForResponse = true;
+
+		const tab = await chrome.tabs.create({url: "https://twitter.com/elonmusk", active: false});
+
+		this.tabId = tab.id;
+
+		// if the previous line does not outpace the content script's request
+		// then clearing the backlog handles it
+		this.callbacks.forEach((theArgs) => this.listener(...theArgs));
 		this.callbacks = [];
 	}
 };
 
 let updatesChecked = false;
+/*
+function handleUpdated(tabId, changeInfo, tabInfo) {
+console.log(`Updated tab: ${tabId}`);
+console.log("Changed attributes: ", changeInfo);
+console.log("New tab Info: ", tabInfo);
+}
 
+chrome.tabs.onUpdated.addListener(handleUpdated);  
+*/
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
 	if (msg.text === "closeme?") {
 
-		CLOSEME_LISTENER.run(sender, sendResponse);
+		CHECKMARK_RESOURCE_MANAGER.listener(sender, sendResponse);
 		return true;
 	}
 	if (msg.text === "checkforupdates?") {
@@ -103,29 +137,12 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 	}
 	else if (msg.text === "cachecheckmark!") {
 
-		cacheCheckmark();
+		CHECKMARK_RESOURCE_MANAGER.cacheCheckmark();
 	}
 	return false;
 });
 
 chrome.runtime.onInstalled.addListener(checkForUpdates);
-
-function cacheCheckmark() {
-
-	if (CLOSEME_LISTENER.waitingForResponse) {
-
-		return;
-	}
-	CLOSEME_LISTENER.waitingForResponse = true;
-
-	chrome.tabs.create({url: "https://twitter.com/elonmusk", active: false}, (tab) => {
-
-		CLOSEME_LISTENER.tabId = tab.id;
-		// if the previous line does not outpace the content script's request
-		// then clearing the backlog handles it
-		CLOSEME_LISTENER.flush();
-	});
-}
 
 function versionCompare(versionA, versionB) {
 
@@ -534,7 +551,7 @@ function checkForUpdates(onInstall = true) {
 			// check if last Twitter update is newer than when checkmark was last retrieved
 			LAST_TWITTER_UPDATE >= result.lastcheckmarkupdate) {
 
-			cacheCheckmark();
+			CHECKMARK_RESOURCE_MANAGER.cacheCheckmark();
 		}
 
 		result.handlesfrequency ??= "weekly";
