@@ -29,9 +29,15 @@ const CHECKMARK_RESOURCE_MANAGER = {
 
 		this.timeoutId = setTimeout(() => {
 
+			if (this.tabId !== null) {
+
+				chrome.tabs.remove(this.tabId).catch((error) => console.log(error.message));
+			}
+
 			this.waitingForResponse = false;
 			this.tabId = null;
 
+			// exponentially increase waiting time
 			this.patience *= 2;
 		}, this.patience);
 	},
@@ -61,7 +67,7 @@ const CHECKMARK_RESOURCE_MANAGER = {
 	cacheCheckmark: async function() {
 
 		if (this.waitingForResponse) {
-	
+
 			return;
 		}
 		this.waitingForResponse = true;
@@ -69,24 +75,24 @@ const CHECKMARK_RESOURCE_MANAGER = {
 		const tab = await chrome.tabs.create({url: "https://twitter.com/elonmusk", active: false});
 
 		this.tabId = tab.id;
+		// this check is probably not necessary
+		if (this.tabId == null) {
+
+			this.waitingForResponse = false;
+			return;
+		}
 
 		// if the previous line does not outpace the content script's request
 		// then clearing the backlog handles it
 		this.callbacks.forEach((theArgs) => this.listener(...theArgs));
 		this.callbacks = [];
+
+		this.stopWaiting();
 	}
 };
 
 let updatesChecked = false;
-/*
-function handleUpdated(tabId, changeInfo, tabInfo) {
-console.log(`Updated tab: ${tabId}`);
-console.log("Changed attributes: ", changeInfo);
-console.log("New tab Info: ", tabInfo);
-}
 
-chrome.tabs.onUpdated.addListener(handleUpdated);  
-*/
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
 	if (msg.text === "closeme?") {
@@ -524,10 +530,10 @@ async function fetchSupporters() {
 function freq2millis(freq) {
 
 	return (
-		freq === "daily"    ?       24 * 60 * 60 * 1000 :
-		freq === "weekly"   ?   7 * 24 * 60 * 60 * 1000 :
-		freq === "monthly"  ?  28 * 24 * 60 * 60 * 1000 :
-		freq === "yearly"   ? 365 * 24 * 60 * 60 * 1000 : Infinity
+		freq === "daily"   ?       24 * 60 * 60 * 1000 :
+		freq === "weekly"  ?   7 * 24 * 60 * 60 * 1000 :
+		freq === "monthly" ?  28 * 24 * 60 * 60 * 1000 :
+		freq === "yearly"  ? 365 * 24 * 60 * 60 * 1000 : Infinity
 	);
 }
 

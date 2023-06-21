@@ -1,3 +1,9 @@
+const STORAGE_KEYS = [
+	"checkmark", "handles", "selectors", "showblue", "showlegacy", "bluelook", "legacylook",
+	"bluecolor", "legacycolor", "bluetext", "legacytext", "blueimage", "legacyimage",
+	"invocations", "polldelay", "supporters"
+];
+
 // checkmark selector to get html with checkmark svg
 const CHECK_SELECTOR = 'div[data-testid="UserName"] > ' + '* > '.repeat(4) + '[dir] > ' + '* > '.repeat(4) + ':nth-child(1)';
 
@@ -12,17 +18,7 @@ const CHECKMARK_LOCATION = Object.freeze({
 
 const DONOR_STYLE = Object.freeze({"namecolor": "#FFA500"});
 const CONTRIBUTOR_STYLE = Object.freeze({"namecolor": "#7B68EE"});
-/*
-chrome.runtime.onMessage.addListener((msg, _, sendResponse) => {
 
-	if (msg.text === "alive?") {
-
-		sendResponse({alive: true});
-		return true;
-	}
-	return false;
-});
-*/
 function waitForElement(selector) {
 
 	return new Promise((resolve) => {
@@ -792,13 +788,7 @@ function validateSelectors(selectorsJSON) {
 	}
 }
 
-async function checkmarkManagerFactory() {
-
-	const properties = await getProperties([
-		"checkmark", "handles", "selectors", "showblue", "showlegacy", "bluelook", "legacylook",
-		"bluecolor", "legacycolor", "bluetext", "legacytext", "blueimage", "legacyimage",
-		"invocations", "polldelay", "supporters"
-	]);
+function checkmarkManagerFactory(properties) {
 
 	if (properties.selectors === undefined) {
 
@@ -813,7 +803,6 @@ async function checkmarkManagerFactory() {
 	if (properties.checkmark === undefined) {
 
 		console.error("Original Birds could not load checkmark.");
-		chrome.runtime.sendMessage({text: "cachecheckmark!"});
 		return null;
 	}
 
@@ -908,22 +897,54 @@ function registerRecurringObserver(manager) {
 	observer.observe(document.body, {childList: true, subtree: true});
 }
 
+// calls the backend and waits up to 90 seconds for checkmark to appear in storage
+function waitForCheckmark() {
+
+	function checkmarkListener(changes) {
+
+		if (changes.checkmark?.newValue !== undefined) {
+
+			chrome.storage.local.get(STORAGE_KEYS).then((result) => {
+
+				const manager = checkmarkManagerFactory(result);
+				if (manager !== null) {
+		
+					listenForUpdates(manager);
+					registerRecurringObserver(manager);
+				}
+			});
+		}
+	}
+
+	chrome.storage.local.onChanged.addListener(checkmarkListener);
+	chrome.runtime.sendMessage({text: "cachecheckmark!"});
+	window.setTimeout(() =>
+		chrome.storage.local.onChanged.removeListener(checkmarkListener), 90 * 1000);
+}
+
 chrome.runtime.sendMessage({text: "closeme?"}, (response) => {
 
 	// go to page known to contain checkmark and cache it
 	if (response.closeme) {
 
 		waitForElement(CHECK_SELECTOR).then(setCheckmark).then(window.close);
+		return;
 	}
-	else {
 
-		checkmarkManagerFactory().then((manager) => {
+	chrome.storage.local.get(STORAGE_KEYS).then((result) => {
 
-			if (manager !== null) {
+		if (result.checkmark === undefined) {
 
-				listenForUpdates(manager);
-				registerRecurringObserver(manager);
-			}
-		});
-	}
+			console.log("Warning: Original Birds has no checkmark.");
+			waitForCheckmark();
+			return;
+		}
+
+		const manager = checkmarkManagerFactory(result);
+		if (manager !== null) {
+
+			listenForUpdates(manager);
+			registerRecurringObserver(manager);
+		}
+	});
 });
