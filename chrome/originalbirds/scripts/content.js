@@ -48,15 +48,10 @@ function setCheckmark(targetElement) {
 	const theDate = new Date();
 	theDate.setHours(0,0,0,0);
 
-	return new Promise((resolve) => chrome.storage.local.set({
+	return chrome.storage.local.set({
 		checkmark: DOMPurify.sanitize(targetElement.outerHTML),
 		lastcheckmarkupdate: theDate.toJSON()
-	}, resolve));
-}
-
-function getProperties(keys) {
-
-	return new Promise((resolve) => chrome.storage.local.get(keys, resolve));
+	});
 }
 
 function myRandomId() {
@@ -840,6 +835,10 @@ function listenForUpdates(manager) {
 
 				manager.selectors = selectors;
 			}
+			else {
+
+				console.log("Warning: Original Birds failed to update selectors.");
+			}
 		}
 		if (changes.handles?.newValue !== undefined) {
 
@@ -847,7 +846,7 @@ function listenForUpdates(manager) {
 		}
 	}
 
-	chrome.runtime.sendMessage({text: "checkforupdates?"}, (response) => {
+	chrome.runtime.sendMessage({text: "checkforupdates?"}).then((response) => {
 
 		if (response.checkingupdates) {
 
@@ -858,7 +857,7 @@ function listenForUpdates(manager) {
 	});
 }
 
-function registerRecurringObserver(manager) {
+function registerObserver(manager) {
 
 	var invocations = manager.invocations;
 	var stopped = false;
@@ -910,7 +909,7 @@ function waitForCheckmark() {
 				if (manager !== null) {
 		
 					listenForUpdates(manager);
-					registerRecurringObserver(manager);
+					registerObserver(manager);
 				}
 			});
 		}
@@ -922,6 +921,7 @@ function waitForCheckmark() {
 		chrome.storage.local.onChanged.removeListener(checkmarkListener), 90 * 1000);
 }
 
+// entry point
 chrome.runtime.sendMessage({text: "closeme?"}, (response) => {
 
 	// go to page known to contain checkmark and cache it
@@ -944,7 +944,7 @@ chrome.runtime.sendMessage({text: "closeme?"}, (response) => {
 		if (manager !== null) {
 
 			listenForUpdates(manager);
-			registerRecurringObserver(manager);
+			registerObserver(manager);
 		}
 	});
 });

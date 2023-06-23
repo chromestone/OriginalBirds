@@ -19,43 +19,30 @@ const SUPPORTERS_URL = DEFAULT_DOMAIN_NAME + "/supporters.json";
 const CHECKMARK_RESOURCE_MANAGER = {
 	waitingForResponse: false,
 	tabId: null,
+	resolve: null,
 	callbacks: [],
-	timeoutId: null,
 	// 5 seconds should be enough time for page load and storage set to complete
 	patience: 5000,
-	stopWaiting: function() {
-
-		clearTimeout(this.timeoutId);
-
-		this.timeoutId = setTimeout(() => {
-
-			if (this.tabId !== null) {
-
-				chrome.tabs.remove(this.tabId).catch((error) => console.log(error.message));
-			}
-
-			this.waitingForResponse = false;
-			this.tabId = null;
-
-			// exponentially increase waiting time
-			this.patience *= 2;
-		}, this.patience);
-	},
 	listener: function(sender, sendResponse) {
 
 		if (this.waitingForResponse) {
 
-			if (this.tabId == null) {
+			if (this.tabId === null) {
 
 				this.callbacks.push([sender, sendResponse]);
 			}
 			else {
 
-				const closeme = sender.tab.id === this.tabId;
-				sendResponse({closeme: closeme});
-				if (closeme) {
+				sendResponse({closeme: sender.tab.id === this.tabId});
+				if (this.resolve !== null) {
 
-					this.stopWaiting();
+					this.resolve();
+				}
+				else {
+
+					console.log("Warning: Original Birds encountered an unexpected state caching checkmark.");
+					this.waitingForResponse = true;
+					this.tabId = null;
 				}
 			}
 		}
@@ -72,22 +59,57 @@ const CHECKMARK_RESOURCE_MANAGER = {
 		}
 		this.waitingForResponse = true;
 
-		const tab = await chrome.tabs.create({url: "https://twitter.com/elonmusk", active: false});
+		for (let i = 0; i < 3; i++) {
 
-		this.tabId = tab.id;
-		// this check is probably not necessary
-		if (this.tabId == null) {
+			const resolvePromise = new Promise((resolve, reject) =>
+				chrome.tabs.create({url: "https://twitter.com/elonmusk", active: false}).
+				then((tab) => {
 
-			this.waitingForResponse = false;
-			return;
+					// this check is probably not necessary
+					if (tab.id == null) {
+
+						reject(new Error("Warning: Original Birds got nullish id from tabs.create."));
+					}
+					this.tabId = tab.id;
+					this.resolve = resolve;
+
+					// if setting the tabId does not outpace the content script's request
+					// then clearing the backlog handles it
+					this.callbacks.forEach((theArgs) => this.listener(...theArgs));
+					this.callbacks = [];
+				})
+			);
+
+			const rejectPromise = new Promise((_, reject) =>
+				setTimeout(() =>
+					reject(new Error("Warning: Original Birds timed out trying to cache checkmark.")), this.patience)
+			);
+
+			try {
+
+				await Promise.race([resolvePromise, rejectPromise]);
+				// After we confirm content script has loaded, we wait again to account for
+				// page load. This gives the content script time to find and set the
+				// checkmark before this function is called again.
+				setTimeout(() => {
+
+					if (this.tabId !== null) {
+
+						chrome.tabs.remove(this.tabId).catch((error) => console.log(error.message));
+					}
+
+					this.waitingForResponse = false;
+					this.tabId = null;
+					this.resolve = null;
+				}, this.patience);
+				return;
+			}
+			catch(error) {
+
+				console.log(error.message);
+				this.patience *= 2;
+			}
 		}
-
-		// if the previous line does not outpace the content script's request
-		// then clearing the backlog handles it
-		this.callbacks.forEach((theArgs) => this.listener(...theArgs));
-		this.callbacks = [];
-
-		this.stopWaiting();
 	}
 };
 
